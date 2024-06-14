@@ -25,9 +25,142 @@ model User {
   lastLogin                   DateTime?
   lastPasswordChanged         DateTime?
   emailVerified               Boolean  @default(false)
-  createdAt                   DateTime @default(now())
   emailVerificationCode       String?
   emailVerificationCodeExpiry DateTime?
   passwordResetCode           String?
   passwordResetCodeExpiry     DateTime?
+  createdAt                   DateTime @default(now())
+  reserves                    Reserve[]
+}
+
+model Tent {
+  id              Int     @id @default(autoincrement())
+  name            String  @db.Text
+  description     String  @db.Text
+  services        String  @db.Text 
+  qtypeople       Int?
+  qtykids         Int?
+  imgroutes       String? @db.Text
+  price           Float?
+  status          String  @default("ACTIVE") @db.Text
+  custom_price    String? @default("[]") @db.Text
+  createdAt       DateTime @default(now())
+  reserveTents    ReserveTent[]
+}
+
+model Product {
+  id              Int             @id @default(autoincrement())
+  categoryId      Int
+  category        ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name            String          @db.Text
+  description     String          @db.Text
+  price           Float
+  imgroutes       String?         @db.Text
+  status          String          @default("ACTIVE") @db.Text
+  custom_price    String? @default("[]") @db.Text
+  createdAt       DateTime @default(now())
+  reserveProducts ReserveProduct[]
+}
+
+model ProductCategory {
+  id            Int        @id @default(autoincrement())
+  name          String     @db.Text
+  products      Product[]
+  createdAt                   DateTime @default(now())
+}
+
+model Experience {
+  id              Int                @id @default(autoincrement())
+  categoryId      Int
+  category        ExperienceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  header          String             @db.Text
+  title           String             @db.Text
+  description     String             @db.Text
+  price           Float
+  duration        String             @db.Text
+  imgRoute        String?            @db.Text
+  status          String             @default("ACTIVE") @db.Text
+  custom_price    String? @default("[]") @db.Text
+  createdAt                   DateTime @default(now())
+  reserveExperiences ReserveExperience[]
+}
+
+model ExperienceCategory {
+  id            Int        @id @default(autoincrement())
+  name          String     @db.Text
+  experiences   Experience[]
+  createdAt                   DateTime @default(now())
+}
+
+
+model Promotion {
+  id              Int    @id @default(autoincrement())
+  code            String?
+  description     String  @db.Text
+  imgroute        String? @db.Text
+  expiredDate     DateTime?
+  status          String  @default("ACTIVE") @db.Text
+  qtypeople       Int?
+  qtyKids         Int?
+  idtents         String? @db.Text
+  idproducts      String? @db.Text
+  idexperiences   String? @db.Text
+  netImport       Float?
+  discount        Int?
+  grossImport     Float?
+  createdAt       DateTime @default(now())
+  reserves        Reserve[]
+}
+
+enum PaymentStatus {
+  PAID
+  PENDING
+  DEBT
+}
+
+model Reserve {
+  id                Int             @id @default(autoincrement())
+  qtypeople         Int?
+  qtyKids           Int?
+  userId            Int
+  user              User            @relation(fields: [userId], references: [id])
+  tents             ReserveTent[]
+  products          ReserveProduct[]
+  experiences       ReserveExperience[]
+  amountTotal       Float?
+  dateFrom          DateTime        @db.Date
+  dateTo            DateTime        @db.Date
+  dateSale          DateTime        @db.Date
+  promotionId       Int?            @default(0)
+  promotion         Promotion?      @relation(fields: [promotionId], references: [id])
+  PayAmountTotal    Float?
+  canceled_reason   String?         @db.Text
+  canceled_status   Boolean         @default(false)
+  paymentStatus     PaymentStatus   @default(PENDING) 
+  AditionalPeople   Int             @default(0)
+  createdAt                         DateTime @default(now())
+}
+
+model ReserveTent {
+  reserveId Int
+  tentId    Int
+  reserve   Reserve @relation(fields: [reserveId], references: [id])
+  tent      Tent    @relation(fields: [tentId], references: [id])
+  @@id([reserveId, tentId])
+}
+
+model ReserveProduct {
+  reserveId Int
+  productId Int
+  reserve   Reserve @relation(fields: [reserveId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+  @@id([reserveId, productId])
+}
+
+model ReserveExperience {
+  reserveId       Int
+  experienceId    Int
+  reserve         Reserve   @relation(fields: [reserveId], references: [id])
+  experience      Experience @relation(fields: [experienceId], references: [id])
+  @@id([reserveId, experienceId])
 }
