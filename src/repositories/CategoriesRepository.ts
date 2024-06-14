@@ -27,7 +27,7 @@ export const updateExperienceCategory = async (id:number, data: ExperienceCatego
   });
 };
 
-export const deleteExperienceCategory = async (id: number): Promise<ExperienceCategory> => {
+export const deleteExperienceCategory = async (id: number):Promise<ExperienceCategory> => {
   return await prisma.experienceCategory.delete({
     where: { id }
   });

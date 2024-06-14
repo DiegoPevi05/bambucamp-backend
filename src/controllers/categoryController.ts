@@ -54,8 +54,8 @@ export const updateExperienceCategory = [
 
 export const deleteExperienceCategory = async (req: Request, res: Response) => {
   try {
-    const category = await categoryService.deleteExperienceCategory(Number(req.params.id));
-    res.json(category);
+    await categoryService.deleteExperienceCategory(Number(req.params.id));
+    res.json({ message: 'Category deleted' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete category' });
   }
@@ -114,8 +114,8 @@ export const updateProductCategory = [
 
 export const deleteProductCategory = async (req: Request, res: Response) => {
   try {
-    const category = await categoryService.deleteProductCategory(Number(req.params.id));
-    res.json(category);
+    await categoryService.deleteProductCategory(Number(req.params.id));
+    res.json({ message: 'Category deleted' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete category' });
   }

@@ -9,13 +9,8 @@ export const getExperienceById = async (id: number) => {
   return await experienceRepository.getExperienceById(id);
 };
 
-export const createExperience = async (data: ExperienceDto) => {
-  if(data.imgRoute){
-    data.imgRoute = data.imgRoute.split('public/')[1];
-  }
-  if(data.custom_price){
-    data.custom_price = data.custom_price.split('public/')[1];
-  }
+export const createExperience = async (data: ExperienceDto, imgRoutes: string) => {
+  data.imgRoute = imgRoutes;
   await experienceRepository.createExperience(data);
 };
 

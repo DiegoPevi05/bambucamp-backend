@@ -19,7 +19,7 @@ export const updateExperienceCategory = async (id:number, data: ExperienceCatego
 };
 
 export const deleteExperienceCategory = async (id: number) => {
-  return await CategoriesRepository.deleteProductCategory(id);
+  return await CategoriesRepository.deleteExperienceCategory(id);
 };
 
 /********************PRODUCT CATEGORY SERVICES ***************************/

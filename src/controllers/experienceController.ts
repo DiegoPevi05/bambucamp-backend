@@ -1,6 +1,11 @@
 import { Request, Response } from 'express';
 import * as experienceService from '../services/experienceService';
 import { body, param, validationResult } from 'express-validator';
+import { serializeImagesTodb } from '../lib/utils';
+import { validateImgFiles } from '../middleware/fileValidation';
+
+// Define a custom type for the Multer file
+type MulterFile = Express.Multer.File;
 
 
 export const getAllExperiences = async (req: Request, res: Response) => {
@@ -19,6 +24,7 @@ export const createExperience = [
   body('description').notEmpty().withMessage('Description is required'),
   body('price').notEmpty().withMessage('Price is required'),
   body('duration').notEmpty().withMessage('Duration is required'),
+  validateImgFiles,
 
   async (req: Request, res: Response) => {
 
@@ -28,7 +34,7 @@ export const createExperience = [
     }
 
     try {
-      await experienceService.createExperience(req.body);
+      await experienceService.createExperience(req.body, serializeImagesTodb(req.files as MulterFile[] | undefined));
       res.status(201).json({ message: 'Experience created' });
     } catch (error) {
       res.status(500).json({ error: 'Failed to create experience' });
@@ -44,6 +50,7 @@ export const updateExperience = [
   body('description').notEmpty().withMessage('Description is required'),
   body('price').notEmpty().withMessage('Price is required'),
   body('duration').notEmpty().withMessage('Duration is required'),
+  validateImgFiles,
 
   async (req: Request, res: Response) => {
 
