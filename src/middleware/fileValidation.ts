@@ -5,7 +5,7 @@ type MulterFile = Express.Multer.File;
 
 export const validateImgFiles = (req: Request, res: Response, next: NextFunction) => {
   const maxFileSize = 2 * 1024 * 1024; // 2MB
-  const allowedMimeTypes = ['image/jpeg', 'image/png'];
+  const allowedMimeTypes = ['image/jpeg', 'image/png','image/webp','image/jpg'];
   const files = req.files as MulterFile[] | undefined;
 
   if (files && Array.isArray(files)) {

@@ -7,7 +7,6 @@ const JWT_SECRET = process.env.JWT_SECRET || 'default_secret';
 
 export const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers['authorization'];
-  console.log(authHeader);
   const token = authHeader && authHeader.split(' ')[1];
   if (token == null) return res.sendStatus(401);
 
