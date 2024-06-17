@@ -3,6 +3,14 @@ import { ExperienceDto } from "../dto/experience";
 
 const prisma = new PrismaClient();
 
+export const getAllPublicExperiences = async (): Promise<Experience[]> => {
+  return await prisma.experience.findMany({
+    where: {
+      status: 'ACTIVE'
+    }
+  });
+};
+
 export const getAllExperiences = async (): Promise<Experience[]> => {
   return await prisma.experience.findMany();
 };

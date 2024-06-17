@@ -5,9 +5,14 @@ import upload from '../middleware/upload';
 
 const router = express.Router();
 
-router.get('/',experienceController.getAllExperiences);
-router.post('/',authenticateToken,checkRole('ADMIN','SUPERVISOR'),upload.array('imgRoutes', 10), experienceController.createExperience);
-router.put('/:id',authenticateToken,checkRole('ADMIN','SUPERVISOR'),upload.array('imgRoutes', 10), experienceController.updateExperience);
+const uploadFields = [
+  { name: 'images', maxCount: 10 }
+];
+
+router.get('/public',experienceController.getAllPublicExperiences);
+router.get('/',authenticateToken,checkRole('ADMIN','SUPERVISOR'),experienceController.getAllExperiences);
+router.post('/',authenticateToken,checkRole('ADMIN','SUPERVISOR'),upload.fields(uploadFields), experienceController.createExperience);
+router.put('/:id',authenticateToken,checkRole('ADMIN','SUPERVISOR'),upload.fields(uploadFields), experienceController.updateExperience);
 router.delete('/:id',authenticateToken,checkRole('ADMIN','SUPERVISOR'), experienceController.deleteExperience);
 
 export default router;

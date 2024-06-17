@@ -1,12 +1,9 @@
-export interface ExperienceDto {
+export interface ProductDto {
   categoryId: number;
-  header: string;
-  title: string;
+  name: string;
   description: string;
   price: number;
-  duration: string;
   images?: string;
   custom_price?: string;
   status?: string;
 }
-

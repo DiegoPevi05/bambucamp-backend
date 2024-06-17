@@ -40,7 +40,7 @@ model Tent {
   services        String  @db.Text 
   qtypeople       Int?
   qtykids         Int?
-  imgroutes       String? @db.Text
+  images          String? @db.Text
   price           Float?
   status          String  @default("ACTIVE") @db.Text
   custom_price    String? @default("[]") @db.Text
@@ -55,7 +55,7 @@ model Product {
   name            String          @db.Text
   description     String          @db.Text
   price           Float
-  imgroutes       String?         @db.Text
+  images          String?         @db.Text
   status          String          @default("ACTIVE") @db.Text
   custom_price    String? @default("[]") @db.Text
   createdAt       DateTime @default(now())
@@ -78,7 +78,7 @@ model Experience {
   description     String             @db.Text
   price           Float
   duration        String             @db.Text
-  imgRoute        String?            @db.Text
+  images          String?            @db.Text
   status          String             @default("ACTIVE") @db.Text
   custom_price    String? @default("[]") @db.Text
   createdAt                   DateTime @default(now())
@@ -97,17 +97,18 @@ model Promotion {
   id              Int    @id @default(autoincrement())
   code            String?
   description     String  @db.Text
-  imgroute        String? @db.Text
+  images          String? @db.Text
   expiredDate     DateTime?
   status          String  @default("ACTIVE") @db.Text
   qtypeople       Int?
-  qtyKids         Int?
+  qtykids         Int?
   idtents         String? @db.Text
   idproducts      String? @db.Text
   idexperiences   String? @db.Text
   netImport       Float?
   discount        Int?
   grossImport     Float?
+  stock           Int?
   createdAt       DateTime @default(now())
   reserves        Reserve[]
 }
@@ -121,7 +122,7 @@ enum PaymentStatus {
 model Reserve {
   id                Int             @id @default(autoincrement())
   qtypeople         Int?
-  qtyKids           Int?
+  qtykids           Int?
   userId            Int
   user              User            @relation(fields: [userId], references: [id])
   tents             ReserveTent[]
@@ -133,11 +134,11 @@ model Reserve {
   dateSale          DateTime        @db.Date
   promotionId       Int?            @default(0)
   promotion         Promotion?      @relation(fields: [promotionId], references: [id])
-  PayAmountTotal    Float?
+  payAmountTotal    Float?
   canceled_reason   String?         @db.Text
   canceled_status   Boolean         @default(false)
   paymentStatus     PaymentStatus   @default(PENDING) 
-  AditionalPeople   Int             @default(0)
+  aditionalPeople   Int             @default(0)
   createdAt                         DateTime @default(now())
 }
 
