@@ -1,64 +1,42 @@
-import * as promotionRepository from '../repositories/PromotionRepository';
-import { PromotionDto } from "../dto/promotion";
+import * as reserveRepository from '../repositories/ReserveRepository';
+import { ReserveDto } from "../dto/reserve";
+import { Reserve, ReserveTent, ReserveProduct, ReserveExperience } from '@prisma/client';
 
-export const getPromotionByCode = async (code: string) => {
-  code = code.toUpperCase();
+export interface ExtendedReserve extends Reserve {
+  tents: ReserveTent[];
+  products: ReserveProduct[];
+  experiences: ReserveExperience[];
+}
 
-  let promotion = await promotionRepository.getPromotionByCode(code);
-
-  if(promotion){
-    if(promotion.expiredDate){
-      if(new Date (promotion.expiredDate) < new Date()){
-        throw new Error('Promotion expired');
-      }
-    }
-
-    if(promotion.stock){
-      if(promotion.stock <= 0){
-        throw new Error('Promotion out of stock');
-      }
-    }
-    if(promotion.status !== 'ACTIVE'){
-      throw new Error('Promotion not active');
-    }
-  }else{
-    throw new Error('Promotion not found');
-  }
-
-  return;
-};
-
-export const getAllPublicPromotions = async () => {
-  const promotions = await promotionRepository.getAllPublicPromotions();
-  return promotions.map((promotion) => ({
-    code: promotion.code,
-    description: promotion.description,
-    images : JSON.parse(promotion.images ? promotion.images : '[]'),
-    expiredDate : promotion.expiredDate,
-    qtypeople: promotion.qtypeople,
-    qtykids: promotion.qtykids,
-    idtents: promotion.idtents,
-    idproducts: promotion.idproducts,
-    idexperiences: promotion.idexperiences,
-    netImport:promotion.netImport,
-    discount:promotion.discount,
-    grossImport:promotion.grossImport
+export const getAllMyReserves = async (userId:number) => {
+  const reserves = await reserveRepository.getMyReserves(userId);
+  return reserves.map((reserve:ExtendedReserve) => ({
+    qtypeople: reserve.qtypeople,
+    qtykids: reserve.qtykids,
+    userId: reserve.userId,
+    tents: reserve.tents,
+    products: reserve.products,
+    experiences: reserve.experiences,
+    amountTotal: reserve.amountTotal,
+    dateFrom: reserve.dateFrom,
+    dateTo: reserve.dateTo,
+    dateSale: reserve.dateSale,
+    promotionId: reserve.promotionId,
+    payAmountTotal: reserve.payAmountTotal,
+    paymentStatus: reserve.paymentStatus,
+    aditionalPeople: reserve.aditionalPeople
   }));
 }
 
-export const getAllPromotions = async () => {
-  const promotions = await promotionRepository.getAllPromotions();
-  promotions.forEach((promotion) => {
-    promotion.images = JSON.parse(promotion.images ? promotion.images : '[]');
-  });
-  return promotions;
+export const getAllReserves = async () => {
+  return await reserveRepository.getAllReserves();
 };
 
-export const getPromotionById = async (id: number) => {
-  return await promotionRepository.getPromotionById(id);
+export const getReserveById = async (id: number) => {
+  return await reserveRepository.getReserveById(id);
 };
 
-export const createPromotion = async (data: PromotionDto, images: string |null) => {
+export const createReserve = async (data: ReserveDto, images: string |null) => {
   if(images){
     data.images   = images;
   }
@@ -69,10 +47,10 @@ export const createPromotion = async (data: PromotionDto, images: string |null) 
   data.discount       = Number(data.discount);
   data.grossImport    = Number(data.grossImport);
 
-  await promotionRepository.createPromotion(data);
+  await reserveRepository.createReserve(data);
 };
 
-export const updatePromotion = async (id:number, data: PromotionDto, images: string |null) => {
+export const updateReserve = async (id:number, data: ReserveDto, images: string |null) => {
 
 
   if(data.code){
@@ -127,10 +105,10 @@ export const updatePromotion = async (id:number, data: PromotionDto, images: str
     data.grossImport   = Number(data.grossImport);
   }
 
-  return await promotionRepository.updatePromotion(id,data);
+  return await reserveRepository.updateReserve(id,data);
 };
 
-export const deletePromotion = async (id: number) => {
-  return await promotionRepository.deletePromotion(id);
+export const deleteReserve = async (id: number) => {
+  return await reserveRepository.deleteReserve(id);
 };
 

@@ -1,12 +1,12 @@
-import { ReserveTent, ReserveProduct, ReserveExperience, PaymentStatus } from '@prisma/client';
+import {  PaymentStatus } from '@prisma/client';
 
 export interface ReserveDto {
   qtypeople: number;
   qtykids: number;
   userId: number;
-  tents: ReserveTent[];
-  products: ReserveProduct[];
-  experiences: ReserveExperience[];
+  tents: { tentId: number; }[];
+  products: { productId: number; }[];
+  experiences: { experienceId: number; }[];
   amountTotal: number;
   dateFrom: Date;
   dateTo: Date;

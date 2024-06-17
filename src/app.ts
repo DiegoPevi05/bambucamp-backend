@@ -8,11 +8,14 @@ import experienceRoutes from './routes/experienceRoutes';
 import productRoutes from './routes/productRoutes';
 import promotionRoutes from './routes/promotionRoutes';
 import tentRoutes from './routes/tentRoutes';
+import path from 'path';
 
 const app = express();
 
 app.use(cors());
 app.use(bodyParser.json());
+// Serve static files
+app.use('/public/images', express.static(path.join(__dirname, '../public/images')));
 
 app.use('/users', userRoutes);
 app.use('/auth', authRoutes);

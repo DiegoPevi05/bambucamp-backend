@@ -1,5 +1,6 @@
 import * as experienceRepository from '../repositories/ExperienceCategory';
 import { ExperienceDto } from '../dto/experience';
+import { deleteImages } from '../lib/utils';
 
 export const getAllPublicExperiences = async () => {
   const experiences = await experienceRepository.getAllPublicExperiences();
@@ -41,6 +42,11 @@ export const createExperience = async (data: ExperienceDto, images: string |null
 };
 
 export const updateExperience = async (id:number, data: ExperienceDto, images: string |null) => {
+  const experience = await experienceRepository.getExperienceById(id);
+
+  if(!experience){
+    throw new Error('Experience not found');
+  }
 
   if(data.categoryId){
     data.categoryId = Number(data.categoryId);
@@ -67,6 +73,7 @@ export const updateExperience = async (id:number, data: ExperienceDto, images: s
   }
 
   if(images){
+    deleteImages(JSON.parse(experience.images ? experience.images : '[]'));
     data.images   = images;
   }
   
@@ -84,6 +91,15 @@ export const updateExperience = async (id:number, data: ExperienceDto, images: s
 };
 
 export const deleteExperience = async (id: number) => {
+
+  const experience = await experienceRepository.getExperienceById(id);
+
+  if(!experience){
+    throw new Error('Experience not found');
+  }
+
+  deleteImages(JSON.parse(experience.images ? experience.images : '[]'));
+
   return await experienceRepository.deleteExperience(id);
 };
 
