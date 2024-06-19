@@ -8,6 +8,7 @@ import experienceRoutes from './routes/experienceRoutes';
 import productRoutes from './routes/productRoutes';
 import promotionRoutes from './routes/promotionRoutes';
 import tentRoutes from './routes/tentRoutes';
+import reserveRoutes from './routes/reserveRoutes';
 import path from 'path';
 
 const app = express();
@@ -24,5 +25,6 @@ app.use('/experiences', experienceRoutes);
 app.use('/products', productRoutes);
 app.use('/promotions', promotionRoutes);
 app.use('/tents', tentRoutes);
+app.use('/reserves', reserveRoutes);
 
 export default app;

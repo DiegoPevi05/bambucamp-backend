@@ -1,28 +1,10 @@
 import { Request, Response } from 'express';
 import * as promotionService from '../services/promotionService';
-import { body, query, param, validationResult } from 'express-validator';
+import { body, param, validationResult } from 'express-validator';
 import { serializeImagesTodb } from '../lib/utils';
 
 // Define a custom type for the Multer file
 type MulterFile = Express.Multer.File;
-
-export const validatePromotionCode = [
-  query('code').notEmpty().withMessage('Code is required'),
-
-  async (req: Request, res: Response) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    try {
-      await promotionService.getPromotionByCode(req.query.code as string);
-      res.json({ message: 'Valid promotion code' });
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to validate promotion code' });
-    }
-  }
-];
 
 export const getAllPublicPromotions = async (req: Request, res: Response) => {
   try {

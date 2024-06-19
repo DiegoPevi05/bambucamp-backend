@@ -21,6 +21,16 @@ export const getProductById = async (id: number): Promise<Product | null> => {
   });
 };
 
+export const getProductsByIds = async (ids: number[]): Promise<Product[]> => {
+  return await prisma.product.findMany({
+    where: {
+      id: {
+        in: ids
+      }
+    }
+  });
+};
+
 export const createProduct = async (data: ProductDto): Promise<Product> => {
   return await prisma.product.create({
     data

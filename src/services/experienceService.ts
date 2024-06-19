@@ -1,4 +1,4 @@
-import * as experienceRepository from '../repositories/ExperienceCategory';
+import * as experienceRepository from '../repositories/ExperienceRepository';
 import { ExperienceDto } from '../dto/experience';
 import { deleteImages } from '../lib/utils';
 

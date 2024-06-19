@@ -7,12 +7,15 @@ export interface ReserveDto {
   tents: { tentId: number; }[];
   products: { productId: number; }[];
   experiences: { experienceId: number; }[];
-  amountTotal: number;
+  discountCodeId?: number;
   dateFrom: Date;
   dateTo: Date;
   dateSale: Date;
-  promotionId: number;
-  payAmountTotal: number;
+  netImport: number;
+  discount?: number;
+  price_is_calculated: boolean;
+  grossImport: number;
+  promotionId?: number;
   canceled_reason?: string;
   canceled_status?: boolean;
   paymentStatus?: PaymentStatus;

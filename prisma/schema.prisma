@@ -38,10 +38,10 @@ model Tent {
   name            String  @db.Text
   description     String  @db.Text
   services        String  @db.Text 
-  qtypeople       Int?
-  qtykids         Int?
+  qtypeople       Int     @default(1)
+  qtykids         Int     @default(0)
   images          String? @db.Text
-  price           Float?
+  price           Float   @default(0)
   status          String  @default("ACTIVE") @db.Text
   custom_price    String? @default("[]") @db.Text
   createdAt       DateTime @default(now())
@@ -54,7 +54,7 @@ model Product {
   category        ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   name            String          @db.Text
   description     String          @db.Text
-  price           Float
+  price           Float           @default(0)
   images          String?         @db.Text
   status          String          @default("ACTIVE") @db.Text
   custom_price    String? @default("[]") @db.Text
@@ -76,7 +76,7 @@ model Experience {
   header          String             @db.Text
   title           String             @db.Text
   description     String             @db.Text
-  price           Float
+  price           Float              @default(0)
   duration        String             @db.Text
   images          String?            @db.Text
   status          String             @default("ACTIVE") @db.Text
@@ -90,6 +90,17 @@ model ExperienceCategory {
   name          String     @db.Text
   experiences   Experience[]
   createdAt                   DateTime @default(now())
+}
+
+model DiscountCode {
+  id              Int    @id @default(autoincrement())
+  code            String
+  expiredDate     DateTime?
+  discount        Int     @default(0)
+  stock           Int?
+  status          String  @default("ACTIVE") @db.Text
+  createdAt       DateTime @default(now())
+  reserves        Reserve[]
 }
 
 
@@ -128,13 +139,17 @@ model Reserve {
   tents             ReserveTent[]
   products          ReserveProduct[]
   experiences       ReserveExperience[]
-  amountTotal       Float?
   dateFrom          DateTime        @db.Date
   dateTo            DateTime        @db.Date
   dateSale          DateTime        @db.Date
-  promotionId       Int?            @default(0)
+  promotionId       Int?            
   promotion         Promotion?      @relation(fields: [promotionId], references: [id])
-  payAmountTotal    Float?
+  price_is_calculated Boolean       @default(false)
+  discountCodeId    Int?         
+  discountCode      DiscountCode?   @relation(fields: [discountCodeId], references: [id])
+  netImport         Float           @default(0)
+  discount          Int             @default(0)
+  grossImport       Float           @default(0)
   canceled_reason   String?         @db.Text
   canceled_status   Boolean         @default(false)
   paymentStatus     PaymentStatus   @default(PENDING) 

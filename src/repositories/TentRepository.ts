@@ -21,6 +21,16 @@ export const getTentById = async (id: number): Promise<Tent | null> => {
   });
 };
 
+export const getTentsByIds = async (ids: number[]): Promise<Tent[]> => {
+  return await prisma.tent.findMany({
+    where: {
+      id: {
+        in: ids
+      }
+    }
+  });
+};
+
 
 export const createTent = async (data: TentDto): Promise<Tent> => {
   return await prisma.tent.create({

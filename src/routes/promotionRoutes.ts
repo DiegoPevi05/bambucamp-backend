@@ -9,7 +9,6 @@ const uploadFields = [
   { name: 'images', maxCount: 10 }
 ];
 
-router.get('/validate-code',promotionController.validatePromotionCode);
 router.get('/public',promotionController.getAllPublicPromotions);
 router.get('/',authenticateToken,checkRole('ADMIN','SUPERVISOR'),promotionController.getAllPromotions);
 router.post('/',authenticateToken,checkRole('ADMIN','SUPERVISOR'),upload.fields(uploadFields), promotionController.createPromotion);

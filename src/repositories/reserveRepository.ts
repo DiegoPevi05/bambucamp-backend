@@ -1,4 +1,4 @@
-import { PrismaClient, Reserve, ReserveTent, ReserveProduct, ReserveExperience   } from "@prisma/client";
+import { PrismaClient, Reserve, ReserveTent, ReserveProduct, ReserveExperience, Tent  } from "@prisma/client";
 import { ReserveDto } from "../dto/reserve";
 
 
@@ -22,7 +22,25 @@ export const getMyReserves = async (userId:number): Promise<ExtendedReserve[]> =
 };
 
 export const getAllReserves = async (): Promise<Reserve[]> => {
-  return await prisma.reserve.findMany();
+  return await prisma.reserve.findMany({
+    include: {
+      tents: {
+        include: {
+          tent: true
+        }
+      },
+      products: {
+        include: {
+          product: true
+        }
+      },
+      experiences: {
+        include: {
+          experience: true
+        }
+      }
+    }
+  });
 };
 
 export const getReserveById = async (id: number): Promise<Reserve | null> => {
@@ -55,6 +73,33 @@ export const createReserve = async (data: ReserveDto): Promise<Reserve> => {
   });
 };
 
+
+export const getAvailableTents = async (checkInTime: Date, checkOutTime:Date, tents:Tent[]): Promise<any[]> => {
+  // Find reservations that overlap with the given date range
+  return await prisma.reserveTent.findMany({
+    where: {
+      tentId: {
+        in: tents.map(tent => tent.id),
+      },
+      reserve: {
+        OR: [
+          {
+            dateFrom: {
+              lt: checkOutTime,
+            },
+            dateTo: {
+              gt: checkInTime,
+            },
+          },
+        ],
+      },
+    },
+    select: {
+      tentId: true,
+    }
+  });
+}
+
 export const updateReserve = async (id:number, data: ReserveDto): Promise<Reserve> => {
   return await prisma.reserve.update({
     where: { id },
@@ -80,6 +125,17 @@ export const updateReserve = async (id:number, data: ReserveDto): Promise<Reserv
 };
 
 export const deleteReserve = async (id: number): Promise<Reserve> => {
+
+  await prisma.reserveTent.deleteMany({
+    where: { reserveId: id }
+  });
+  await prisma.reserveProduct.deleteMany({
+    where: { reserveId: id }
+  });
+  await prisma.reserveExperience.deleteMany({
+    where: { reserveId: id }
+  });
+
   return await prisma.reserve.delete({
     where: { id }
   });

@@ -21,6 +21,16 @@ export const getExperienceById = async (id: number): Promise<Experience | null> 
   });
 };
 
+export const getExperiencesByIds = async (ids: number[]): Promise<Experience[]> => {
+  return await prisma.experience.findMany({
+    where: {
+      id: {
+        in: ids
+      }
+    }
+  });
+};
+
 export const createExperience = async (data: ExperienceDto): Promise<Experience> => {
   return await prisma.experience.create({
     data
