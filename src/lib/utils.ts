@@ -1,8 +1,11 @@
 import fs from 'fs';
 import path from 'path';
-import { Tent } from '@prisma/client';
+import { Tent , Product, Experience } from '@prisma/client';
 import * as reserveRepository from '../repositories/ReserveRepository';
 import * as discountCodeRepository from '../repositories/DiscountCodeRepository';
+import * as tentRepository from '../repositories/TentRepository';
+import * as productRepository from '../repositories/ProductRepository';
+import * as experienceRepository from '../repositories/ExperienceRepository';
 
 // Define a custom type for the Multer file
 type MulterFile = Express.Multer.File;
@@ -47,17 +50,16 @@ export const calculatePrice = (basePrice: number , customPrices: string | null):
 };
 
 export const getCurrentCustomPrice = (customPrices: string): number => {
+
   const prices: CustomPrice[] = JSON.parse(customPrices);
+
   const currentDate = new Date();
   
-  // Find all prices that match the date range
   const matchingPrices = prices.filter(price => currentDate >= price.dateFrom && currentDate <= price.dateTo);
 
-  // If there are no matching prices, return null
   if (matchingPrices.length === 0) {
     return 0;
   }
-  // Sort the matching prices by dateTo in descending order and return the first one
   matchingPrices.sort((a, b) => b.dateTo.getTime() - a.dateTo.getTime());
   
   return matchingPrices[0].price;
@@ -118,4 +120,78 @@ export const applyDiscount = async (grossImport: number, discountCodeId: number 
 
   return grossImport - (grossImport * discount.discount) / 100;
 };
+
+
+export const getTents = async (tents: { tentId:number }[]): Promise<Tent[]> => {
+
+  if(!tents) throw new Error( " Input at least one tent" );
+
+  if(tents.length <= 0) throw new Error ("No tents to validate");
+
+  const tentsIds = tents.map(tent => tent.tentId);
+  const tentsDb = await tentRepository.getTentsByIds(tentsIds);
+
+  const missingTentIds = tentsIds.filter(
+    id => !tentsDb.some((tent:Tent) => tent.id === id)
+  );
+
+  if (missingTentIds.length > 0) {
+    throw new Error(`Tents with ids ${missingTentIds.join(', ')} not found`);
+  }
+
+  return tentsDb;
+}
+
+export const getProducts = async (products: { productId: number }[]): Promise<Product[]> => {
+
+  if (!products || products.length === 0) {
+    return [];
+  }
+
+  const productIds = products.map((product) => product.productId);
+  const productsDb = await productRepository.getProductsByIds(productIds);
+
+  const missingProductIds = productIds.filter(
+    (id) => !productsDb.some((product:Product) => product.id === id)
+  );
+
+  if (missingProductIds.length > 0) {
+    throw new Error(`Products with ids ${missingProductIds.join(', ')} not found`);
+  }
+
+  return productsDb;
+}
+
+export const getExperiences = async (experiences: { experienceId: number }[]): Promise<Experience[]> => {
+
+  if (!experiences || experiences.length === 0) {
+    return [];
+  }
+
+  const experienceIds = experiences.map((experience) => experience.experienceId);
+  const experiencesDb = await experienceRepository.getExperiencesByIds(experienceIds);
+
+  const missingExperienceIds = experienceIds.filter(
+    (id) => !experiencesDb.some((experience:Experience) => experience.id === id)
+  );
+
+  if (missingExperienceIds.length > 0) {
+    throw new Error(`Experiences with ids ${missingExperienceIds.join(', ')} not found`);
+  }
+  
+  return experiencesDb;
+}
+
+export const calculateReservePrice = (tents:Tent[], products:Product[], experiences:Experience[]): number => {
+
+      const calculateTentsPrice = tents.reduce((acc, tent) => acc + calculatePrice(tent.price,tent.custom_price), 0);
+      const calculateProductsPrice = products.reduce((acc, product) => acc + calculatePrice(product.price,product.custom_price), 0);
+
+      const calculateExperiencesPrice = experiences.reduce((acc, experience) => acc + calculatePrice(experience.price,experience.custom_price), 0);
+
+      return calculateTentsPrice + calculateProductsPrice + calculateExperiencesPrice;
+}
+
+
+
 

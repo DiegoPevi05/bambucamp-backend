@@ -43,6 +43,7 @@ export const getReserveById = async (id: number) => {
   return await reserveRepository.getReserveById(id);
 };
 
+
 export const createReserve = async (data: ReserveDto) => {
   if(!data.dateFrom)  throw new Error(" Input date From to create a Reserve");
 
@@ -57,82 +58,75 @@ export const createReserve = async (data: ReserveDto) => {
   data.dateTo = checkOutTime;
 
   data.dateSale = new Date();
+  data.qtypeople = Number(data.qtypeople);
+  data.qtykids = Number(data.qtykids);
   data.discountCodeId = Number(data.discountCodeId);
-
-  if(!data.tents) throw new Error( " Input at least one tent" );
-
-  if(data.tents.length <= 0) throw new Error ("No tents to validate");
-
-  const tentsIds = data.tents.map(tent => tent.tentId);
-  const tentsDb = await tentRepository.getTentsByIds(tentsIds);
-
-  const missingTentIds = tentsIds.filter(
-    id => !tentsDb.some(tent => tent.id === id)
-  );
-
-  if (missingTentIds.length > 0) {
-    throw new Error(`Tents with ids ${missingTentIds.join(', ')} not found`);
-  }
-
-  // Check Availability
-  const TentsAreAvialble = await utils.checkAvailability(checkInTime,checkOutTime,tentsDb);
-  if(TentsAreAvialble){
-    throw new Error ( "Tents have no Availability for the days selected");
-  }
-
-  const isRoomSizeCorrect = utils.checkRoomSize(tentsDb, data.qtypeople, data.qtykids, data.aditionalPeople);
-  if(!isRoomSizeCorrect){
-    throw new Error("The room size is not correct");
-  }
-
-  if(data.price_is_calculated){
-
-      const productsIds = data.products.map(product => product.productId);
-      const productsDb = await productRepository.getProductsByIds(productsIds);
-
-      const missingProductIds = productsIds.filter(
-        id => !productsDb.some(product => product.id === id)
-      );
-
-      if (missingProductIds.length > 0) {
-        throw new Error(`Products with ids ${missingProductIds.join(', ')} not found`);
-      }
-      
-      const experiencesIds = data.experiences.map(experience => experience.experienceId);
-      const experiencesDb = await experienceRepository.getExperiencesByIds(experiencesIds);
-
-      const missingExperienceIds = experiencesIds.filter(
-        id => !experiencesDb.some(experience => experience.id === id)
-      );
-
-      if (missingExperienceIds.length > 0) {
-        throw new Error(`Experiences with ids ${missingExperienceIds.join(', ')} not found`);
-      }
+  data.userId = Number(data.userId);
 
 
-      const calculateTentsPrice = tentsDb.reduce((acc, tent) => acc + utils.calculatePrice(tent.price,tent.custom_price), 0);
 
-      const calculateProductsPrice = productsDb.reduce((acc, product) => acc + utils.calculatePrice(product.price,product.custom_price), 0);
+  if(!data.promotionId){
 
-      const calculateExperiencesPrice = experiencesDb.reduce((acc, experience) => acc + utils.calculatePrice(experience.price,experience.custom_price), 0);
+    const tentsDb = await utils.getTents(data.tents);
+    // Check Availability
+    const TentsAreAvialble = await utils.checkAvailability(checkInTime,checkOutTime,tentsDb);
+    if(TentsAreAvialble){
+      throw new Error ( "Tents have no Availability for the days selected");
+    }
 
-      data.netImport = calculateTentsPrice + calculateProductsPrice + calculateExperiencesPrice;
+    const isRoomSizeCorrect = utils.checkRoomSize(tentsDb, data.qtypeople, data.qtykids, data.aditionalPeople);
+    if(!isRoomSizeCorrect){
+      throw new Error("The room size is not correct");
+    }
 
-      data.grossImport = await utils.applyDiscount(data.netImport, data.discountCodeId);
+    if(data.price_is_calculated){
+
+        const productsDb = await utils.getProducts(data.products);
+
+        const experiencesDb = await utils.getExperiences(data.experiences);
+
+        data.netImport = utils.calculateReservePrice(tentsDb, productsDb, experiencesDb);
+
+        data.grossImport = await utils.applyDiscount(data.netImport, data.discountCodeId);
+
+    }else{
+
+        data.grossImport = await utils.applyDiscount(data.netImport, data.discountCodeId);
+
+    }
 
   }else{
 
-      data.grossImport = await utils.applyDiscount(data.netImport, data.discountCodeId);
+    let promotion = await promotionRepository.getPromotionById(Number(data.promotionId));
 
-  }
-
-  /*&let promotion = null;
-  if (data.promotionId) {
-    promotion = await promotionRepository.getPromotionById(data.promotionId);
     if (!promotion) {
       throw new Error(`Promotion with id ${data.promotionId} not found`);
     }
-  }*/
+
+    if(promotion.stock || promotion.stock !== null){
+      if(promotion.stock <= 0) throw new Error("Promotion is out of stock");
+    }
+
+    data.promotionId  = Number(promotion.id);
+    data.qtypeople    = promotion.qtypeople;
+    data.qtykids      = promotion.qtykids;
+    data.netImport    = promotion.netImport;
+    data.discount     = promotion.discount;
+    data.grossImport  = promotion.grossImport;
+
+    const tentsDb = await utils.getTents(promotion.idtents as any);
+    // Check Availability
+    const TentsAreAvialble = await utils.checkAvailability(checkInTime,checkOutTime,tentsDb);
+    if(TentsAreAvialble){
+      throw new Error ( "Tents have no Availability for the days selected");
+    }
+
+    data.tents = promotion.idtents as any;
+    data.products = promotion.idproducts as any;
+    data.experiences = promotion.idexperiences as any;
+
+  }
+
   await reserveRepository.createReserve(data);
 };
 

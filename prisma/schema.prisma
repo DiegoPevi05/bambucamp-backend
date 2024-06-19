@@ -111,14 +111,14 @@ model Promotion {
   images          String? @db.Text
   expiredDate     DateTime?
   status          String  @default("ACTIVE") @db.Text
-  qtypeople       Int?
-  qtykids         Int?
-  idtents         String? @db.Text
+  qtypeople       Int    @default(1)
+  qtykids         Int    @default(0)
+  idtents         String @db.Text
   idproducts      String? @db.Text
   idexperiences   String? @db.Text
-  netImport       Float?
-  discount        Int?
-  grossImport     Float?
+  netImport       Float
+  discount        Int
+  grossImport     Float
   stock           Int?
   createdAt       DateTime @default(now())
   reserves        Reserve[]
@@ -132,8 +132,8 @@ enum PaymentStatus {
 
 model Reserve {
   id                Int             @id @default(autoincrement())
-  qtypeople         Int?
-  qtykids           Int?
+  qtypeople         Int             @default(1)
+  qtykids           Int             @default(0)
   userId            Int
   user              User            @relation(fields: [userId], references: [id])
   tents             ReserveTent[]
