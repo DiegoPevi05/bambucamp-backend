@@ -1,37 +1,11 @@
 import * as promotionRepository from '../repositories/PromotionRepository';
 import { PromotionDto } from "../dto/promotion";
 
-export const getPromotionByCode = async (code: string) => {
-  code = code.toUpperCase();
-
-  let promotion = await promotionRepository.getPromotionByCode(code);
-
-  if(promotion){
-    if(promotion.expiredDate){
-      if(new Date (promotion.expiredDate) < new Date()){
-        throw new Error('Promotion expired');
-      }
-    }
-
-    if(promotion.stock){
-      if(promotion.stock <= 0){
-        throw new Error('Promotion out of stock');
-      }
-    }
-    if(promotion.status !== 'ACTIVE'){
-      throw new Error('Promotion not active');
-    }
-  }else{
-    throw new Error('Promotion not found');
-  }
-
-  return;
-};
 
 export const getAllPublicPromotions = async () => {
   const promotions = await promotionRepository.getAllPublicPromotions();
   return promotions.map((promotion) => ({
-    code: promotion.code,
+    title: promotion.title,
     description: promotion.description,
     images : JSON.parse(promotion.images ? promotion.images : '[]'),
     expiredDate : promotion.expiredDate,
@@ -42,7 +16,8 @@ export const getAllPublicPromotions = async () => {
     idexperiences: promotion.idexperiences,
     netImport:promotion.netImport,
     discount:promotion.discount,
-    grossImport:promotion.grossImport
+    grossImport:promotion.grossImport,
+    stock: promotion.stock
   }));
 }
 

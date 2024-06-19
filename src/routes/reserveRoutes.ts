@@ -6,6 +6,7 @@ const router = express.Router();
 
 router.get('/me',authenticateToken,checkRole('CLIENT'),reserveController.getAllMyReserves);
 router.get('/',authenticateToken,checkRole('ADMIN','SUPERVISOR'),reserveController.getAllReserves);
+router.post('/reserve',authenticateToken,checkRole('CLIENT'), reserveController.createReserveByUser);
 router.post('/',authenticateToken,checkRole('ADMIN','SUPERVISOR'), reserveController.createReserve);
 router.put('/:id',authenticateToken,checkRole('ADMIN','SUPERVISOR'), reserveController.updateReserve);
 router.delete('/:id',authenticateToken,checkRole('ADMIN','SUPERVISOR'), reserveController.deleteReserve);

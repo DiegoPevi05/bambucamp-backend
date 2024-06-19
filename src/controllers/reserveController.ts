@@ -28,6 +28,35 @@ export const getAllReserves = async (req: Request, res: Response) => {
   }
 };
 
+export const createReserveByUser = [
+  body('qtypeople').notEmpty().withMessage('Quantity of people is required'),
+  body('qtykids').notEmpty().withMessage('Quantity of kids is required'),
+  body('tents').isArray().withMessage('Tents must be an array'),
+  body('products').isArray().withMessage('Products must be an array'),
+  body('experiences').isArray().withMessage('Experiences must be an array'),
+  body('dateFrom').notEmpty().withMessage('Date from is required'),
+  body('dateTo').notEmpty().withMessage('Date to is required'),
+
+  async (req: Request, res: Response) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+      if (!req.user) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      };
+      await reserveService.createReserveByUser(req.body, req.user.id);
+      res.status(201).json({ message: 'Reserve created' });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: 'Failed to create reserve' });
+    }
+  }
+];
+
 export const createReserve = [
   body('qtypeople').notEmpty().withMessage('Quantity of people is required'),
   body('qtykids').notEmpty().withMessage('Quantity of kids is required'),
@@ -35,10 +64,8 @@ export const createReserve = [
   body('tents').isArray().withMessage('Tents must be an array'),
   body('products').isArray().withMessage('Products must be an array'),
   body('experiences').isArray().withMessage('Experiences must be an array'),
-  body('amountTotal').notEmpty().withMessage('Amount total is required'),
   body('dateFrom').notEmpty().withMessage('Date from is required'),
   body('dateTo').notEmpty().withMessage('Date to is required'),
-  body('payAmountTotal').notEmpty().withMessage('Pay amount total is required'),
 
   async (req: Request, res: Response) => {
 

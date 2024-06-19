@@ -1,7 +1,4 @@
 import * as reserveRepository from '../repositories/ReserveRepository';
-import * as tentRepository from '../repositories/TentRepository';
-import * as productRepository from '../repositories/ProductRepository';
-import * as experienceRepository from '../repositories/ExperienceRepository';
 import { ReserveDto } from "../dto/reserve";
 import { Reserve, ReserveTent, ReserveProduct, ReserveExperience } from '@prisma/client';
 import * as promotionRepository from '../repositories/PromotionRepository';
@@ -12,6 +9,10 @@ export interface ExtendedReserve extends Reserve {
   products: ReserveProduct[];
   experiences: ReserveExperience[];
 }
+
+export const searchAvailableTents = async (dateFrom: Date, dateTo: Date) => {
+  return await reserveRepository.searchAvailableTents(dateFrom, dateTo);
+};
 
 export const getAllMyReserves = async (userId:number) => {
   const reserves = await reserveRepository.getMyReserves(userId);
@@ -41,6 +42,12 @@ export const getAllReserves = async () => {
 
 export const getReserveById = async (id: number) => {
   return await reserveRepository.getReserveById(id);
+};
+
+export const createReserveByUser = async (data: ReserveDto, userId: number) => {
+  data.userId = userId;
+  data.price_is_calculated = true;
+  await createReserve(data);
 };
 
 
@@ -101,6 +108,12 @@ export const createReserve = async (data: ReserveDto) => {
 
     if (!promotion) {
       throw new Error(`Promotion with id ${data.promotionId} not found`);
+    }
+
+    if(promotion.expiredDate){
+      if(promotion.expiredDate < new Date()){
+        throw new Error("Promotion is expired");
+      }
     }
 
     if(promotion.stock || promotion.stock !== null){

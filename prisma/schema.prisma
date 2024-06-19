@@ -30,21 +30,23 @@ model User {
   passwordResetCode           String?
   passwordResetCodeExpiry     DateTime?
   createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt @default(now())
   reserves                    Reserve[]
 }
 
 model Tent {
-  id              Int     @id @default(autoincrement())
-  name            String  @db.Text
-  description     String  @db.Text
-  services        String  @db.Text 
-  qtypeople       Int     @default(1)
-  qtykids         Int     @default(0)
-  images          String? @db.Text
-  price           Float   @default(0)
-  status          String  @default("ACTIVE") @db.Text
-  custom_price    String? @default("[]") @db.Text
-  createdAt       DateTime @default(now())
+  id              Int             @id @default(autoincrement())
+  name            String          @db.Text
+  description     String          @db.Text
+  services        String          @db.Text 
+  qtypeople       Int             @default(1)
+  qtykids         Int             @default(0)
+  images          String?         @db.Text
+  price           Float           @default(0)
+  status          String          @default("ACTIVE") @db.Text
+  custom_price    String?         @default("[]") @db.Text
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt @default(now())
   reserveTents    ReserveTent[]
 }
 
@@ -57,70 +59,76 @@ model Product {
   price           Float           @default(0)
   images          String?         @db.Text
   status          String          @default("ACTIVE") @db.Text
-  custom_price    String? @default("[]") @db.Text
-  createdAt       DateTime @default(now())
+  custom_price    String?         @default("[]") @db.Text
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt @default(now())
   reserveProducts ReserveProduct[]
 }
 
 model ProductCategory {
-  id            Int        @id @default(autoincrement())
-  name          String     @db.Text
+  id            Int               @id @default(autoincrement())
+  name          String            @db.Text
   products      Product[]
-  createdAt                   DateTime @default(now())
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt @default(now())
 }
 
 model Experience {
-  id              Int                @id @default(autoincrement())
+  id              Int             @id @default(autoincrement())
   categoryId      Int
   category        ExperienceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  header          String             @db.Text
-  title           String             @db.Text
-  description     String             @db.Text
-  price           Float              @default(0)
-  duration        String             @db.Text
-  images          String?            @db.Text
-  status          String             @default("ACTIVE") @db.Text
-  custom_price    String? @default("[]") @db.Text
-  createdAt                   DateTime @default(now())
+  header          String          @db.Text
+  title           String          @db.Text
+  description     String          @db.Text
+  price           Float           @default(0)
+  duration        String          @db.Text
+  images          String?         @db.Text
+  status          String          @default("ACTIVE") @db.Text
+  custom_price    String?         @default("[]") @db.Text
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt @default(now())
   reserveExperiences ReserveExperience[]
 }
 
 model ExperienceCategory {
-  id            Int        @id @default(autoincrement())
-  name          String     @db.Text
-  experiences   Experience[]
-  createdAt                   DateTime @default(now())
+  id              Int             @id @default(autoincrement())
+  name            String          @db.Text
+  experiences     Experience[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt @default(now())
 }
 
 model DiscountCode {
-  id              Int    @id @default(autoincrement())
+  id              Int             @id @default(autoincrement())
   code            String
   expiredDate     DateTime?
-  discount        Int     @default(0)
+  discount        Int             @default(0)
   stock           Int?
-  status          String  @default("ACTIVE") @db.Text
-  createdAt       DateTime @default(now())
+  status          String          @default("ACTIVE") @db.Text
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt @default(now())
   reserves        Reserve[]
 }
 
 
 model Promotion {
-  id              Int    @id @default(autoincrement())
-  code            String?
-  description     String  @db.Text
-  images          String? @db.Text
+  id              Int             @id @default(autoincrement())
+  title           String?
+  description     String          @db.Text
+  images          String?         @db.Text
   expiredDate     DateTime?
-  status          String  @default("ACTIVE") @db.Text
-  qtypeople       Int    @default(1)
-  qtykids         Int    @default(0)
-  idtents         String @db.Text
-  idproducts      String? @db.Text
-  idexperiences   String? @db.Text
+  status          String          @default("ACTIVE") @db.Text
+  qtypeople       Int             @default(1)
+  qtykids         Int             @default(0)
+  idtents         String          @db.Text
+  idproducts      String?         @db.Text
+  idexperiences   String?         @db.Text
   netImport       Float
   discount        Int
   grossImport     Float
   stock           Int?
-  createdAt       DateTime @default(now())
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt @default(now())
   reserves        Reserve[]
 }
 
@@ -155,6 +163,7 @@ model Reserve {
   paymentStatus     PaymentStatus   @default(PENDING) 
   aditionalPeople   Int             @default(0)
   createdAt                         DateTime @default(now())
+  updatedAt         DateTime        @updatedAt @default(now())
 }
 
 model ReserveTent {
@@ -163,6 +172,8 @@ model ReserveTent {
   reserve   Reserve @relation(fields: [reserveId], references: [id])
   tent      Tent    @relation(fields: [tentId], references: [id])
   @@id([reserveId, tentId])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime  @updatedAt @default(now())
 }
 
 model ReserveProduct {
@@ -171,6 +182,8 @@ model ReserveProduct {
   reserve   Reserve @relation(fields: [reserveId], references: [id])
   product   Product @relation(fields: [productId], references: [id])
   @@id([reserveId, productId])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime  @updatedAt @default(now())
 }
 
 model ReserveExperience {
@@ -179,4 +192,6 @@ model ReserveExperience {
   reserve         Reserve   @relation(fields: [reserveId], references: [id])
   experience      Experience @relation(fields: [experienceId], references: [id])
   @@id([reserveId, experienceId])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime  @updatedAt @default(now())
 }

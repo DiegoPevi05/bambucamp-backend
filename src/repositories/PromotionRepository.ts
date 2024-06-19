@@ -21,12 +21,6 @@ export const getPromotionById = async (id: number): Promise<Promotion | null> =>
   });
 };
 
-export const getPromotionByCode = async (code: string): Promise<Promotion | null> => {
-  return await prisma.promotion.findFirst({
-    where: { code }
-  });
-}
-
 export const createPromotion = async (data: PromotionDto): Promise<Promotion> => {
   return await prisma.promotion.create({
     data

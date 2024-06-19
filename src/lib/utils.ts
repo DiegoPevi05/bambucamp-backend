@@ -129,7 +129,8 @@ export const getTents = async (tents: { tentId:number }[]): Promise<Tent[]> => {
   if(tents.length <= 0) throw new Error ("No tents to validate");
 
   const tentsIds = tents.map(tent => tent.tentId);
-  const tentsDb = await tentRepository.getTentsByIds(tentsIds);
+  let tentsDb = await tentRepository.getTentsByIds(tentsIds);
+  tentsDb = tentsDb.filter(tent => tent.status === 'ACTIVE');
 
   const missingTentIds = tentsIds.filter(
     id => !tentsDb.some((tent:Tent) => tent.id === id)
@@ -149,7 +150,8 @@ export const getProducts = async (products: { productId: number }[]): Promise<Pr
   }
 
   const productIds = products.map((product) => product.productId);
-  const productsDb = await productRepository.getProductsByIds(productIds);
+  let productsDb = await productRepository.getProductsByIds(productIds);
+  productsDb = productsDb.filter(product => product.status === 'ACTIVE');
 
   const missingProductIds = productIds.filter(
     (id) => !productsDb.some((product:Product) => product.id === id)
@@ -169,7 +171,8 @@ export const getExperiences = async (experiences: { experienceId: number }[]): P
   }
 
   const experienceIds = experiences.map((experience) => experience.experienceId);
-  const experiencesDb = await experienceRepository.getExperiencesByIds(experienceIds);
+  let   experiencesDb = await experienceRepository.getExperiencesByIds(experienceIds);
+  experiencesDb = experiencesDb.filter(experience => experience.status === 'ACTIVE');
 
   const missingExperienceIds = experienceIds.filter(
     (id) => !experiencesDb.some((experience:Experience) => experience.id === id)

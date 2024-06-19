@@ -1,5 +1,5 @@
 export interface PromotionDto {
-  code: string;
+  title: string;
   description: string;
   images?: string;
   expireDate: Date;
@@ -7,8 +7,8 @@ export interface PromotionDto {
   qtypeople: number;
   qtykids: number;
   idtents: string;
-  idproducts: string;
-  idexperiences: string;
+  idproducts?: string;
+  idexperiences?: string;
   netImport:number;
   discount: number;
   grossImport: number;

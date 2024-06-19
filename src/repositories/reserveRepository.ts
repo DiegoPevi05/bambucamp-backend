@@ -10,6 +10,46 @@ export interface ExtendedReserve extends Reserve {
 
 const prisma = new PrismaClient();
 
+export const searchAvailableTents = async (dateFrom: Date, dateTo: Date): Promise<Tent[]> => {
+  // Find all reserved tent IDs within the date range
+  const reservedTentIds = await prisma.reserveTent.findMany({
+    where: {
+      reserve: {
+        OR: [
+          {
+            dateFrom: {
+              lte: dateTo,
+            },
+          },
+          {
+            dateTo: {
+              gte: dateFrom,
+            },
+          },
+        ],
+      },
+    },
+    select: {
+      tentId: true,
+    },
+  });
+
+  // Extract unique tent IDs
+  const reservedTentIdSet = new Set(reservedTentIds.map(rt => rt.tentId));
+
+  // Fetch all tents that are ACTIVE and add the 'reserved' field
+  const tents = await prisma.tent.findMany({
+    where: {
+      status: 'ACTIVE',
+    },
+  });
+
+  return tents.map(tent => ({
+    ...tent,
+    reserved: reservedTentIdSet.has(tent.id),
+  }));
+};
+
 export const getMyReserves = async (userId:number): Promise<ExtendedReserve[]> => {
   return await prisma.reserve.findMany({
     where: { userId },
