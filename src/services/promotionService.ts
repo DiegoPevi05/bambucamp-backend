@@ -50,8 +50,8 @@ export const createPromotion = async (data: PromotionDto, images: string |null) 
 export const updatePromotion = async (id:number, data: PromotionDto, images: string |null) => {
 
 
-  if(data.code){
-    data.code   = data.code;
+  if(data.title){
+    data.title   = data.title;
   }
 
   if(data.description){

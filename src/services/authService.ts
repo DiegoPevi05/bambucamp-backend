@@ -11,6 +11,12 @@ const JWT_SECRET = process.env.JWT_SECRET || 'default_secret';
 /*************************SIGN UP FUNCTION************************************/
 export const signUp = async (data: SingUpRequest) => {
 
+  const userExistant = await userRepository.getUserByEmail(data.email);
+
+  if(userExistant){
+    throw new Error('User already Exist');
+  }
+
   const hashedPassword = await bcrypt.hash(data.password, 10);
 
   const user =  await userRepository.createUser({ ...data, password: hashedPassword });
@@ -127,7 +133,8 @@ export const signIn = async (email: string, password: string) => {
       firstName: user.firstName, 
       lastName: user.lastName,
       phoneNumber: user.phoneNumber,
-      email: user.email 
+      email: user.email,
+      role: user.role
     } 
   };
 };

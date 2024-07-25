@@ -11,6 +11,13 @@ export const getUserById = async (id: number) => {
 };
 
 export const createUser = async (data: SingUpRequest) => {
+
+  const userExistant = await userRepository.getUserByEmail(data.email);
+
+  if(userExistant){
+    throw new Error('User already Exist');
+  }
+
   const hashedPassword = await bcrypt.hash(data.password, 10);
   await userRepository.createUser({ ...data, password: hashedPassword });
 };
