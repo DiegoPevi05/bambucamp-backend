@@ -1,10 +1,69 @@
 import { PrismaClient, User } from '@prisma/client';
-import { SingUpRequest } from '../dto/user';
+import { SingUpRequest, UserFilters, PaginatedUsers, UserDto } from '../dto/user';
 
 const prisma = new PrismaClient();
 
-export const getAllUsers = async (): Promise<User[]> => {
-  return await prisma.user.findMany();
+interface Pagination {
+  page: number;
+  pageSize: number;
+}
+
+export const getAllUsers = async (filters: UserFilters, pagination: Pagination): Promise<PaginatedUsers> => {
+  const { firstName, lastName, email, role } = filters;
+  const { page, pageSize } = pagination;
+  
+  const skip = (page - 1) * pageSize;
+  const take = pageSize;
+
+  const totalCount = await prisma.user.count({
+    where: {
+      ...(firstName && { firstName: { contains: firstName, mode: 'insensitive' } }),
+      ...(lastName && { lastName: { contains: lastName, mode: 'insensitive' } }),
+      ...(email && { email: { contains: email, mode: 'insensitive' } }),
+      ...(role && { role }), // Direct equality check for enum
+    },
+  });
+
+  const users = await prisma.user.findMany({
+    where: {
+      ...(firstName && { firstName: { contains: firstName, mode: 'insensitive' } }),
+      ...(lastName && { lastName: { contains: lastName, mode: 'insensitive' } }),
+      ...(email && { email: { contains: email, mode: 'insensitive' } }),
+      ...(role && { role }), // Direct equality check for enum
+    },
+    skip,
+    take,
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      firstName: true,
+      lastName: true,
+      phoneNumber: true,
+      isDisabled: true,
+      lastLogin: true,
+      lastPasswordChanged: true,
+      emailVerified: true,
+      createdAt: true,
+      updatedAt: true
+    }
+  });
+
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  return {
+    users,
+    totalPages,
+    currentPage: page,
+  };
+
+};
+
+export const updateLastLogin = async (userId: number) => {
+  return prisma.user.update({
+    where: { id: userId },
+    data: { lastLogin: new Date() },
+  });
 };
 
 export const getUserById = async (id: number): Promise<User | null> => {
@@ -19,11 +78,18 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
   });
 };
 
-export const createUser = async (data: SingUpRequest): Promise<User> => {
+export const createUser = async (data: UserDto): Promise<User> => {
   return await prisma.user.create({
     data
   });
 };
+
+export const updateUser = async(userId:Number,data:UserDto):Promise<User> => {
+  return await prisma.user.update({
+    where:{ id : Number(userId) },
+    data: data
+  });
+}
 
 export const updateVerificationToken = async (email: string, token: string): Promise<User> => {
   return await prisma.user.update({

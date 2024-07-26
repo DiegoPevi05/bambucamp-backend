@@ -1,16 +1,21 @@
 import bcrypt from 'bcryptjs';
 import * as userRepository from '../repositories/userRepository';
-import { SingUpRequest } from '../dto/user';
+import { UserFilters, PaginatedUsers, UserDto } from '../dto/user';
 
-export const getAllUsers = async () => {
-  return await userRepository.getAllUsers();
+interface Pagination {
+  page: number;
+  pageSize: number;
+}
+
+export const getAllUsers = async (filters: UserFilters, pagination: Pagination): Promise<PaginatedUsers> => {
+  return await userRepository.getAllUsers(filters, pagination);
 };
 
 export const getUserById = async (id: number) => {
   return await userRepository.getUserById(id);
 };
 
-export const createUser = async (data: SingUpRequest) => {
+export const createUser = async (data: UserDto) => {
 
   const userExistant = await userRepository.getUserByEmail(data.email);
 
@@ -18,9 +23,32 @@ export const createUser = async (data: SingUpRequest) => {
     throw new Error('User already Exist');
   }
 
-  const hashedPassword = await bcrypt.hash(data.password, 10);
+  let hashedPassword: string;
+
+  if(data.password != undefined){
+    hashedPassword =  await bcrypt.hash(data?.password, 10);
+  }else{
+    throw new Error('Password is necesary');
+  }  
+
   await userRepository.createUser({ ...data, password: hashedPassword });
 };
+
+export const updateUser = async(userId:Number, data:UserDto) => {
+
+  const user = await userRepository.getUserByEmail(data.email);
+
+  let hashedPassword: string | undefined;
+
+  if(data.password){
+    hashedPassword = await bcrypt.hash(data.password, 10);
+    data.password  = hashedPassword;
+  }else{
+    data.password = user?.password ? user?.password : "";
+  }
+
+  await userRepository.updateUser(userId,data);
+}
 
 export const disableUser = async (id: number) => {
   return await userRepository.disableUser(id);

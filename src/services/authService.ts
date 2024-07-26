@@ -124,6 +124,10 @@ export const signIn = async (email: string, password: string) => {
   if (!isPasswordValid) {
     throw new Error('Invalid email or password');
   }
+
+  // Update the lastLogin field
+  await userRepository.updateLastLogin(user.id);
+
   const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '1h' });
 
   return { 

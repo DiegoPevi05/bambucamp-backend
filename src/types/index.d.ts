@@ -6,6 +6,4 @@ declare module "express" {
     user?: User;
     role?: string;
   }
-
-
 }
