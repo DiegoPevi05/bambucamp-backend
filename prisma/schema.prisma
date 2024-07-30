@@ -36,7 +36,8 @@ model User {
 
 model Tent {
   id              Int             @id @default(autoincrement())
-  name            String          @db.Text
+  header          String          @db.Text
+  title           String          @db.Text
   description     String          @db.Text
   services        String          @db.Text 
   qtypeople       Int             @default(1)

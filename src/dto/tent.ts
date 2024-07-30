@@ -1,5 +1,6 @@
 export interface TentDto {
-  name: string;
+  header:string;
+  title: string;
   description: string;
   services:string;
   qtypeople: number;

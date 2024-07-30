@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import * as authService from '../services/authService';
-import { SingInRequest, SignInResponse } from '../dto/user';
+import { SignInRequest, SignInResponse } from '../dto/user';
 import { body, query, validationResult } from 'express-validator';
 
 
@@ -123,7 +123,7 @@ export const signIn = [
   body('email').isEmail().withMessage('Must be a valid email'),
   body('password').notEmpty().withMessage('Password is required'),
 
-  async (req: Request<{}, {}, SingInRequest>, res: Response) => {
+  async (req: Request<{}, {}, SignInRequest>, res: Response) => {
     try {
       const { email, password } = req.body;
       const { token, user } = await authService.signIn(email, password);

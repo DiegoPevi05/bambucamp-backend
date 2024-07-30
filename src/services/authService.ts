@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import * as userRepository from '../repositories/userRepository';
-import { SingUpRequest } from '../dto/user';
+import { UserDto} from '../dto/user';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../config/email/mail';
 import { randomUUID } from 'crypto';
 
@@ -9,7 +9,7 @@ import { randomUUID } from 'crypto';
 const JWT_SECRET = process.env.JWT_SECRET || 'default_secret';
 
 /*************************SIGN UP FUNCTION************************************/
-export const signUp = async (data: SingUpRequest) => {
+export const signUp = async (data: UserDto) => {
 
   const userExistant = await userRepository.getUserByEmail(data.email);
 

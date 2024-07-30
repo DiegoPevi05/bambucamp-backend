@@ -25,7 +25,8 @@ export const getAllTents = async (req: Request, res: Response) => {
 };
 
 export const createTent = [
-  body('name').notEmpty().withMessage('Name is required'),
+  body('header').notEmpty().withMessage('Header is required'),
+  body('title').notEmpty().withMessage('Title is required'),
   body('description').notEmpty().withMessage('Description is required'),
   body('services').notEmpty().withMessage('Services is required'),
   body('qtypeople').notEmpty().withMessage('Quantity of people is required'),

@@ -5,7 +5,8 @@ import { TentDto } from "../dto/tent";
 export const getAllPublicTents = async () => {
   const tents = await tentRepository.getAllPublicTents();
   return tents.map((tent) => ({
-    name: tent.name,
+    header:tent.header,
+    title: tent.title,
     description: tent.description,
     services: tent.services,
     images : JSON.parse(tent.images ? tent.images : '[]'),
@@ -41,9 +42,12 @@ export const createTent = async (data: TentDto, images: string |null) => {
 
 export const updateTent = async (id:number, data: TentDto, images: string |null) => {
 
+  if(data.header){
+    data.header = data.header;
+  }
 
-  if(data.name){
-    data.name   = data.name;
+  if(data.title){
+    data.title   = data.title;
   }
 
   if(data.description){
