@@ -1,7 +1,12 @@
 import { PrismaClient, Tent   } from "@prisma/client";
-import { TentDto } from "../dto/tent";
+import { TentDto, TentFilters, PaginatedTents } from "../dto/tent";
 
 const prisma = new PrismaClient();
+
+interface Pagination {
+  page: number;
+  pageSize: number;
+}
 
 export const getAllPublicTents = async (): Promise<Tent[]> => {
   return await prisma.tent.findMany({
@@ -11,8 +16,37 @@ export const getAllPublicTents = async (): Promise<Tent[]> => {
   });
 };
 
-export const getAllTents = async (): Promise<Tent[]> => {
-  return await prisma.tent.findMany();
+export const getAllTents = async (filters: TentFilters, pagination: Pagination): Promise<PaginatedTents> => {
+
+  const { title, status } = filters;
+  const { page, pageSize } = pagination;
+  
+  const skip = (page - 1) * pageSize;
+  const take = pageSize;
+
+  const totalCount = await prisma.tent.count({
+    where: {
+      ...(title && { title: { contains: title, mode: 'insensitive' } }),
+      ...(status && { status: { contains: status, mode: 'insensitive' } }),
+    },
+  });
+
+  const tents = await prisma.tent.findMany({
+    where: {
+      ...(title && { title: { contains: title, mode: 'insensitive' } }),
+      ...(status && { status: { contains: status, mode: 'insensitive' } }),
+    },
+    skip,
+    take
+  });
+
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  return {
+    tents,
+    totalPages,
+    currentPage: page,
+  };
 };
 
 export const getTentById = async (id: number): Promise<Tent | null> => {

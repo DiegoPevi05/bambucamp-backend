@@ -17,8 +17,21 @@ export const getAllPublicTents = async (req: Request, res: Response) => {
 
 export const getAllTents = async (req: Request, res: Response) => {
   try {
-    const tents = await tentService.getAllTents();
-    res.json(tents);
+    const { title,status, page = '1', pageSize = '10' } = req.query;
+
+    const filters = {
+      title: title as string | undefined,
+      status: status as string | undefined
+    };
+
+    const pagination = {
+      page: parseInt(page as string, 10),
+      pageSize: parseInt(pageSize as string, 10),
+    };
+
+    const PaginatedTents = await tentService.getAllTents(filters, pagination);
+
+    res.json(PaginatedTents);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch tents' });
   }

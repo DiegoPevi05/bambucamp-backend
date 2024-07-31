@@ -5,8 +5,19 @@ export interface TentDto {
   services:string;
   qtypeople: number;
   qtykids: number;
-  images?: string;
+  images: string;
   price: number;
-  status?: string;
+  status: string;
   custom_price?: string;
 }
+
+export interface TentFilters {
+  title?: string;
+  status?:string;
+};
+
+export interface PaginatedTents {
+  tents: TentDto[];
+  totalPages: number;
+  currentPage: number;
+};

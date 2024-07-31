@@ -1,5 +1,5 @@
 import * as tentRepository from '../repositories/TentRepository';
-import { TentDto } from "../dto/tent";
+import { TentFilters, PaginatedTents, TentDto } from '../dto/tent';
 
 
 export const getAllPublicTents = async () => {
@@ -17,12 +17,17 @@ export const getAllPublicTents = async () => {
   }));
 }
 
-export const getAllTents = async () => {
-  const tents = await tentRepository.getAllTents();
-  tents.forEach((tent) => {
+interface Pagination {
+  page: number;
+  pageSize: number;
+}
+
+export const getAllTents = async (filters: TentFilters, pagination: Pagination): Promise<PaginatedTents> => {
+  const tentsPaginated = await tentRepository.getAllTents(filters,pagination);
+  tentsPaginated.tents.forEach((tent) => {
     tent.images = JSON.parse(tent.images ? tent.images : '[]');
   });
-  return tents;
+  return tentsPaginated;
 };
 
 export const getTentById = async (id: number) => {

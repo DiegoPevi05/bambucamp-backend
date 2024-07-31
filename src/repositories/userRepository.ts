@@ -1,5 +1,5 @@
 import { PrismaClient, User } from '@prisma/client';
-import { SingUpRequest, UserFilters, PaginatedUsers, UserDto } from '../dto/user';
+import {  UserFilters, PaginatedUsers, UserDto } from '../dto/user';
 
 const prisma = new PrismaClient();
 
