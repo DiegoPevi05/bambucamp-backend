@@ -58,7 +58,7 @@ model Product {
   name            String          @db.Text
   description     String          @db.Text
   price           Float           @default(0)
-  quantity        Int             @default(0)
+  stock           Int             @default(0)
   images          String          @db.Text
   status          String          @default("ACTIVE") @db.Text
   custom_price    String          @default("[]") @db.Text

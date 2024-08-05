@@ -1,10 +1,6 @@
 import { Request, Response } from 'express';
 import * as tentService from '../services/tentService';
 import { body, param, validationResult } from 'express-validator';
-import { serializeImagesTodb, moveImagesToSubFolder } from '../lib/utils';
-
-// Define a custom type for the Multer file
-type MulterFile = Express.Multer.File;
 
 export const getAllPublicTents = async (req: Request, res: Response) => {
   try {

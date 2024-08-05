@@ -45,7 +45,7 @@ export const createProduct = async (data: ProductDto, files: MulterFile[] | { [f
   }
   data.categoryId     = Number(data.categoryId);
   data.price          = Number(data.price);
-  data.quantity       = Number(data.quantity);
+  data.stock       = Number(data.stock);
 
   const product = await productRepository.createProduct(data);
 
@@ -82,8 +82,8 @@ export const updateProduct = async (id:number, data: ProductDto, files: MulterFi
     product.description   = data.description;
   }
 
-  if(data.quantity &&  Number(data.quantity) != product.quantity ){
-    product.quantity = Number(data.quantity);
+  if(data.stock &&  Number(data.stock) != product.stock ){
+    product.stock = Number(data.stock);
   }
 
   if(files || data.existing_images){

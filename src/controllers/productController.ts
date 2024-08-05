@@ -1,10 +1,6 @@
 import { Request, Response } from 'express';
 import * as productService from '../services/productService';
 import { body, param, validationResult } from 'express-validator';
-import { serializeImagesTodb } from '../lib/utils';
-
-// Define a custom type for the Multer file
-type MulterFile = Express.Multer.File;
 
 export const getAllPublicProducts = async (req: Request, res: Response) => {
   try {
@@ -42,6 +38,7 @@ export const createProduct = [
   body('name').notEmpty().withMessage('Name is required'),
   body('description').notEmpty().withMessage('Description is required'),
   body('price').notEmpty().withMessage('Price is required'),
+  body('stock').notEmpty().withMessage('Stock is required'),
 
   async (req: Request, res: Response) => {
 
@@ -51,7 +48,7 @@ export const createProduct = [
     }
 
     try {
-      await productService.createProduct(req.body, serializeImagesTodb(req.files  as { [fieldname: string]: MulterFile[] }));
+      await productService.createProduct(req.body, req.files);
       res.status(201).json({ message: 'Product created' });
     } catch (error) {
       console.log(error);
@@ -71,7 +68,7 @@ export const updateProduct = [
     }
 
     try {
-      await productService.updateProduct(Number(req.params.id), req.body ,serializeImagesTodb(req.files  as { [fieldname: string]: MulterFile[] }) );
+      await productService.updateProduct(Number(req.params.id), req.body  , req.files );
       res.json({ message: 'Product updated' });
     } catch (error) {
       res.status(500).json({ error: 'Failed to update product' });
