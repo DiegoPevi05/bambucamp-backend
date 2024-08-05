@@ -17,8 +17,21 @@ export const getAllPublicProducts = async (req: Request, res: Response) => {
 
 export const getAllProducts = async (req: Request, res: Response) => {
   try {
-    const products = await productService.getAllProducts();
-    res.json(products);
+    const { name, page = '1', pageSize = '10' } = req.query;
+
+    const filters = {
+      name: name as string | undefined
+    };
+
+    const pagination = {
+      page: parseInt(page as string, 10),
+      pageSize: parseInt(pageSize as string, 10),
+    };
+
+    const PaginatedTents = await productService.getAllProducts(filters, pagination);
+
+    res.json(PaginatedTents);
+
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch products' });
   }

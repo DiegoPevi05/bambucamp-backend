@@ -1,5 +1,6 @@
 import * as tentRepository from '../repositories/TentRepository';
 import { TentFilters, PaginatedTents, TentDto } from '../dto/tent';
+import { deleteSubFolder, serializeImagesTodb, moveImagesToSubFolder, deleteImages } from '../lib/utils';
 
 
 export const getAllPublicTents = async () => {
@@ -34,7 +35,13 @@ export const getTentById = async (id: number) => {
   return await tentRepository.getTentById(id);
 };
 
-export const createTent = async (data: TentDto, images: string |null) => {
+// Define a custom type for the Multer file
+type MulterFile = Express.Multer.File;
+
+export const createTent = async (data: TentDto, files: MulterFile[] | { [fieldname:string] :MulterFile[]; } | undefined ) => {
+
+ const images = serializeImagesTodb(files as { [fieldname: string]: MulterFile[] });
+
   if(images){
     data.images   = images;
   }
@@ -42,52 +49,118 @@ export const createTent = async (data: TentDto, images: string |null) => {
   data.qtykids        = Number(data.qtykids);
   data.price          = Number(data.price);
 
-  await tentRepository.createTent(data);
-};
+  const tent = await tentRepository.createTent(data); // Assume this returns the created tent's ID
 
-export const updateTent = async (id:number, data: TentDto, images: string |null) => {
-
-  if(data.header){
-    data.header = data.header;
-  }
-
-  if(data.title){
-    data.title   = data.title;
-  }
-
-  if(data.description){
-    data.description   = data.description;
-  }
-
-  if(data.services){
-    data.services   = data.services;
-  }
 
   if(images){
-    data.images   = images;
+    // Move images to the new folder
+    const movedImages = await moveImagesToSubFolder(tent.id, "tents", JSON.parse(images || '[]'));
+
+    await updateTentImages(tent.id, JSON.stringify(movedImages));
   }
 
-  if(data.qtypeople){
-    data.qtypeople   = Number(data.qtypeople);
+  return tent;
+};
+
+export const updateTent = async (id:number, data: TentDto, files: MulterFile[] | { [fieldname:string] :MulterFile[]; } | undefined) => {
+
+  const tent = await tentRepository.getTentById(id);
+
+  if(!tent){
+    throw Error ( "Glamping no se ha encontrado en la base de datos");
   }
 
-  if(data.qtykids){
-    data.qtykids   = Number(data.qtykids);
+  if(data.header &&  data.header != tent.header){
+    tent.header = data.header;
   }
 
-  if(data.price){
-    data.price   = Number(data.price);
+  if(data.title &&  data.title != tent.title){
+    tent.title   = data.title;
   }
 
-  if(data.status){
-    data.status   = data.status;
+  if(data.description &&  data.description != tent.description){
+    tent.description   = data.description;
+  }
+
+  if(data.services &&  data.services != tent.services){
+    tent.services   = data.services;
+  }
+
+  if(data.custom_price && data.custom_price != tent.custom_price){
+    tent.custom_price = data.custom_price;
   }
 
 
-  return await tentRepository.updateTent(id,data);
+  if(files || data.existing_images){
+
+    
+    let imagesToConserve:string[] = tent.images ? JSON.parse(tent.images) : [];
+    // Normalize paths to use forward slashes
+    imagesToConserve = imagesToConserve.map(image => image.replace(/\\/g, '/'));
+
+    if(data.existing_images){
+
+      const imageToReplace: string[] = data.existing_images ? JSON.parse(data.existing_images) : [];
+
+      if (imageToReplace.length >= 0  && imagesToConserve.length != imageToReplace.length ) {
+        // Find the images that need to be removed
+        const imagesToRemove = imagesToConserve.filter(dbImage => !imageToReplace.includes(dbImage));
+        // Perform the removal of images
+        if (imagesToRemove.length > 0) {
+          deleteImages(imagesToRemove);
+        }
+
+        imagesToConserve  = imagesToConserve.filter(dbImage => imageToReplace.includes(dbImage))
+      }
+
+    }
+
+    let NewMovedImages:any[] = [];
+
+    if(files){
+
+      const imagesFiles = serializeImagesTodb(files as { [fieldname: string]: MulterFile[] });
+
+      NewMovedImages = await moveImagesToSubFolder(tent.id, "tents", JSON.parse(imagesFiles || '[]'));
+
+    }
+
+    const allImages = [...imagesToConserve, ...NewMovedImages];
+
+    tent.images = JSON.stringify(allImages);
+  }
+
+  if(data.qtypeople &&  data.qtypeople != tent.qtypeople){
+    tent.qtypeople   = Number(data.qtypeople);
+  }
+
+  if(data.qtykids && data.qtykids != tent.qtykids){
+    tent.qtykids   = Number(data.qtykids);
+  }
+
+  if(data.price && Number(data.price) != tent.price){
+    tent.price   = Number(data.price);
+  }
+
+  if(data.status && data.status != tent.status){
+    tent.status   = data.status;
+  }
+
+  tent.updatedAt = new Date();
+
+  return await tentRepository.updateTent(id,tent);
+
 };
 
 export const deleteTent = async (id: number) => {
+ 
+  const tent = await tentRepository.getTentById(id);
+  if (tent?.images) {
+      deleteSubFolder(tent.id,"tents");
+  }
   return await tentRepository.deleteTent(id);
 };
 
+export const updateTentImages = async (tentId: number, images: string) => {
+  await tentRepository.updateTentImages(tentId, images);
+};

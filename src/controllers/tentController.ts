@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import * as tentService from '../services/tentService';
-import { body, query, param, validationResult } from 'express-validator';
-import { serializeImagesTodb } from '../lib/utils';
+import { body, param, validationResult } from 'express-validator';
+import { serializeImagesTodb, moveImagesToSubFolder } from '../lib/utils';
 
 // Define a custom type for the Multer file
 type MulterFile = Express.Multer.File;
@@ -54,7 +54,10 @@ export const createTent = [
     }
 
     try {
-      await tentService.createTent(req.body, serializeImagesTodb(req.files  as { [fieldname: string]: MulterFile[] }));
+      req.files
+      // Create the tent
+      await tentService.createTent(req.body, req.files);
+
       res.status(201).json({ message: 'Tent created' });
     } catch (error) {
       console.log(error);
@@ -74,8 +77,11 @@ export const updateTent = [
     }
 
     try {
-      await tentService.updateTent(Number(req.params.id), req.body ,serializeImagesTodb(req.files  as { [fieldname: string]: MulterFile[] }) );
+
+      await tentService.updateTent(Number(req.params.id), req.body , req.files);
+
       res.json({ message: 'Tent updated' });
+
     } catch (error) {
       res.status(500).json({ error: 'Failed to update tent' });
     }
@@ -85,6 +91,7 @@ export const updateTent = [
 export const deleteTent = async (req: Request, res: Response) => {
   try {
     await tentService.deleteTent(Number(req.params.id));
+
     res.json({ message: 'Tent deleted' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete tent' });

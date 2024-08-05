@@ -85,4 +85,16 @@ export const deleteTent = async (id: number): Promise<Tent> => {
   });
 };
 
+export const updateTentImages = async (tentId: number, images: string) => {
+  try {
+    await prisma.tent.update({
+      where: { id: tentId },
+      data: { images: images }
+    });
+  } catch (error) {
+    console.error('Error updating tent images:', error);
+    throw new Error('Failed to update tent images');
+  }
+};
+
 

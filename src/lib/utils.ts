@@ -33,6 +33,37 @@ export const deleteImages = (imagePaths: string[]) => {
   });
 };
 
+export const deleteSubFolder = (tentId: number, subfolderName:string) => {
+
+  const subFolderPath = path.join(__dirname,`../../public/images/${subfolderName}`, tentId.toString());
+
+  if (fs.existsSync(subFolderPath)) {
+    fs.rmSync(subFolderPath, { recursive: true, force: true });
+    console.log(`Successfully deleted folder: ${subFolderPath}`);
+  } else {
+    console.error(`Folder does not exist: ${subFolderPath}`);
+  }
+};
+
+
+export const moveImagesToSubFolder = async (tentId: number, subfolderName:string ,images: string[]): Promise<string[]> => {
+  const newPaths: string[] = [];
+
+  const subFolderPath = path.join(__dirname,`../../public/images/${subfolderName}`, tentId.toString());
+  if (!fs.existsSync(subFolderPath)) {
+    fs.mkdirSync(subFolderPath, { recursive: true });
+  }
+
+  for (const image of images) {
+    const oldPath = path.join(__dirname, '../../', image);
+    const newPath = path.join(subFolderPath, path.basename(image));
+    await fs.promises.rename(oldPath, newPath);
+    newPaths.push(newPath.replace(path.join(__dirname, '../../'), ''));
+  }
+
+  return newPaths;
+};
+
 
 interface CustomPrice {
   dateFrom: Date;

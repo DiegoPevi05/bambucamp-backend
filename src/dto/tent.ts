@@ -9,6 +9,7 @@ export interface TentDto {
   price: number;
   status: string;
   custom_price?: string;
+  existing_images?:string;
 }
 
 export interface TentFilters {

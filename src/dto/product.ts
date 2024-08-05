@@ -3,7 +3,19 @@ export interface ProductDto {
   name: string;
   description: string;
   price: number;
-  images?: string;
-  custom_price?: string;
+  quantity:number;
+  images: string;
   status?: string;
+  custom_price?: string;
+  existing_images?:string;
 }
+
+export interface ProductFilters {
+  name?: string;
+};
+
+export interface PaginatedProducts {
+  products: ProductDto[];
+  totalPages: number;
+  currentPage: number;
+};
