@@ -17,7 +17,7 @@ export const getAllPublicProducts = async (): Promise<Product[]> => {
 };
 
 export const getAllProducts = async (filters:ProductFilters, pagination:Pagination): Promise<PaginatedProducts> => {
-  const { name } = filters;
+  const { name, status } = filters;
   const { page, pageSize } = pagination;
   
   const skip = (page - 1) * pageSize;
@@ -26,15 +26,20 @@ export const getAllProducts = async (filters:ProductFilters, pagination:Paginati
   const totalCount = await prisma.product.count({
     where: {
       ...(name && { name: { contains: name, mode: 'insensitive' } }),
+      ...(status && { status: { contains: status, mode: 'insensitive' } }),
     },
   });
 
   const products = await prisma.product.findMany({
     where: {
       ...(name && { name: { contains: name, mode: 'insensitive' } }),
+      ...(status && { status: { contains: status, mode: 'insensitive' } }),
     },
     skip,
-    take
+    take,
+    include: {
+      category: true, // Include the category object
+    },
   });
 
   const totalPages = Math.ceil(totalCount / pageSize);

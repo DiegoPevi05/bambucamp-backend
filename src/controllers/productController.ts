@@ -13,10 +13,11 @@ export const getAllPublicProducts = async (req: Request, res: Response) => {
 
 export const getAllProducts = async (req: Request, res: Response) => {
   try {
-    const { name, page = '1', pageSize = '10' } = req.query;
+    const { name, status, page = '1', pageSize = '10' } = req.query;
 
     const filters = {
-      name: name as string | undefined
+      name: name as string | undefined,
+      status: status as string | undefined
     };
 
     const pagination = {
@@ -29,6 +30,7 @@ export const getAllProducts = async (req: Request, res: Response) => {
     res.json(PaginatedTents);
 
   } catch (error) {
+    console.log(error)
     res.status(500).json({ error: 'Failed to fetch products' });
   }
 };

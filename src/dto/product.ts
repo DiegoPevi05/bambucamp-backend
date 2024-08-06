@@ -10,12 +10,17 @@ export interface ProductDto {
   existing_images?:string;
 }
 
+export interface ProductPublicDto extends ProductDto  {
+  category: { id: number; name:string, createdAt:Date, updatedAt:Date };
+}
+
 export interface ProductFilters {
   name?: string;
+  status?:string;
 };
 
 export interface PaginatedProducts {
-  products: ProductDto[];
+  products: ProductPublicDto[];
   totalPages: number;
   currentPage: number;
 };
