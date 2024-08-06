@@ -141,7 +141,7 @@ export const updateProduct = async (id:number, data: ProductDto, files: MulterFi
 export const deleteProduct = async (id: number) => {
   const product = await productRepository.getProductById(id);
   if (product?.images) {
-      deleteSubFolder(product.id,"tents");
+      deleteSubFolder(product.id,"products");
   }
   return await productRepository.deleteProduct(id);
 };
