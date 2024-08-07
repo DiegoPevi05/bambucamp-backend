@@ -80,13 +80,13 @@ model Experience {
   categoryId      Int
   category        ExperienceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   header          String          @db.Text
-  title           String          @db.Text
+  name            String          @db.Text
   description     String          @db.Text
   price           Float           @default(0)
-  duration        String          @db.Text
-  images          String?         @db.Text
+  duration        Float           @default(0)
+  images          String          @db.Text
   status          String          @default("ACTIVE") @db.Text
-  custom_price    String?         @default("[]") @db.Text
+  custom_price    String          @default("[]") @db.Text
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt @default(now())
   reserveExperiences ReserveExperience[]

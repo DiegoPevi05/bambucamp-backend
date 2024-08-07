@@ -1,12 +1,27 @@
 export interface ExperienceDto {
   categoryId: number;
   header: string;
-  title: string;
+  name: string;
   description: string;
   price: number;
-  duration: string;
-  images?: string;
-  custom_price?: string;
+  duration: number;
+  images: string;
   status?: string;
+  custom_price?: string;
+  existing_images?:string;
 }
 
+export interface ExperiencePublicDto extends ExperienceDto  {
+  category: { id: number; name:string, createdAt:Date, updatedAt:Date };
+}
+
+export interface ExperienceFilters {
+  name?: string;
+  status?:string;
+};
+
+export interface PaginatedExperiences {
+  experiences: ExperiencePublicDto[];
+  totalPages: number;
+  currentPage: number;
+};

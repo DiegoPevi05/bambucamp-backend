@@ -86,10 +86,10 @@ export const deleteProduct = async (id: number): Promise<Product> => {
   });
 };
 
-export const updateProductImages = async (tentId: number, images: string) => {
+export const updateProductImages = async (productId: number, images: string) => {
   try {
     await prisma.product.update({
-      where: { id: tentId },
+      where: { id: productId },
       data: { images: images }
     });
   } catch (error) {

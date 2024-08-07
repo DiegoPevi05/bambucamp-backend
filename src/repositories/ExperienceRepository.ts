@@ -1,7 +1,12 @@
 import { PrismaClient, Experience   } from "@prisma/client";
-import { ExperienceDto } from "../dto/experience";
+import { ExperienceDto, ExperienceFilters, PaginatedExperiences } from "../dto/experience";
 
 const prisma = new PrismaClient();
+
+interface Pagination {
+  page: number;
+  pageSize: number;
+}
 
 export const getAllPublicExperiences = async (): Promise<Experience[]> => {
   return await prisma.experience.findMany({
@@ -11,8 +16,40 @@ export const getAllPublicExperiences = async (): Promise<Experience[]> => {
   });
 };
 
-export const getAllExperiences = async (): Promise<Experience[]> => {
-  return await prisma.experience.findMany();
+export const getAllExperiences = async (filters:ExperienceFilters, pagination:Pagination): Promise<PaginatedExperiences> => {
+  const { name, status } = filters;
+  const { page, pageSize } = pagination;
+  
+  const skip = (page - 1) * pageSize;
+  const take = pageSize;
+
+  const totalCount = await prisma.experience.count({
+    where: {
+      ...(name && { name: { contains: name, mode: 'insensitive' } }),
+      ...(status && { status: { contains: status, mode: 'insensitive' } }),
+    },
+  });
+
+  const experiences = await prisma.experience.findMany({
+    where: {
+      ...(name && { name: { contains: name, mode: 'insensitive' } }),
+      ...(status && { status: { contains: status, mode: 'insensitive' } }),
+    },
+    skip,
+    take,
+    include: {
+      category: true, // Include the category object
+    },
+  });
+
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  return {
+    experiences,
+    totalPages,
+    currentPage: page,
+  };
+
 };
 
 export const getExperienceById = async (id: number): Promise<Experience | null> => {
@@ -49,5 +86,21 @@ export const deleteExperience = async (id: number): Promise<Experience> => {
     where: { id }
   });
 };
+
+export const updateExperienceImages = async (experienceId: number, images: string) => {
+  try {
+    await prisma.experience.update({
+      where: { id: experienceId },
+      data: { images: images }
+    });
+  } catch (error) {
+    console.error('Error updating experience images:', error);
+    throw new Error('Failed to update experience images');
+  }
+};
+
+
+
+
 
 

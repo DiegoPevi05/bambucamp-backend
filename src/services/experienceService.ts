@@ -1,13 +1,13 @@
 import * as experienceRepository from '../repositories/ExperienceRepository';
-import { ExperienceDto } from '../dto/experience';
-import { deleteImages } from '../lib/utils';
+import { ExperienceDto, ExperienceFilters, PaginatedExperiences } from '../dto/experience';
+import { deleteSubFolder, serializeImagesTodb, moveImagesToSubFolder, deleteImages } from '../lib/utils';
 
 export const getAllPublicExperiences = async () => {
   const experiences = await experienceRepository.getAllPublicExperiences();
 
   return experiences.map((experience) => ({
     header: experience.header,
-    title: experience.title,
+    name: experience.name,
     description: experience.description,
     price: experience.price,
     duration: experience.duration,
@@ -15,91 +15,147 @@ export const getAllPublicExperiences = async () => {
   }));
 
 };
-export const getAllExperiences = async () => {
-  const experiences = await experienceRepository.getAllExperiences();
-  experiences.forEach((experience) => {
+
+interface Pagination {
+  page: number;
+  pageSize: number;
+}
+
+export const getAllExperiences = async (filters:ExperienceFilters, pagination:Pagination): Promise<PaginatedExperiences> => {
+  const experiencesPaginated = await experienceRepository.getAllExperiences(filters,pagination);
+  experiencesPaginated.experiences.forEach((experience) => {
     experience.images = JSON.parse(experience.images ? experience.images : '[]');
   });
-  return experiences;
+  return experiencesPaginated;
 };
 
 export const getExperienceById = async (id: number) => {
   return await experienceRepository.getExperienceById(id);
 };
 
-export const createExperience = async (data: ExperienceDto, images: string |null) => {
+// Define a custom type for the Multer file
+type MulterFile = Express.Multer.File;
+
+export const createExperience = async (data: ExperienceDto, files: MulterFile[] | { [fieldname:string] :MulterFile[]; } | undefined) => {
+
+ const images = serializeImagesTodb(files as { [fieldname: string]: MulterFile[] });
+
   if(images){
     data.images   = images;
   }
   data.categoryId = Number(data.categoryId);
   data.price      = Number(data.price);
+  data.duration   = Number(data.duration);
 
-  if(data.custom_price){
-    data.custom_price = data.custom_price;
+  const experience = await experienceRepository.createExperience(data);
+
+  if(images){
+    // Move images to the new folder
+    const movedImages = await moveImagesToSubFolder(experience.id, "experiences", JSON.parse(images || '[]'));
+
+    await updateExperienceImages(experience.id, JSON.stringify(movedImages));
   }
 
-  await experienceRepository.createExperience(data);
+  return experience;
+
 };
 
-export const updateExperience = async (id:number, data: ExperienceDto, images: string |null) => {
+export const updateExperience = async (id:number, data: ExperienceDto, files: MulterFile[] | { [fieldname:string] :MulterFile[]; } | undefined) => {
+
   const experience = await experienceRepository.getExperienceById(id);
 
   if(!experience){
-    throw new Error('Experience not found');
+    throw new Error('Experiencia no encontrada en la base de datos');
   }
 
-  if(data.categoryId){
-    data.categoryId = Number(data.categoryId);
+  if(data.categoryId &&  Number(data.categoryId) != experience.categoryId ){
+    experience.categoryId = Number(data.categoryId);
   }
 
-  if(data.header){
-    data.header = data.header;
+  if(data.header &&  data.header != experience.header){
+    experience.header   = data.header;
   }
 
-  if(data.title){
-    data.title = data.title;
+  if(data.name &&  data.name != experience.name){
+    experience.name   = data.name;
   }
 
-  if(data.description){
-    data.description = data.description;
+  if(data.description &&  data.description != experience.description){
+    experience.description   = data.description;
   }
 
-  if(data.price){
-    data.price      = Number(data.price);
+  if(data.price &&  Number(data.price) != experience.price ){
+    experience.price = Number(data.price);
   }
 
-  if(data.duration){
-    data.duration = data.duration;
+  if(data.duration &&  Number(data.duration) != experience.duration ){
+    experience.duration = Number(data.duration);
   }
 
-  if(images){
-    deleteImages(JSON.parse(experience.images ? experience.images : '[]'));
-    data.images   = images;
+
+  if(files || data.existing_images){
+
+    
+    let imagesToConserve:string[] = experience.images ? JSON.parse(experience.images) : [];
+    // Normalize paths to use forward slashes
+    imagesToConserve = imagesToConserve.map(image => image.replace(/\\/g, '/'));
+
+    if(data.existing_images){
+
+      const imageToReplace: string[] = data.existing_images ? JSON.parse(data.existing_images) : [];
+
+      if (imageToReplace.length >= 0  && imagesToConserve.length != imageToReplace.length ) {
+        // Find the images that need to be removed
+        const imagesToRemove = imagesToConserve.filter(dbImage => !imageToReplace.includes(dbImage));
+        // Perform the removal of images
+        if (imagesToRemove.length > 0) {
+          deleteImages(imagesToRemove);
+        }
+
+        imagesToConserve  = imagesToConserve.filter(dbImage => imageToReplace.includes(dbImage))
+      }
+
+    }
+
+    let NewMovedImages:any[] = [];
+
+    if(files){
+
+      const imagesFiles = serializeImagesTodb(files as { [fieldname: string]: MulterFile[] });
+
+      NewMovedImages = await moveImagesToSubFolder(experience.id, "experiences", JSON.parse(imagesFiles || '[]'));
+
+    }
+
+    const allImages = [...imagesToConserve, ...NewMovedImages];
+
+    experience.images = JSON.stringify(allImages);
   }
   
-  if(data.custom_price){
-    data.custom_price = data.custom_price;
+  if(data.status && data.status != experience.status){
+    experience.status   = data.status;
   }
 
-  if(data.status){
-    if(data.status === 'ACTIVE' || data.status === 'INACTIVE'){
-      data.status = data.status;
-    }
+  if(data.custom_price && data.custom_price != experience.custom_price){
+    experience.custom_price = data.custom_price;
   }
 
-  return await experienceRepository.updateExperience(id,data);
+  experience.updatedAt = new Date();
+
+  return await experienceRepository.updateExperience(id,experience);
+
 };
 
 export const deleteExperience = async (id: number) => {
 
   const experience = await experienceRepository.getExperienceById(id);
-
-  if(!experience){
-    throw new Error('Experience not found');
+  if (experience?.images) {
+      deleteSubFolder(experience.id,"experiences");
   }
-
-  deleteImages(JSON.parse(experience.images ? experience.images : '[]'));
-
   return await experienceRepository.deleteExperience(id);
 };
 
+
+export const updateExperienceImages = async (experienceId: number, images: string) => {
+  await experienceRepository.updateExperienceImages(experienceId, images);
+};

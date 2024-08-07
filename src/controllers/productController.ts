@@ -25,9 +25,9 @@ export const getAllProducts = async (req: Request, res: Response) => {
       pageSize: parseInt(pageSize as string, 10),
     };
 
-    const PaginatedTents = await productService.getAllProducts(filters, pagination);
+    const PaginatedProducts = await productService.getAllProducts(filters, pagination);
 
-    res.json(PaginatedTents);
+    res.json(PaginatedProducts);
 
   } catch (error) {
     console.log(error)
