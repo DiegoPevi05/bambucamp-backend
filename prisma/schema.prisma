@@ -118,20 +118,20 @@ model DiscountCode {
 
 model Promotion {
   id              Int             @id @default(autoincrement())
-  title           String?
+  title           String
   description     String          @db.Text
-  images          String?         @db.Text
-  expiredDate     DateTime?
+  images          String          @db.Text
+  expiredDate     DateTime        @default(now())
   status          String          @default("ACTIVE") @db.Text
   qtypeople       Int             @default(1)
   qtykids         Int             @default(0)
   idtents         String          @db.Text
-  idproducts      String?         @db.Text
-  idexperiences   String?         @db.Text
+  idproducts      String          @default("[]") @db.Text
+  idexperiences   String          @default("[]") @db.Text
   netImport       Float
   discount        Int
   grossImport     Float
-  stock           Int?
+  stock           Int             @default(1)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt @default(now())
   reserves        Reserve[]

@@ -86,6 +86,8 @@ export const updateDiscountCode = async (id:number, data: DiscountCodeDto) => {
   if(data.status && data.status != discountCode.status){
     discountCode.status   = data.status;
   }
+  
+  discountCode.updatedAt = new Date();
 
   return await discountcodeRepository.updateDiscountCode(id,discountCode);
 };

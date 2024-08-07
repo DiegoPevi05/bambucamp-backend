@@ -1,10 +1,6 @@
 import { Request, Response } from 'express';
 import * as promotionService from '../services/promotionService';
 import { body, param, validationResult } from 'express-validator';
-import { serializeImagesTodb } from '../lib/utils';
-
-// Define a custom type for the Multer file
-type MulterFile = Express.Multer.File;
 
 export const getAllPublicPromotions = async (req: Request, res: Response) => {
   try {
@@ -17,8 +13,22 @@ export const getAllPublicPromotions = async (req: Request, res: Response) => {
 
 export const getAllPromotions = async (req: Request, res: Response) => {
   try {
-    const promotions = await promotionService.getAllPromotions();
-    res.json(promotions);
+    const { title, status, page = '1', pageSize = '10' } = req.query;
+
+    const filters = {
+      title: title as string | undefined,
+      status: status as string | undefined
+    };
+
+    const pagination = {
+      page: parseInt(page as string, 10),
+      pageSize: parseInt(pageSize as string, 10),
+    };
+
+    const PaginatedPromotions = await promotionService.getAllPromotions(filters, pagination);
+
+    res.json(PaginatedPromotions);
+
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch promotions' });
   }
@@ -41,7 +51,7 @@ export const createPromotion = [
     }
 
     try {
-      await promotionService.createPromotion(req.body, serializeImagesTodb(req.files  as { [fieldname: string]: MulterFile[] }));
+      await promotionService.createPromotion(req.body, req.files);
       res.status(201).json({ message: 'Promotion created' });
     } catch (error) {
       console.log(error);
@@ -61,7 +71,7 @@ export const updatePromotion = [
     }
 
     try {
-      await promotionService.updatePromotion(Number(req.params.id), req.body ,serializeImagesTodb(req.files  as { [fieldname: string]: MulterFile[] }) );
+      await promotionService.updatePromotion(Number(req.params.id), req.body ,req.files);
       res.json({ message: 'Promotion updated' });
     } catch (error) {
       res.status(500).json({ error: 'Failed to update promotion' });

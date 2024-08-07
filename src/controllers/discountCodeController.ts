@@ -55,7 +55,6 @@ export const createDiscountCode = [
     }
 
     try {
-      console.log(req.body);
       await discountCodeService.createDiscountCode(req.body);
       res.status(201).json({ message: 'DiscountCode created' });
     } catch (error) {
