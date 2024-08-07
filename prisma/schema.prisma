@@ -85,6 +85,9 @@ model Experience {
   price           Float           @default(0)
   duration        Float           @default(0)
   images          String          @db.Text
+  limit_age       Int             @default(1)
+  qtypeople       Int             @default(1)
+  suggestions     String          @default("[]") @db.Text
   status          String          @default("ACTIVE") @db.Text
   custom_price    String          @default("[]") @db.Text
   createdAt       DateTime        @default(now())
@@ -103,9 +106,9 @@ model ExperienceCategory {
 model DiscountCode {
   id              Int             @id @default(autoincrement())
   code            String
-  expiredDate     DateTime?
+  expiredDate     DateTime        @default(now())
   discount        Int             @default(0)
-  stock           Int?
+  stock           Int             @default(1)
   status          String          @default("ACTIVE") @db.Text
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt @default(now())

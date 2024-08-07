@@ -1,5 +1,5 @@
 import * as discountcodeRepository from '../repositories/DiscountCodeRepository';
-import { DiscountCodeDto } from '../dto/discountcode';
+import { DiscountCodeDto, DiscountCodeFilters, PaginatedDiscountCodes } from '../dto/discountcode';
 
 export const getDiscountCodeByCode = async (code: string) => {
   const discountCode = await discountcodeRepository.getDiscountCodeByCode(code);
@@ -25,8 +25,13 @@ export const getDiscountCodeByCode = async (code: string) => {
   return discountCode;
 };
 
-export const getAllDiscountCodes = async () => {
-  return await discountcodeRepository.getAllDiscountCodes();
+interface Pagination {
+  page: number;
+  pageSize: number;
+}
+
+export const getAllDiscountCodes = async (filters:DiscountCodeFilters, pagination:Pagination):Promise<PaginatedDiscountCodes> => {
+  return await discountcodeRepository.getAllDiscountCodes(filters,pagination);
 };
 
 export const getDiscountCodeById = async (id: number) => {
@@ -56,23 +61,33 @@ export const updateDiscountCode = async (id:number, data: DiscountCodeDto) => {
     throw new Error('DiscountCode not found');
   }
 
+  if(data.code &&  data.code != discountCode.code ){
+    discountCode.code = data.code;
+  }
+
   if(data.expiredDate){
     const expiredDate = new Date(data.expiredDate);
 
     if(expiredDate < new Date()){
       throw new Error('Expired date must be greater than current date');
     }
+
+    discountCode.expiredDate = expiredDate;
   }
 
-  if(data.discount){
-    data.discount = Number(data.discount);
-  };
-
-  if(data.stock){
-    data.stock = Number(data.stock);
+  if(data.discount &&  Number(data.discount) != discountCode.discount ){
+    discountCode.discount = Number(data.discount);
   }
 
-  return await discountcodeRepository.updateDiscountCode(id,data);
+  if(data.stock &&  Number(data.stock) != discountCode.stock ){
+    discountCode.stock = Number(data.stock);
+  }
+
+  if(data.status && data.status != discountCode.status){
+    discountCode.status   = data.status;
+  }
+
+  return await discountcodeRepository.updateDiscountCode(id,discountCode);
 };
 
 export const deleteDiscountCode = async (id: number) => {

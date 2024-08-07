@@ -46,6 +46,8 @@ export const createExperience = async (data: ExperienceDto, files: MulterFile[] 
   data.categoryId = Number(data.categoryId);
   data.price      = Number(data.price);
   data.duration   = Number(data.duration);
+  data.qtypeople  = Number(data.qtypeople);
+  data.limit_age  = Number(data.limit_age);
 
   const experience = await experienceRepository.createExperience(data);
 
@@ -130,6 +132,18 @@ export const updateExperience = async (id:number, data: ExperienceDto, files: Mu
     const allImages = [...imagesToConserve, ...NewMovedImages];
 
     experience.images = JSON.stringify(allImages);
+  }
+
+  if(data.limit_age &&  Number(data.limit_age) != experience.limit_age ){
+    experience.limit_age = Number(data.limit_age);
+  }
+
+  if(data.qtypeople &&  Number(data.qtypeople) != experience.qtypeople ){
+    experience.qtypeople = Number(data.qtypeople);
+  }
+
+  if(data.suggestions && data.suggestions != experience.suggestions){
+    experience.suggestions   = data.suggestions;
   }
   
   if(data.status && data.status != experience.status){

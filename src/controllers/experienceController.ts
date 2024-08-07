@@ -40,6 +40,8 @@ export const createExperience = [
   body('description').notEmpty().withMessage('Description is required'),
   body('price').notEmpty().withMessage('Price is required'),
   body('duration').notEmpty().withMessage('Duration is required'),
+  body('qtypeople').notEmpty().withMessage('Cantidad de personas es requerido'),
+  body('limit_age').notEmpty().withMessage('Limite de edad requerido'),
 
   async (req: Request, res: Response) => {
 

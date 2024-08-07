@@ -6,6 +6,9 @@ export interface ExperienceDto {
   price: number;
   duration: number;
   images: string;
+  limit_age:number;
+  qtypeople:number;
+  suggestions:string;
   status?: string;
   custom_price?: string;
   existing_images?:string;
