@@ -9,6 +9,7 @@ import productRoutes from './routes/productRoutes';
 import promotionRoutes from './routes/promotionRoutes';
 import tentRoutes from './routes/tentRoutes';
 import reserveRoutes from './routes/reserveRoutes';
+import discountRoutes from './routes/discountCodesRoutes';
 import path from 'path';
 
 const app = express();
@@ -23,6 +24,7 @@ app.use('/auth', authRoutes);
 app.use('/categories', categoryRoutes);
 app.use('/experiences', experienceRoutes);
 app.use('/products', productRoutes);
+app.use('/discounts',discountRoutes);
 app.use('/promotions', promotionRoutes);
 app.use('/tents', tentRoutes);
 app.use('/reserves', reserveRoutes);

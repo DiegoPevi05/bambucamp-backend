@@ -22,16 +22,30 @@ export const validateDiscountCode = [
 
 export const getAllDiscountCodes = async (req: Request, res: Response) => {
   try {
-    const discountCodes = await discountCodeService.getAllDiscountCodes();
-    res.json(discountCodes);
+
+    const { code, status, page = '1', pageSize = '10' } = req.query;
+
+    const filters = {
+      code: code as string | undefined,
+      status: status as string | undefined
+    };
+
+    const pagination = {
+      page: parseInt(page as string, 10),
+      pageSize: parseInt(pageSize as string, 10),
+    };
+
+    const PaginatedDiscountCodes = await discountCodeService.getAllDiscountCodes(filters, pagination);
+
+    res.json(PaginatedDiscountCodes);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch discountCodes' });
   }
 };
 
 export const createDiscountCode = [
-  body('code').notEmpty().withMessage('Category is required'),
-  body('discount').notEmpty().withMessage('Title is required'),
+  body('code').notEmpty().withMessage('Codigo es requerido'),
+  body('discount').notEmpty().withMessage('Descuento es requerido'),
 
   async (req: Request, res: Response) => {
 
@@ -41,6 +55,7 @@ export const createDiscountCode = [
     }
 
     try {
+      console.log(req.body);
       await discountCodeService.createDiscountCode(req.body);
       res.status(201).json({ message: 'DiscountCode created' });
     } catch (error) {
