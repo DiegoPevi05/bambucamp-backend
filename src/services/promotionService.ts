@@ -3,7 +3,7 @@ import * as tentRepository from '../repositories/TentRepository';
 import * as experienceRepository from '../repositories/ExperienceRepository';
 import * as productRepository from '../repositories/ProductRepository';
 
-import { PromotionDto, PromotionFilters, PaginatedPromotions } from "../dto/promotion";
+import { PromotionDto, PromotionFilters, PaginatedPromotions, PromotionOptions } from "../dto/promotion";
 import { serializeImagesTodb, moveImagesToSubFolder, deleteSubFolder, deleteImages } from '../lib/utils';
 
 
@@ -24,6 +24,26 @@ export const getAllPublicPromotions = async () => {
     grossImport:promotion.grossImport,
     stock: promotion.stock
   }));
+}
+
+export const getAllPromotionOptions = async():Promise<PromotionOptions> => {
+  const promotionOptions = await promotionRepository.getAllPromotionOptions();
+
+  promotionOptions?.tents?.forEach((tent)=>{
+    tent.images = JSON.parse(tent.images ? tent.images : '[]');
+
+  })
+
+  promotionOptions?.products?.forEach((product)=>{
+    product.images = JSON.parse(product.images ? product.images : '[]');
+  })
+
+  promotionOptions?.experiences?.forEach((experience)=>{
+    experience.images = JSON.parse(experience.images ? experience.images : '[]');
+  })
+
+  return promotionOptions;
+
 }
 
 interface Pagination {

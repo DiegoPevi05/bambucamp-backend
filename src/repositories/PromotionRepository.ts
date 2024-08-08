@@ -1,5 +1,5 @@
 import { PrismaClient, Promotion   } from "@prisma/client";
-import { PromotionDto, PromotionFilters, PaginatedPromotions, PromotionPublicDto } from "../dto/promotion";
+import { PromotionDto, PromotionFilters, PaginatedPromotions, PromotionPublicDto, PromotionOptions } from "../dto/promotion";
 
 const prisma = new PrismaClient();
 
@@ -15,6 +15,40 @@ export const getAllPublicPromotions = async (): Promise<Promotion[]> => {
     }
   });
 };
+
+export const getAllPromotionOptions = async():Promise<PromotionOptions> => {
+
+  const tents =  await prisma.tent.findMany({
+    where: {
+      status: 'ACTIVE'
+    }
+  });
+
+  const products =  await prisma.product.findMany({
+    where: {
+      status: 'ACTIVE'
+    },
+    include: {
+      category: true, // Include the category object
+    },
+  });
+
+  const experiences =  await prisma.experience.findMany({
+    where: {
+      status: 'ACTIVE'
+    },
+    include: {
+      category: true, // Include the category object
+    },
+  });
+
+  return {
+    tents,
+    products,
+    experiences,
+  }
+
+}
 
 export const getAllPromotions = async (filters:PromotionFilters, pagination:Pagination): Promise<PaginatedPromotions> => {
 

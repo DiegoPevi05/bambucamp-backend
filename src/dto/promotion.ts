@@ -20,6 +20,12 @@ export interface PromotionDto {
   existing_images?:string;
 }
 
+export interface PromotionOptions {
+  tents?: TentDto[];
+  products?: ProductPublicDto[];
+  experiences?:ExperiencePublicDto[];
+}
+
 export interface PromotionPublicDto extends PromotionDto  {
   tents: TentDto[];
   products?: ProductPublicDto[];

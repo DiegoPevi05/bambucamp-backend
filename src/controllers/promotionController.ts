@@ -11,6 +11,15 @@ export const getAllPublicPromotions = async (req: Request, res: Response) => {
   }
 };
 
+export const getAllPromotionOptions = async( req:Request, res:Response ) => {
+  try {
+    const promotionsOptions = await promotionService.getAllPromotionOptions();
+    res.json(promotionsOptions);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch promotions options' });
+  }
+}
+
 export const getAllPromotions = async (req: Request, res: Response) => {
   try {
     const { title, status, page = '1', pageSize = '10' } = req.query;

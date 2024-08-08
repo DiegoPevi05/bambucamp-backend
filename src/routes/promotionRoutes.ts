@@ -11,6 +11,7 @@ const uploadFields = [
 
 router.get('/public',promotionController.getAllPublicPromotions);
 router.get('/',authenticateToken,checkRole('ADMIN','SUPERVISOR'),promotionController.getAllPromotions);
+router.get('/options',authenticateToken,checkRole('ADMIN','SUPERVISOR'),promotionController.getAllPromotionOptions);
 router.post('/',authenticateToken,checkRole('ADMIN','SUPERVISOR'),upload.fields(uploadFields), promotionController.createPromotion);
 router.put('/:id',authenticateToken,checkRole('ADMIN','SUPERVISOR'),upload.fields(uploadFields), promotionController.updatePromotion);
 router.delete('/:id',authenticateToken,checkRole('ADMIN','SUPERVISOR'), promotionController.deletePromotion);
