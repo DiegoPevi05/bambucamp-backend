@@ -1,4 +1,9 @@
 import {  Experience, PaymentStatus, Tent, Product } from '@prisma/client';
+import { TentDto } from './tent';
+import { ProductPublicDto } from './product';
+import { ExperiencePublicDto } from './experience';
+import { PromotionDto } from './promotion';
+import { DiscountCodeDto } from './discountcode'; }
 
 export interface ReserveTentDto {
   idTent:number;
@@ -19,6 +24,14 @@ export interface ReserveExperienceDto {
   name:string;
   price:number;
   quantity:number;
+}
+
+export interface ReserveOptions {
+  tents?: TentDto[];
+  products?: ProductPublicDto[];
+  experiences?:ExperiencePublicDto[];
+  promotions?:PromotionDto[];
+  discounts?:DiscountCodeDto[];
 }
 
 export interface ReserveDto {

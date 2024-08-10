@@ -1,5 +1,5 @@
 import { PrismaClient, Reserve, ReserveTent, ReserveProduct, ReserveExperience, Tent,   } from "@prisma/client";
-import { ReserveDto, ReserveFilters, PaginatedReserve, ReserveTentDto, ReserveExperienceDto, ReserveProductDto } from "../dto/reserve";
+import { ReserveDto, ReserveFilters, PaginatedReserve, ReserveTentDto, ReserveExperienceDto, ReserveProductDto, ReserveOptions } from "../dto/reserve";
 
 interface Pagination {
   page: number;
@@ -105,6 +105,54 @@ export const getMyReserves = async (userId:number): Promise<{reserves:ReserveDto
 
 };
 
+export const getAllReserveOptions = async():Promise<ReserveOptions> => {
+
+  const tents =  await prisma.tent.findMany({
+    where: {
+      status: 'ACTIVE'
+    }
+  });
+
+  const products =  await prisma.product.findMany({
+    where: {
+      status: 'ACTIVE'
+    },
+    include: {
+      category: true, // Include the category object
+    },
+  });
+
+  const experiences =  await prisma.experience.findMany({
+    where: {
+      status: 'ACTIVE'
+    },
+    include: {
+      category: true, // Include the category object
+    },
+  });
+
+  const promotions = await prisma.promotion.findMany({
+    where:{
+      status:'ACTIVE'
+    },
+  })
+
+  const discounts = await prisma.discountCode.findMany({
+    where:{
+      status:'ACTIVE'
+    },
+  })
+
+  return {
+    tents,
+    products,
+    experiences,
+    promotions,
+    discounts
+  }
+
+}
+
 export const getAllReserves = async ( filters: ReserveFilters, pagination: Pagination): Promise<PaginatedReserve> => {
   const { dateFrom, dateTo } = filters;
   const { page, pageSize } = pagination;
@@ -132,44 +180,11 @@ export const getAllReserves = async ( filters: ReserveFilters, pagination: Pagin
       experiences: true,  // Include ReserveExperience data
     },
   });
-  // Fetch full Tent, Product, and Experience data based on ids in ReserveTent, ReserveProduct, and ReserveExperience
-  const enrichedReserves = await Promise.all(
-    reserves.map(async (reserve) => {
-      const tentIds = reserve.tents.map((t) => t.idTent);
-      const productIds = reserve.products.map((p) => p.idProduct);
-      const experienceIds = reserve.experiences.map((e) => e.idExperience);
-
-      const tents = await prisma.tent.findMany({
-        where: {
-          id: { in: tentIds },
-        },
-      });
-
-      const products = await prisma.product.findMany({
-        where: {
-          id: { in: productIds },
-        },
-      });
-
-      const experiences = await prisma.experience.findMany({
-        where: {
-          id: { in: experienceIds },
-        },
-      });
-
-      return {
-        ...reserve,
-        tentsDB : tents,
-        productsDB: products,
-        experiencesDB: experiences,
-      };
-    })
-  );
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
   return {
-    reserves: enrichedReserves,
+    reserves,
     totalPages,
     currentPage: page,
   };

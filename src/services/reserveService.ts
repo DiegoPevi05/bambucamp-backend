@@ -1,5 +1,5 @@
 import * as reserveRepository from '../repositories/ReserveRepository';
-import { PaginatedReserve, ReserveDto, ReserveFilters, ReserveTentDto,ReserveProductDto,ReserveExperienceDto } from "../dto/reserve";
+import { PaginatedReserve, ReserveDto, ReserveFilters, ReserveTentDto,ReserveProductDto,ReserveExperienceDto, ReserveOptions } from "../dto/reserve";
 import * as promotionRepository from '../repositories/PromotionRepository';
 import *  as userRepository from '../repositories/userRepository';
 import * as utils from '../lib/utils';
@@ -10,6 +10,30 @@ export const searchAvailableTents = async (dateFrom: Date, dateTo: Date) => {
 
 export const getAllMyReserves = async (userId:number) => {
   return await reserveRepository.getMyReserves(userId);
+}
+
+export const getAllReseveOptions = async():Promise<ReserveOptions> => {
+  const reserveOptions = await reserveRepository.getAllReserveOptions();
+
+  reserveOptions?.tents?.forEach((tent)=>{
+    tent.images = JSON.parse(tent.images ? tent.images : '[]');
+
+  })
+
+  reserveOptions?.products?.forEach((product)=>{
+    product.images = JSON.parse(product.images ? product.images : '[]');
+  })
+
+  reserveOptions?.experiences?.forEach((experience)=>{
+    experience.images = JSON.parse(experience.images ? experience.images : '[]');
+  })
+
+  reserveOptions?.promotions?.forEach((promotion)=>{
+    promotion.images = JSON.parse(promotion.images ? promotion.images : '[]');
+  })
+
+  return reserveOptions;
+
 }
 
 interface Pagination {

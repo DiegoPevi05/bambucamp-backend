@@ -18,6 +18,16 @@ export const getAllMyReserves = [
   }
 ] 
 
+export const getAllReserveOptions = async( req:Request, res:Response ) => {
+  try {
+    const reserveOptions = await reserveService.getAllReseveOptions();
+    res.json(reserveOptions);
+  } catch (error) {
+
+    res.status(500).json({ error: 'Failed to fetch promotions options' });
+  }
+}
+
 
 export const getAllReserves = async (req: Request, res: Response) => {
   try {
