@@ -86,8 +86,8 @@ export const createPromotion = async (data: PromotionDto, files: MulterFile[] | 
 
   if(data.idtents){
     const idtents = JSON.parse(data.idtents)
-    idtents.map((tentId:number)=>{
-      const tent = tentRepository.getTentById(tentId);
+    idtents.map((tentId:{id:number,label:string,qty:number,price:number})=>{
+      const tent = tentRepository.getTentById(tentId.id);
       if(!tent){
         throw new Error(`Tienda no encontrada ${tentId}`)
       }
@@ -98,8 +98,8 @@ export const createPromotion = async (data: PromotionDto, files: MulterFile[] | 
 
   if(data.idproducts){
     const idproducts = JSON.parse(data.idproducts)
-    idproducts.map((productId:number)=>{
-      const product = productRepository.getProductById(productId);
+    idproducts.map((productId:{id:number,label:string,qty:number,price:number})=>{
+      const product = productRepository.getProductById(productId.id);
       if(!product){
         throw new Error(`Producto no encontrado ${productId}`)
       }
@@ -108,8 +108,8 @@ export const createPromotion = async (data: PromotionDto, files: MulterFile[] | 
 
   if(data.idexperiences){
     const idexperiences = JSON.parse(data.idexperiences)
-    idexperiences.map((experienceId:number)=>{
-      const experience = experienceRepository.getExperienceById(experienceId);
+    idexperiences.map((experienceId:{id:number,label:string,qty:number,price:number})=>{
+      const experience = experienceRepository.getExperienceById(experienceId.id);
       if(!experience){
         throw new Error(`Experiencia no encontrada ${experienceId}`)
       }
@@ -129,6 +129,15 @@ export const createPromotion = async (data: PromotionDto, files: MulterFile[] | 
   data.netImport      = Number(data.netImport);
   data.discount       = Number(data.discount);
   data.grossImport    = Number(data.grossImport);
+
+  if(data.expiredDate){
+    const expiredDate = new Date(data.expiredDate);
+
+    if(expiredDate < new Date()){
+      throw new Error('Expired date must be greater than current date');
+    }
+    data.expiredDate = new Date(data.expiredDate);
+  }
 
   const promotion = await promotionRepository.createPromotion(data);
 
@@ -199,8 +208,8 @@ export const updatePromotion = async (id:number, data: PromotionDto, files: Mult
 
   if(data.idtents){
     const idtents = JSON.parse(data.idtents)
-    idtents.map((tentId:number)=>{
-      const tent = tentRepository.getTentById(tentId);
+    idtents.map((tentId:{id:number,label:string,qty:number,price:number})=>{
+      const tent = tentRepository.getTentById(tentId.id);
       if(!tent){
         throw new Error(`Tienda no encontrada ${tentId}`)
       }
@@ -211,8 +220,8 @@ export const updatePromotion = async (id:number, data: PromotionDto, files: Mult
 
   if(data.idproducts){
     const idproducts = JSON.parse(data.idproducts)
-    idproducts.map((productId:number)=>{
-      const product = productRepository.getProductById(productId);
+    idproducts.map((productId:{id:number,label:string,qty:number,price:number})=>{
+      const product = productRepository.getProductById(productId.id);
       if(!product){
         throw new Error(`Producto no encontrado ${productId}`)
       }
@@ -222,8 +231,8 @@ export const updatePromotion = async (id:number, data: PromotionDto, files: Mult
 
   if(data.idexperiences){
     const idexperiences = JSON.parse(data.idexperiences)
-    idexperiences.map((experienceId:number)=>{
-      const experience = experienceRepository.getExperienceById(experienceId);
+    idexperiences.map((experienceId:{id:number,label:string,qty:number,price:number})=>{
+      const experience = experienceRepository.getExperienceById(experienceId.id);
       if(!experience){
         throw new Error(`Experiencia no encontrada ${experienceId}`)
       }

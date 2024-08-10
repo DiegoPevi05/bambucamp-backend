@@ -82,7 +82,7 @@ export const getAllPromotions = async (filters:PromotionFilters, pagination:Pagi
     const tents = await prisma.tent.findMany({
       where: {
         id: {
-          in: idTents,
+          in: idTents.id,
         },
       },
     });
@@ -90,7 +90,7 @@ export const getAllPromotions = async (filters:PromotionFilters, pagination:Pagi
     const products = await prisma.product.findMany({
       where: {
         id: {
-          in: idProducts,
+          in: idProducts.id,
         },
       },
       include: {
@@ -101,7 +101,7 @@ export const getAllPromotions = async (filters:PromotionFilters, pagination:Pagi
     const experiences = await prisma.experience.findMany({
       where: {
         id: {
-          in: idExperiences,
+          in: idExperiences.id,
         },
       },
       include: {

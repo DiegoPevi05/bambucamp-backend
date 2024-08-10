@@ -48,7 +48,6 @@ model Tent {
   custom_price    String          @default("[]") @db.Text
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt @default(now())
-  reserveTents    ReserveTent[]
 }
 
 model Product {
@@ -64,7 +63,6 @@ model Product {
   custom_price    String          @default("[]") @db.Text
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt @default(now())
-  reserveProducts ReserveProduct[]
 }
 
 model ProductCategory {
@@ -92,7 +90,6 @@ model Experience {
   custom_price    String          @default("[]") @db.Text
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt @default(now())
-  reserveExperiences ReserveExperience[]
 }
 
 model ExperienceCategory {
@@ -112,7 +109,6 @@ model DiscountCode {
   status          String          @default("ACTIVE") @db.Text
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt @default(now())
-  reserves        Reserve[]
 }
 
 
@@ -134,7 +130,6 @@ model Promotion {
   stock           Int             @default(1)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt @default(now())
-  reserves        Reserve[]
 }
 
 enum PaymentStatus {
@@ -149,21 +144,19 @@ model Reserve {
   qtykids           Int             @default(0)
   userId            Int
   user              User            @relation(fields: [userId], references: [id])
-  tents             ReserveTent[]
-  products          ReserveProduct[]
-  experiences       ReserveExperience[]
+  tents             ReserveTent[]   @relation(onDelete: Cascade)
+  products          ReserveProduct[] @relation(onDelete: Cascade)
+  experiences       ReserveExperience[] @relation(onDelete: Cascade)
   dateFrom          DateTime        @db.Date
   dateTo            DateTime        @db.Date
   dateSale          DateTime        @db.Date
-  promotionId       Int?            
-  promotion         Promotion?      @relation(fields: [promotionId], references: [id])
+  promotionId       Int             @default(0)            
   price_is_calculated Boolean       @default(false)
-  discountCodeId    Int?         
-  discountCode      DiscountCode?   @relation(fields: [discountCodeId], references: [id])
+  discountCodeId    Int             @default(0)         
   netImport         Float           @default(0)
   discount          Int             @default(0)
   grossImport       Float           @default(0)
-  canceled_reason   String?         @db.Text
+  canceled_reason   String          @db.Text
   canceled_status   Boolean         @default(false)
   paymentStatus     PaymentStatus   @default(PENDING) 
   aditionalPeople   Int             @default(0)
@@ -172,31 +165,38 @@ model Reserve {
 }
 
 model ReserveTent {
-  reserveId Int
-  tentId    Int
-  reserve   Reserve @relation(fields: [reserveId], references: [id])
-  tent      Tent    @relation(fields: [tentId], references: [id])
-  @@id([reserveId, tentId])
-  createdAt       DateTime @default(now())
+  id              Int       @id @default(autoincrement())
+  reserveId       Int
+  idTent          Int
+  name            String    @db.Text
+  price           Float     @default(0)
+  quantity        Int       @default(1)
+  reserve         Reserve   @relation(fields: [reserveId], references: [id], onDelete: Cascade)
+  createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt @default(now())
 }
 
 model ReserveProduct {
-  reserveId Int
-  productId Int
-  reserve   Reserve @relation(fields: [reserveId], references: [id])
-  product   Product @relation(fields: [productId], references: [id])
-  @@id([reserveId, productId])
-  createdAt       DateTime @default(now())
+  id              Int       @id @default(autoincrement())
+  reserveId       Int
+  idProduct       Int
+  name            String    @db.Text
+  price           Float     @default(0)
+  quantity        Int       @default(1)
+  reserve         Reserve   @relation(fields: [reserveId], references: [id], onDelete: Cascade)
+  createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt @default(now())
 }
 
 model ReserveExperience {
+  id              Int       @id @default(autoincrement())
   reserveId       Int
-  experienceId    Int
-  reserve         Reserve   @relation(fields: [reserveId], references: [id])
-  experience      Experience @relation(fields: [experienceId], references: [id])
-  @@id([reserveId, experienceId])
-  createdAt       DateTime @default(now())
+  idExperience    Int
+  name            String    @db.Text
+  price           Float     @default(0)
+  quantity        Int       @default(1)
+  reserve         Reserve   @relation(fields: [reserveId], references: [id], onDelete: Cascade)
+  createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt @default(now())
 }
+

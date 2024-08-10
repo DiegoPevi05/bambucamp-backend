@@ -16,6 +16,7 @@ export const getAllPromotionOptions = async( req:Request, res:Response ) => {
     const promotionsOptions = await promotionService.getAllPromotionOptions();
     res.json(promotionsOptions);
   } catch (error) {
+
     res.status(500).json({ error: 'Failed to fetch promotions options' });
   }
 }
@@ -39,18 +40,23 @@ export const getAllPromotions = async (req: Request, res: Response) => {
     res.json(PaginatedPromotions);
 
   } catch (error) {
+    console.log(error)
     res.status(500).json({ error: 'Failed to fetch promotions' });
   }
 };
 
 export const createPromotion = [
-  body('code').notEmpty().withMessage('Code is required'),
+  body('title').notEmpty().withMessage('Titulo is required'),
   body('description').notEmpty().withMessage('Description is required'),
+  body('expiredDate').notEmpty().withMessage('Expired Date is required'),
+  body('status').notEmpty().withMessage('Status is required'),
   body('qtypeople').notEmpty().withMessage('Quantity of people is required'),
   body('qtykids').notEmpty().withMessage('Quantity of kids is required'),
-  body('idtents').notEmpty().withMessage('Id tents is required'),
-  body('stock').notEmpty().withMessage('Stock is required'),
+  body('netImport').notEmpty().withMessage('Net Import is required'),
   body('discount').notEmpty().withMessage('Discount is required'),
+  body('grossImport').notEmpty().withMessage('Gross Import is required'),
+  body('stock').notEmpty().withMessage('Stock is required'),
+  body('idtents').notEmpty().withMessage('Id tents is required'),
 
   async (req: Request, res: Response) => {
 

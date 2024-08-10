@@ -153,13 +153,13 @@ export const applyDiscount = async (grossImport: number, discountCodeId: number 
 };
 
 
-export const getTents = async (tents: { tentId:number }[]): Promise<Tent[]> => {
+export const getTents = async (tents: { idTent:number, name:string, price:number, quantity:number }[]): Promise<Tent[]> => {
 
   if(!tents) throw new Error( " Input at least one tent" );
 
   if(tents.length <= 0) throw new Error ("No tents to validate");
 
-  const tentsIds = tents.map(tent => tent.tentId);
+  const tentsIds = tents.map(tent => tent.idTent);
   let tentsDb = await tentRepository.getTentsByIds(tentsIds);
   tentsDb = tentsDb.filter(tent => tent.status === 'ACTIVE');
 
@@ -174,13 +174,13 @@ export const getTents = async (tents: { tentId:number }[]): Promise<Tent[]> => {
   return tentsDb;
 }
 
-export const getProducts = async (products: { productId: number }[]): Promise<Product[]> => {
+export const getProducts = async (products: { idProduct: number, name:string, price:number, quantity:number }[]): Promise<Product[]> => {
 
   if (!products || products.length === 0) {
     return [];
   }
 
-  const productIds = products.map((product) => product.productId);
+  const productIds = products.map((product) => product.idProduct);
   let productsDb = await productRepository.getProductsByIds(productIds);
   productsDb = productsDb.filter(product => product.status === 'ACTIVE');
 
@@ -195,13 +195,13 @@ export const getProducts = async (products: { productId: number }[]): Promise<Pr
   return productsDb;
 }
 
-export const getExperiences = async (experiences: { experienceId: number }[]): Promise<Experience[]> => {
+export const getExperiences = async (experiences: { idExperience: number, name:string, price:number, quantity:number }[]): Promise<Experience[]> => {
 
   if (!experiences || experiences.length === 0) {
     return [];
   }
 
-  const experienceIds = experiences.map((experience) => experience.experienceId);
+  const experienceIds = experiences.map((experience) => experience.idExperience);
   let   experiencesDb = await experienceRepository.getExperiencesByIds(experienceIds);
   experiencesDb = experiencesDb.filter(experience => experience.status === 'ACTIVE');
 
@@ -216,14 +216,29 @@ export const getExperiences = async (experiences: { experienceId: number }[]): P
   return experiencesDb;
 }
 
-export const calculateReservePrice = (tents:Tent[], products:Product[], experiences:Experience[]): number => {
+export const calculateReservePrice = (tents: { tent: Tent; quantity: number }[],
+  products: { product: Product; quantity: number }[],
+  experiences: { experience: Experience; quantity: number }[]): number => {
 
-      const calculateTentsPrice = tents.reduce((acc, tent) => acc + calculatePrice(tent.price,tent.custom_price), 0);
-      const calculateProductsPrice = products.reduce((acc, product) => acc + calculatePrice(product.price,product.custom_price), 0);
+  // Calculate the total price for tents
+  const calculateTentsPrice = tents.reduce((acc, { tent, quantity }) => {
+    const pricePerTent = calculatePrice(tent.price, tent.custom_price);
+    return acc + (pricePerTent * quantity); // Multiply by quantity
+  }, 0);
 
-      const calculateExperiencesPrice = experiences.reduce((acc, experience) => acc + calculatePrice(experience.price,experience.custom_price), 0);
+  // Calculate the total price for products
+  const calculateProductsPrice = products.reduce((acc, { product, quantity }) => {
+    const pricePerProduct = calculatePrice(product.price, product.custom_price);
+    return acc + (pricePerProduct * quantity); // Multiply by quantity
+  }, 0);
 
-      return calculateTentsPrice + calculateProductsPrice + calculateExperiencesPrice;
+  // Calculate the total price for experiences
+  const calculateExperiencesPrice = experiences.reduce((acc, { experience, quantity }) => {
+    const pricePerExperience = calculatePrice(experience.price, experience.custom_price);
+    return acc + (pricePerExperience * quantity); // Multiply by quantity
+  }, 0);
+
+  return calculateTentsPrice + calculateProductsPrice + calculateExperiencesPrice;
 }
 
 
