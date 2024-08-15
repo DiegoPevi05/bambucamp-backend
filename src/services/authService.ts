@@ -15,7 +15,7 @@ export const signUp = async (data: UserDto) => {
   const userExistant = await userRepository.getUserByEmail(data.email);
 
   if(userExistant){
-    throw new BadRequestError('User already Exist');
+    throw new BadRequestError('error.userAlreadyExist');
   }
 
   const hashedPassword = await bcrypt.hash(data.password, 10);
@@ -35,11 +35,11 @@ export const verifyEmail = async(email:string,token:string) => {
   const user = await userRepository.getUserByEmail(email);
 
   if(!user){
-    throw new NotFoundError('User not found')
+    throw new NotFoundError('error.noUserFoundInDB')
   }
 
   if (user.emailVerified) {
-    throw new BadRequestError('Email already verified');
+    throw new BadRequestError('error.emailAlreadyVerified');
   }
 
   if(user.emailVerificationCodeExpiry){
@@ -47,12 +47,12 @@ export const verifyEmail = async(email:string,token:string) => {
     const expiryDate = user.emailVerificationCodeExpiry;
 
     if(expiryDate.getTime() <= now.getTime()){
-      throw new BadRequestError('Token is already Expired, request another one')
+      throw new BadRequestError("error.verificationCodeIsAlreadyExpired")
     }
   }
 
   if(user.emailVerificationCode != token){
-     throw new BadRequestError('Token is invalid')
+     throw new BadRequestError('error.codeInvalid')
   }
 
   await userRepository.updateEmailVerified(user.email);

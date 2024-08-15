@@ -66,7 +66,11 @@
 		"failedToGenerateResetCode": "Failed to generate password reset code",
 		"failedToVerifyPasswordResetCode": "Failed to verify password reset code",
 		"passwordChangeFailed": "Failed to change password",
-		"loginFailed": "Failed to log in"
+		"loginFailed": "Failed to log in",
+		"userAlreadyExist": "User already Exist",
+		"emailAlreadyVerified": "Email already verified",
+		"verificationCodeIsAlreadyExpired": "Verification code is already Expired, request another one",
+		"codeInvalid": "Verificaiton Code is invalid"
 	},
 	"message": {
 		"reserveCreated": "Reserve created",
