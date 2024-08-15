@@ -3,7 +3,7 @@ import { PaginatedReserve, ReserveDto, ReserveFilters, ReserveTentDto,ReservePro
 import * as promotionRepository from '../repositories/PromotionRepository';
 import *  as userRepository from '../repositories/userRepository';
 import * as utils from '../lib/utils';
-import { BadRequestError } from "../middleware/errors";
+import { BadRequestError, NotFoundError } from "../middleware/errors";
 
 export const searchAvailableTents = async (dateFrom: Date, dateTo: Date) => {
   return await reserveRepository.searchAvailableTents(dateFrom, dateTo);
@@ -64,7 +64,7 @@ export const createReserve = async (data: ReserveDto) => {
   checkInTime.setUTCHours(17, 0, 0, 0);
   data.dateFrom = checkInTime;
 
-  if(!data.dateTo) throw new Error(" Input date To to create a Reserve");
+  if(!data.dateTo) throw new BadRequestError(" Input date To to create a Reserve");
 
   const checkOutTime = new Date(data.dateTo);
   checkOutTime.setUTCHours(17, 0, 0, 0);
@@ -84,12 +84,12 @@ export const createReserve = async (data: ReserveDto) => {
     // Check Availability
     const TentsAreAvialble = await utils.checkAvailability(checkInTime,checkOutTime,tentsDb);
     if(!TentsAreAvialble){
-      throw new Error ( "Tents have no Availability for the days selected");
+      throw new BadRequestError("Tents have no Availability for the days selected");
     }
 
     const isRoomSizeCorrect = utils.checkRoomSize(tentsDb, data.qtypeople, data.qtykids, data.aditionalPeople);
     if(!isRoomSizeCorrect){
-      throw new Error("The room size is not correct");
+      throw new BadRequestError("The room size is not correct");
     }
 
     if(data.price_is_calculated){
@@ -130,17 +130,17 @@ export const createReserve = async (data: ReserveDto) => {
     let promotion = await promotionRepository.getPromotionById(Number(data.promotionId));
 
     if (!promotion) {
-      throw new Error(`Promotion with id ${data.promotionId} not found`);
+      throw new NotFoundError(`Promotion not found`);
     }
 
     if(promotion.expiredDate){
       if(promotion.expiredDate < new Date()){
-        throw new Error("Promotion is expired");
+        throw new BadRequestError("Promotion is expired");
       }
     }
 
     if(promotion.stock || promotion.stock !== null){
-      if(promotion.stock <= 0) throw new Error("Promotion is out of stock");
+      if(promotion.stock <= 0) throw new BadRequestError("Promotion is out of stock");
     }
 
     data.promotionId  = Number(promotion.id);
@@ -150,12 +150,6 @@ export const createReserve = async (data: ReserveDto) => {
     data.discount     = promotion.discount;
     data.grossImport  = promotion.grossImport;
 
-    const tentsDb = await utils.getTents(promotion.idtents as any);
-    // Check Availability
-    const TentsAreAvialble = await utils.checkAvailability(checkInTime,checkOutTime,tentsDb);
-    if(!TentsAreAvialble){
-      throw new Error ( "Tents have no Availability for the days selected");
-    }
 
     const idtents = JSON.parse(promotion.idtents) as { id:number; label:string; qty:number; price:number; }[];
     const idproducts = JSON.parse(promotion.idproducts) as { id:number; label:string; qty:number; price:number; }[];
@@ -169,6 +163,16 @@ export const createReserve = async (data: ReserveDto) => {
       quantity: tent.qty,
     }));
 
+    const tentsDb = await utils.getTents(promotionTents);
+    if(tentsDb.length != promotionTents.length){
+      throw new NotFoundError("Not found all Tents in promotion");
+    }
+    // Check Availability
+    const TentsAreAvialble = await utils.checkAvailability(checkInTime,checkOutTime,tentsDb);
+    if(!TentsAreAvialble){
+      throw new BadRequestError("Tents have no Availability for the days selected");
+    }
+
     // Convert idproducts to ReserveProduct structure
     const promotionProducts:ReserveProductDto[] = idproducts.map(product => ({
       idProduct: product.id,
@@ -176,6 +180,8 @@ export const createReserve = async (data: ReserveDto) => {
       price: product.price,
       quantity: product.qty,
     }));
+
+    await utils.getProducts(promotionProducts);
 
     // Convert idexperiences to ReserveExperience structure
     const promotionExperiences:ReserveExperienceDto[] = idexperiences.map(experience => ({
@@ -185,9 +191,12 @@ export const createReserve = async (data: ReserveDto) => {
       quantity: experience.qty,
     }));
 
+    await utils.getExperiences(promotionExperiences);
+
     data.tents = promotionTents;
     data.products = promotionProducts;
     data.experiences = promotionExperiences;
+
 
     await promotionRepository.updatePromotionStock(promotion.id,promotion.stock - 1);
 
@@ -201,21 +210,21 @@ export const updateReserve = async (id:number, data: ReserveDto) => {
   const reserve = await reserveRepository.getReserveById(id);
 
   if(!reserve){
-    throw new Error('La Reserva  no se encuentra en la base de datos');
+    throw new NotFoundError('The reserve is not found in the database.');
   }
 
 
   const user = await userRepository.getUserById(data.userId);
 
   if(!user){
-    throw new Error ('El usuario no existe en la base de datos');
+    throw new NotFoundError('The user in the database does not exist.');
   }
 
   if(reserve.userId != user.id){
     reserve.userId = user.id;
   }
 
-  if(!data.dateFrom)  throw new Error(" Input date From to create a Reserve");
+  if(!data.dateFrom)  throw new BadRequestError(" Input date From to create a Reserve");
 
   let checkInTime = new Date();
 
@@ -227,7 +236,7 @@ export const updateReserve = async (id:number, data: ReserveDto) => {
     checkInTime = new Date(reserve.dateFrom);
   }
 
-  if(!data.dateTo) throw new Error(" Input date To to create a Reserve");
+  if(!data.dateTo) throw new BadRequestError(" Input date To to create a Reserve");
 
   let checkOutTime = new Date(data.dateTo);
 
@@ -270,12 +279,12 @@ export const updateReserve = async (id:number, data: ReserveDto) => {
     // Check Availability
     const TentsAreAvialble = await utils.checkAvailability(checkInTime,checkOutTime,tentsDb);
     if(!TentsAreAvialble){
-      throw new Error ( "Tents have no Availability for the days selected");
+      throw new BadRequestError( "Tents have no Availability for the days selected");
     }
 
     const isRoomSizeCorrect = utils.checkRoomSize(tentsDb, data.qtypeople, data.qtykids, data.aditionalPeople);
     if(!isRoomSizeCorrect){
-      throw new Error("The room size is not correct");
+      throw new BadRequestError("The room size is not correct");
     }
 
     reserve.price_is_calculated = data.price_is_calculated;
@@ -322,17 +331,17 @@ export const updateReserve = async (id:number, data: ReserveDto) => {
     let promotion = await promotionRepository.getPromotionById(Number(data.promotionId));
 
     if (!promotion) {
-      throw new Error(`Promotion with id ${data.promotionId} not found`);
+      throw new NotFoundError(`Promotion not found`);
     }
 
     if(promotion.expiredDate){
       if(promotion.expiredDate < new Date()){
-        throw new Error("Promotion is expired");
+        throw new BadRequestError("Promotion is expired");
       }
     }
 
     if(promotion.stock || promotion.stock !== null){
-      if(promotion.stock <= 0) throw new Error("Promotion is out of stock");
+      if(promotion.stock <= 0) throw new BadRequestError("Promotion is out of stock");
     }
 
     reserve.promotionId  = Number(promotion.id);
@@ -346,7 +355,7 @@ export const updateReserve = async (id:number, data: ReserveDto) => {
     // Check Availability
     const TentsAreAvialble = await utils.checkAvailability(checkInTime,checkOutTime,tentsDb);
     if(TentsAreAvialble){
-      throw new Error ( "Tents have no Availability for the days selected");
+      throw new BadRequestError( "Tents have no Availability for the days selected");
     }
 
     const idtents = JSON.parse(promotion.idtents) as { id:number; label:string; qty:number; price:number; }[];

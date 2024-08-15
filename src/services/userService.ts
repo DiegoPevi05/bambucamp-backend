@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import * as userRepository from '../repositories/userRepository';
 import { UserFilters, PaginatedUsers, UserDto } from '../dto/user';
+import {BadRequestError} from '../middleware/errors';
 
 interface Pagination {
   page: number;
@@ -20,7 +21,7 @@ export const createUser = async (data: UserDto) => {
   const userExistant = await userRepository.getUserByEmail(data.email);
 
   if(userExistant){
-    throw new Error('User already Exist');
+    throw new BadRequestError('User already Exist');
   }
 
   let hashedPassword: string;
@@ -28,7 +29,7 @@ export const createUser = async (data: UserDto) => {
   if(data.password != undefined){
     hashedPassword =  await bcrypt.hash(data?.password, 10);
   }else{
-    throw new Error('Password is necesary');
+    throw new BadRequestError('Password is necesary');
   }  
 
   await userRepository.createUser({ ...data, password: hashedPassword });

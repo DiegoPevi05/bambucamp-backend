@@ -4,6 +4,7 @@ import * as userRepository from '../repositories/userRepository';
 import { UserDto} from '../dto/user';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../config/email/mail';
 import { randomUUID } from 'crypto';
+import {BadRequestError, NotFoundError} from '../middleware/errors';
 
 
 const JWT_SECRET = process.env.JWT_SECRET || 'default_secret';
@@ -14,7 +15,7 @@ export const signUp = async (data: UserDto) => {
   const userExistant = await userRepository.getUserByEmail(data.email);
 
   if(userExistant){
-    throw new Error('User already Exist');
+    throw new BadRequestError('User already Exist');
   }
 
   const hashedPassword = await bcrypt.hash(data.password, 10);
@@ -34,11 +35,11 @@ export const verifyEmail = async(email:string,token:string) => {
   const user = await userRepository.getUserByEmail(email);
 
   if(!user){
-    throw new Error('User not found')
+    throw new NotFoundError('User not found')
   }
 
   if (user.emailVerified) {
-    throw new Error('Email already verified');
+    throw new BadRequestError('Email already verified');
   }
 
   if(user.emailVerificationCodeExpiry){
@@ -46,12 +47,12 @@ export const verifyEmail = async(email:string,token:string) => {
     const expiryDate = user.emailVerificationCodeExpiry;
 
     if(expiryDate.getTime() <= now.getTime()){
-      throw new Error('Token is already Expired, request another one')
+      throw new BadRequestError('Token is already Expired, request another one')
     }
   }
 
   if(user.emailVerificationCode != token){
-     throw new Error('Token is invalid')
+     throw new BadRequestError('Token is invalid')
   }
 
   await userRepository.updateEmailVerified(user.email);
@@ -62,11 +63,11 @@ export const verifyEmail = async(email:string,token:string) => {
 export const resetPassword = async (email: string) => {
   const user = await userRepository.getUserByEmail(email);
   if (!user) {
-    throw new Error('User not found');
+    throw new NotFoundError('User not found');
   };
 
   if (!user.emailVerified) {
-    throw new Error('Email not verified');
+    throw new BadRequestError('Email not verified');
   };
 
   const token = randomUUID().slice(0, 6);
@@ -82,7 +83,7 @@ export const verifyPasswordResetCode = async (email: string, token: string) => {
   const user = await userRepository.getUserByEmail(email);
 
   if (!user) {
-    throw new Error('User not found');
+    throw new NotFoundError('User not found');
   }
 
   if(user.passwordResetCodeExpiry){
@@ -90,12 +91,12 @@ export const verifyPasswordResetCode = async (email: string, token: string) => {
     const expiryDate = user.passwordResetCodeExpiry;
 
     if(expiryDate.getTime() <= now.getTime()){
-      throw new Error('Token is already Expired, request another one')
+      throw new BadRequestError('Token is already Expired, request another one')
     }
   }
 
   if(user.passwordResetCode != token){
-     throw new Error('Token is invalid')
+     throw new BadRequestError('Token is invalid')
   }
 
   return;
@@ -113,16 +114,16 @@ export const updatePassword = async (email: string, password: string, token:stri
 export const signIn = async (email: string, password: string) => {
   const user = await userRepository.getUserByEmail(email);
   if (!user) {
-    throw new Error('Invalid email or password');
+    throw new BadRequestError('Invalid email or password');
   }
 
   if (!user.emailVerified) {
-    throw new Error('Email not verified');
+    throw new BadRequestError('Email not verified');
   }
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
-    throw new Error('Invalid email or password');
+    throw new BadRequestError('Invalid email or password');
   }
 
   // Update the lastLogin field

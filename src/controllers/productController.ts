@@ -1,13 +1,18 @@
 import { Request, Response } from 'express';
 import * as productService from '../services/productService';
 import { body, param, validationResult } from 'express-validator';
+import {CustomError} from '../middleware/errors';
 
 export const getAllPublicProducts = async (req: Request, res: Response) => {
   try {
     const products = await productService.getAllPublicProducts();
     res.json(products);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch products' });
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Failed to fetch products' });
+    }
   }
 };
 
@@ -30,8 +35,11 @@ export const getAllProducts = async (req: Request, res: Response) => {
     res.json(PaginatedProducts);
 
   } catch (error) {
-    console.log(error)
-    res.status(500).json({ error: 'Failed to fetch products' });
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Failed to fetch products' });
+    }
   }
 };
 
@@ -46,15 +54,18 @@ export const createProduct = [
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ error: errors.array() });
     }
 
     try {
       await productService.createProduct(req.body, req.files);
       res.status(201).json({ message: 'Product created' });
     } catch (error) {
-      console.log(error);
-      res.status(500).json({ error: 'Failed to create product' });
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Failed to create product' });
+      }
     }
   }
 ];
@@ -66,14 +77,18 @@ export const updateProduct = [
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ error: errors.array() });
     }
 
     try {
       await productService.updateProduct(Number(req.params.id), req.body  , req.files );
       res.json({ message: 'Product updated' });
     } catch (error) {
-      res.status(500).json({ error: 'Failed to update product' });
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Failed to update product' });
+      }
     }
   }
 ];
@@ -83,7 +98,12 @@ export const deleteProduct = async (req: Request, res: Response) => {
     await productService.deleteProduct(Number(req.params.id));
     res.json({ message: 'Product deleted' });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to delete product' });
+
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Failed to delete product' });
+    }
   }
 };
 

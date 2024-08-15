@@ -1,13 +1,18 @@
 import { Request, Response } from 'express';
 import * as tentService from '../services/tentService';
 import { body, param, validationResult } from 'express-validator';
+import {CustomError} from '../middleware/errors';
 
 export const getAllPublicTents = async (req: Request, res: Response) => {
   try {
     const tents = await tentService.getAllPublicTents();
     res.json(tents);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch tents' });
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Failed to fetch tents' });
+    }
   }
 };
 
@@ -29,7 +34,13 @@ export const getAllTents = async (req: Request, res: Response) => {
 
     res.json(PaginatedTents);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch tents' });
+
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Failed to fetch tents' });
+    }
+
   }
 };
 
@@ -46,7 +57,7 @@ export const createTent = [
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ error: errors.array() });
     }
 
     try {
@@ -56,8 +67,11 @@ export const createTent = [
 
       res.status(201).json({ message: 'Tent created' });
     } catch (error) {
-      console.log(error);
-      res.status(500).json({ error: 'Failed to create promotion' });
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Failed to create promotion' });
+      }
     }
   }
 ];
@@ -69,7 +83,7 @@ export const updateTent = [
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ error: errors.array() });
     }
 
     try {
@@ -79,7 +93,11 @@ export const updateTent = [
       res.json({ message: 'Tent updated' });
 
     } catch (error) {
-      res.status(500).json({ error: 'Failed to update tent' });
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Failed to update tent' });
+      }
     }
   }
 ];
@@ -90,7 +108,11 @@ export const deleteTent = async (req: Request, res: Response) => {
 
     res.json({ message: 'Tent deleted' });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to delete tent' });
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Failed to delete tent' });
+    }
   }
 };
 

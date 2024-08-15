@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import * as userService from '../services/userService';
 import { body, validationResult } from 'express-validator';
 import { Role } from '@prisma/client';
+import {CustomError} from '../middleware/errors';
 
 export const getMe = async (req: Request, res: Response) => {
   res.json(req.user);
@@ -26,7 +27,11 @@ export const getAllUsers = async (req: Request, res: Response) => {
     const PaginatedUsers = await userService.getAllUsers(filters, pagination);
     res.json(PaginatedUsers);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch users' });
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Failed to fetch users' });
+    }
   }
 };
 
@@ -39,7 +44,11 @@ export const getUserById = async (req: Request, res: Response) => {
       res.status(404).json({ error: 'User not found' });
     }
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch user' });
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Failed to fetch user' });
+    }
   }
 };
 
@@ -59,7 +68,7 @@ export const createUser = [
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ error: errors.array() });
     }
 
     try {
@@ -71,8 +80,11 @@ export const createUser = [
       const user = await userService.createUser(req.body);
       res.status(201).json(user);
     } catch (error) {
-      console.log(error)
-      res.status(500).json({ error: 'Failed to create user' });
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Failed to create user' });
+      }
     }
   }
 ]
@@ -94,7 +106,7 @@ export const updateUser = [
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ error: errors.array() });
     }
 
     try {
@@ -107,8 +119,11 @@ export const updateUser = [
       const user = await userService.updateUser(IdUser,req.body);
       res.status(200).json(user);
     } catch (error) {
-      console.log(error)
-      res.status(500).json({ error: 'Failed to update user' });
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Failed to update user' });
+      }
     }
   }
 ]
@@ -130,7 +145,11 @@ export const disableUser = async (req: Request, res: Response) => {
     await userService.disableUser(IdUser);
     res.status(200).json({ message: 'User disabled' });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to disable user' });
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Failed to disable user' });
+    }
   }
 }
 
@@ -150,7 +169,11 @@ export const enableUser = async (req: Request, res: Response) => {
     await userService.enableUser(IdUser);
     res.status(200).json({ message: 'User enabled' });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to enable user' });
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Failed to enable user' });
+    }
   }
 }
 
@@ -166,7 +189,11 @@ export const deleteUser = async (req: Request, res: Response) => {
     await userService.deleteUser(IdUser);
     res.status(200).json({ message: 'User deleted' });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to delete user' });
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Failed to delete user' });
+    }
   }
 }
 

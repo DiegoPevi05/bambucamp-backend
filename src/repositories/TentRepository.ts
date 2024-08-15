@@ -1,5 +1,6 @@
 import { PrismaClient, Tent   } from "@prisma/client";
 import { TentDto, TentFilters, PaginatedTents } from "../dto/tent";
+import {BadRequestError} from "../middleware/errors";
 
 const prisma = new PrismaClient();
 
@@ -93,7 +94,7 @@ export const updateTentImages = async (tentId: number, images: string) => {
     });
   } catch (error) {
     console.error('Error updating tent images:', error);
-    throw new Error('Failed to update tent images');
+    throw new BadRequestError('Failed to update tent images');
   }
 };
 

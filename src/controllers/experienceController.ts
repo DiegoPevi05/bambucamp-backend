@@ -1,13 +1,19 @@
 import { Request, Response } from 'express';
 import * as experienceService from '../services/experienceService';
 import { body, param, validationResult } from 'express-validator';
+import {CustomError} from '../middleware/errors';
 
 export const getAllPublicExperiences = async (req: Request, res: Response) => {
   try {
     const experiences = await experienceService.getAllPublicExperiences();
     res.json(experiences);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch experiences' });
+
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Failed to fetch experiences' });
+    }
   }
 };
 
@@ -29,7 +35,11 @@ export const getAllExperiences = async (req: Request, res: Response) => {
 
     res.json(PaginatedExperiences);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch experiences' });
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Failed to fetch experiences' });
+    }
   }
 };
 
@@ -47,15 +57,18 @@ export const createExperience = [
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ error: errors.array() });
     }
 
     try {
       await experienceService.createExperience(req.body, req.files);
       res.status(201).json({ message: 'Experience created' });
     } catch (error) {
-      console.log(error);
-      res.status(500).json({ error: 'Failed to create experience' });
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Failed to create experience' });
+      }
     }
   }
 ];
@@ -67,14 +80,18 @@ export const updateExperience = [
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ error: errors.array() });
     }
 
     try {
       await experienceService.updateExperience(Number(req.params.id), req.body ,req.files );
       res.json({ message: 'Experience updated' });
     } catch (error) {
-      res.status(500).json({ error: 'Failed to update experience' });
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Failed to update experience' });
+      }
     }
   }
 ];
@@ -84,7 +101,11 @@ export const deleteExperience = async (req: Request, res: Response) => {
     await experienceService.deleteExperience(Number(req.params.id));
     res.json({ message: 'Experience deleted' });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to delete experience' });
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Failed to delete experience' });
+    }
   }
 };
 

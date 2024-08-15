@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import * as authService from '../services/authService';
 import { SignInRequest, SignInResponse } from '../dto/user';
 import { body, query, validationResult } from 'express-validator';
+import {CustomError} from '../middleware/errors';
 
 
 export const signUp = [
@@ -20,14 +21,19 @@ export const signUp = [
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ error: errors.array() });
     }
 
     try {
       await authService.signUp(req.body);
       res.status(201).json({ message: "Email verification link has been sent to your email" });
     } catch (error) {
-      res.status(500).json({ error: 'Failed to create user' });
+
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Failed to create user' });
+      }
     }
   }
 ] 
@@ -40,7 +46,7 @@ export const verifyAccount = [
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ error: errors.array() });
     }
 
     try {
@@ -48,7 +54,11 @@ export const verifyAccount = [
       await authService.verifyEmail(email as string, code as string);
       res.status(200).json({ message: "Email successfully verified" });
     } catch (error) {
-      res.status(400).json({ error: (error as Error).message });
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Failed to verify Account' });
+      }
     }
   }
 ];
@@ -60,14 +70,18 @@ export const forgotPassword = [
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ error: errors.array() });
     }
 
     try {
       await authService.resetPassword(req.body.email);
       res.status(200).json({ message: "Password reset link has been sent to your email" });
     } catch (error) {
-      res.status(400).json({ error: (error as Error).message });
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Failed to generate password reset code' });
+      }
     }
   }
 ];
@@ -80,7 +94,7 @@ export const verifyPasswordResetCode = [
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ error: errors.array() });
     }
 
     try {
@@ -88,7 +102,11 @@ export const verifyPasswordResetCode = [
       await authService.verifyPasswordResetCode(email, code);
       res.status(200).json({ message: "Code successfully verified" });
     } catch (error) {
-      res.status(400).json({ error: (error as Error).message });
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Failed to verify password reset code' });
+      }
     }
   }
 ];
@@ -105,7 +123,7 @@ export const updatePassword = [
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ error: errors.array() });
     }
 
     try {
@@ -113,7 +131,11 @@ export const updatePassword = [
       await authService.updatePassword(email, password, code);
       res.status(200).json({ message: "Password successfully updated" });
     } catch (error) {
-      res.status(400).json({ error: (error as Error).message });
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Failed to change password' });
+      }
     }
   }
 ];
@@ -130,7 +152,11 @@ export const signIn = [
       const signInResponse: SignInResponse = { token, user };
       res.json(signInResponse);
     } catch (error) {
-      res.status(401).json({ error: (error as Error).message });
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Failed to log in' });
+      }
     }
   }
 ]

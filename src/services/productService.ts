@@ -1,6 +1,7 @@
 import * as productRepository from '../repositories/ProductRepository';
 import { ProductDto, ProductFilters, PaginatedProducts } from "../dto/product";
 import { deleteSubFolder, serializeImagesTodb, moveImagesToSubFolder, deleteImages } from '../lib/utils';
+import {NotFoundError} from '../middleware/errors';
 
 export const getAllPublicProducts = async () => {
   const products = await productRepository.getAllPublicProducts();
@@ -67,7 +68,7 @@ export const updateProduct = async (id:number, data: ProductDto, files: MulterFi
   const product = await productRepository.getProductById(id);
 
   if(!product){
-    throw Error ( "Producto no encotrado en la base de datos");
+    throw new NotFoundError("Product not found in the database");
   }
 
   if(data.categoryId &&  Number(data.categoryId) != product.categoryId ){

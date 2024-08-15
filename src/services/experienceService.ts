@@ -1,6 +1,7 @@
 import * as experienceRepository from '../repositories/ExperienceRepository';
 import { ExperienceDto, ExperienceFilters, PaginatedExperiences } from '../dto/experience';
 import { deleteSubFolder, serializeImagesTodb, moveImagesToSubFolder, deleteImages } from '../lib/utils';
+import {BadRequestError} from '../middleware/errors';
 
 export const getAllPublicExperiences = async () => {
   const experiences = await experienceRepository.getAllPublicExperiences();
@@ -67,7 +68,7 @@ export const updateExperience = async (id:number, data: ExperienceDto, files: Mu
   const experience = await experienceRepository.getExperienceById(id);
 
   if(!experience){
-    throw new Error('Experiencia no encontrada en la base de datos');
+    throw new BadRequestError('Experience not found in the database');
   }
 
   if(data.categoryId &&  Number(data.categoryId) != experience.categoryId ){

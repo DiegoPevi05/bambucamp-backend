@@ -1,13 +1,18 @@
 import { Request, Response } from 'express';
 import * as promotionService from '../services/promotionService';
 import { body, param, validationResult } from 'express-validator';
+import {CustomError} from '../middleware/errors';
 
 export const getAllPublicPromotions = async (req: Request, res: Response) => {
   try {
     const promotions = await promotionService.getAllPublicPromotions();
     res.json(promotions);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch promotions' });
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Failed to fetch promotions' });
+    }
   }
 };
 
@@ -16,8 +21,11 @@ export const getAllPromotionOptions = async( req:Request, res:Response ) => {
     const promotionsOptions = await promotionService.getAllPromotionOptions();
     res.json(promotionsOptions);
   } catch (error) {
-
-    res.status(500).json({ error: 'Failed to fetch promotions options' });
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Failed to fetch promotions options' });
+    }
   }
 }
 
@@ -40,8 +48,11 @@ export const getAllPromotions = async (req: Request, res: Response) => {
     res.json(PaginatedPromotions);
 
   } catch (error) {
-    console.log(error)
-    res.status(500).json({ error: 'Failed to fetch promotions' });
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: error.message });
+    } else {
+     res.status(500).json({ error: 'Failed to fetch promotions' });
+    }
   }
 };
 
@@ -62,15 +73,18 @@ export const createPromotion = [
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ error: errors.array() });
     }
 
     try {
       await promotionService.createPromotion(req.body, req.files);
       res.status(201).json({ message: 'Promotion created' });
     } catch (error) {
-      console.log(error);
-      res.status(500).json({ error: 'Failed to create promotion' });
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Failed to create promotion' });
+      }
     }
   }
 ];
@@ -82,14 +96,18 @@ export const updatePromotion = [
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ error: errors.array() });
     }
 
     try {
       await promotionService.updatePromotion(Number(req.params.id), req.body ,req.files);
       res.json({ message: 'Promotion updated' });
     } catch (error) {
-      res.status(500).json({ error: 'Failed to update promotion' });
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Failed to update promotion' });
+      }
     }
   }
 ];
@@ -99,7 +117,11 @@ export const deletePromotion = async (req: Request, res: Response) => {
     await promotionService.deletePromotion(Number(req.params.id));
     res.json({ message: 'Promotion deleted' });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to delete promotion' });
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Failed to delete promotion' });
+    }
   }
 };
 

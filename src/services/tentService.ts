@@ -1,6 +1,7 @@
 import * as tentRepository from '../repositories/TentRepository';
 import { TentFilters, PaginatedTents, TentDto } from '../dto/tent';
 import { deleteSubFolder, serializeImagesTodb, moveImagesToSubFolder, deleteImages } from '../lib/utils';
+import {NotFoundError} from '../middleware/errors';
 
 
 export const getAllPublicTents = async () => {
@@ -67,7 +68,7 @@ export const updateTent = async (id:number, data: TentDto, files: MulterFile[] |
   const tent = await tentRepository.getTentById(id);
 
   if(!tent){
-    throw Error ( "Glamping no se ha encontrado en la base de datos");
+    throw new NotFoundError("Glamping not found in the databsae");
   }
 
   if(data.header &&  data.header != tent.header){

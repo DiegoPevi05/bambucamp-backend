@@ -1,26 +1,27 @@
 import * as discountcodeRepository from '../repositories/DiscountCodeRepository';
 import { DiscountCodeDto, DiscountCodeFilters, PaginatedDiscountCodes } from '../dto/discountcode';
+import {BadRequestError, NotFoundError} from '../middleware/errors';
 
 export const getDiscountCodeByCode = async (code: string) => {
   const discountCode = await discountcodeRepository.getDiscountCodeByCode(code);
   if(!discountCode){
-    throw new Error('DiscountCode not found');
+    throw new NotFoundError('DiscountCode not found');
   };
 
   if(discountCode.expiredDate){
     if(discountCode.expiredDate < new Date()){
-      throw new Error('DiscountCode expired');
+      throw new BadRequestError('DiscountCode expired');
     };
   }
 
   if(discountCode.stock){
     if(discountCode.stock <= 0){
-      throw new Error('DiscountCode out of stock');
+      throw new BadRequestError('DiscountCode out of stock');
     };
   }
 
   if(discountCode.status === 'INACTIVE'){
-    throw new Error('DiscountCode is inactive');
+    throw new BadRequestError('DiscountCode is inactive');
   };
   return discountCode;
 };
@@ -46,7 +47,7 @@ export const createDiscountCode = async (data: DiscountCodeDto) => {
     expiredDate.setUTCHours(5, 0, 0, 0);
 
     if(expiredDate < new Date()){
-      throw new Error('Expired date must be greater than current date');
+      throw new BadRequestError('Expired date must be greater than current date');
     }
     data.expiredDate = expiredDate;
   }
@@ -61,7 +62,7 @@ export const updateDiscountCode = async (id:number, data: DiscountCodeDto) => {
   const discountCode = await discountcodeRepository.getDiscountCodeById(id);
 
   if(!discountCode){
-    throw new Error('DiscountCode not found');
+    throw new NotFoundError('DiscountCode not found');
   }
 
   if(data.code &&  data.code != discountCode.code ){
@@ -73,7 +74,7 @@ export const updateDiscountCode = async (id:number, data: DiscountCodeDto) => {
     expiredDate.setUTCHours(5, 0, 0, 0);
 
     if(expiredDate < new Date()){
-      throw new Error('Expired date must be greater than current date');
+      throw new BadRequestError('Expired date must be greater than current date');
     }
 
     discountCode.expiredDate = expiredDate;

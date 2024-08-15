@@ -1,5 +1,6 @@
 import { PrismaClient, Experience   } from "@prisma/client";
 import { ExperienceDto, ExperienceFilters, PaginatedExperiences } from "../dto/experience";
+import {BadRequestError} from "../middleware/errors";
 
 const prisma = new PrismaClient();
 
@@ -94,8 +95,7 @@ export const updateExperienceImages = async (experienceId: number, images: strin
       data: { images: images }
     });
   } catch (error) {
-    console.error('Error updating experience images:', error);
-    throw new Error('Failed to update experience images');
+    throw new BadRequestError('Failed to update experience images');
   }
 };
 

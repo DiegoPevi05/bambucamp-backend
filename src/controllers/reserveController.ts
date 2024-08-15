@@ -77,7 +77,7 @@ export const createReserveByUser = [
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ error: errors.array() });
     }
 
     try {
@@ -110,7 +110,7 @@ export const createReserve = [
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ error: errors.array() });
     }
 
     try {
@@ -120,6 +120,7 @@ export const createReserve = [
       if (error instanceof CustomError) {
         res.status(error.statusCode).json({ error: error.message });
       } else {
+        console.log(error)
         res.status(500).json({ error: 'Failed to create reserve' });
       }
     }
@@ -133,7 +134,7 @@ export const updateReserve = [
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ error: errors.array() });
     }
 
     try {

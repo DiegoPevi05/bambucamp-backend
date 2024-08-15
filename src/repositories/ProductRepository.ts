@@ -1,5 +1,6 @@
 import { PrismaClient, Product   } from "@prisma/client";
 import { ProductDto, ProductFilters, PaginatedProducts } from "../dto/product";
+import {BadRequestError} from "../middleware/errors";
 
 const prisma = new PrismaClient();
 
@@ -93,8 +94,7 @@ export const updateProductImages = async (productId: number, images: string) => 
       data: { images: images }
     });
   } catch (error) {
-    console.error('Error updating product images:', error);
-    throw new Error('Failed to update product images');
+    throw new BadRequestError('Failed to update product images');
   }
 };
 

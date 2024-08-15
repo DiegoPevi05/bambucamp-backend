@@ -1,5 +1,6 @@
 import { PrismaClient, Promotion   } from "@prisma/client";
 import { PromotionDto, PromotionFilters, PaginatedPromotions, PromotionPublicDto, PromotionOptions } from "../dto/promotion";
+import {BadRequestError} from "../middleware/errors";
 
 const prisma = new PrismaClient();
 
@@ -170,8 +171,7 @@ export const updatePromotionImages = async (promotionId: number, images: string)
       data: { images: images }
     });
   } catch (error) {
-    console.error('Error updating promotion images:', error);
-    throw new Error('Failed to update promotion images');
+    throw new BadRequestError('Failed to update promotion images');
   }
 };
 
