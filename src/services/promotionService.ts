@@ -90,11 +90,11 @@ export const createPromotion = async (data: PromotionDto, files: MulterFile[] | 
     idtents.map((tentId:{id:number,label:string,qty:number,price:number})=>{
       const tent = tentRepository.getTentById(tentId.id);
       if(!tent){
-        throw new NotFoundError(`Glamping not found`)
+        throw new NotFoundError("error.noAllTentsFound");
       }
     })
   }else{
-    throw new BadRequestError("No glamping selected");
+    throw new BadRequestError("error.noTentsToValidate");
   }
 
   if(data.idproducts){
@@ -102,7 +102,7 @@ export const createPromotion = async (data: PromotionDto, files: MulterFile[] | 
     idproducts.map((productId:{id:number,label:string,qty:number,price:number})=>{
       const product = productRepository.getProductById(productId.id);
       if(!product){
-        throw new NotFoundError(`Product not found`);
+        throw new NotFoundError("error.noAllProductsFound");
       }
     })
   };
@@ -112,7 +112,7 @@ export const createPromotion = async (data: PromotionDto, files: MulterFile[] | 
     idexperiences.map((experienceId:{id:number,label:string,qty:number,price:number})=>{
       const experience = experienceRepository.getExperienceById(experienceId.id);
       if(!experience){
-        throw new NotFoundError(`Experiencia no encontrada`)
+        throw new NotFoundError("error.noAllExperiencesFound")
       }
     })
   };
@@ -136,7 +136,7 @@ export const createPromotion = async (data: PromotionDto, files: MulterFile[] | 
     expiredDate.setUTCHours(5, 0, 0, 0);
 
     if(expiredDate < new Date()){
-      throw new BadRequestError('Expired date must be greater than current date');
+      throw new BadRequestError("error.expiredDateGreaterThanToday");
     }
     data.expiredDate = expiredDate;
   }
@@ -159,7 +159,7 @@ export const updatePromotion = async (id:number, data: PromotionDto, files: Mult
   const promotion = await promotionRepository.getPromotionById(id);
 
   if(!promotion){
-    throw new NotFoundError('Promotion not found in the database');
+    throw new NotFoundError("error.noPromotionFoundInDB");
   }
 
   if(data.title &&  data.title != promotion.title){
@@ -175,7 +175,7 @@ export const updatePromotion = async (id:number, data: PromotionDto, files: Mult
     expiredDate.setUTCHours(5, 0, 0, 0);
 
     if(expiredDate < new Date()){
-      throw new BadRequestError('Expired date must be greater than current date');
+      throw new BadRequestError("error.expiredDateGreaterThanToday");
     }
 
     promotion.expiredDate = expiredDate;
@@ -214,7 +214,7 @@ export const updatePromotion = async (id:number, data: PromotionDto, files: Mult
     idtents.map((tentId:{id:number,label:string,qty:number,price:number})=>{
       const tent = tentRepository.getTentById(tentId.id);
       if(!tent){
-        throw new NotFoundError(`Glamping not found`)
+        throw new NotFoundError("error.noAllTentsFound")
       }
     })
 
@@ -226,7 +226,7 @@ export const updatePromotion = async (id:number, data: PromotionDto, files: Mult
     idproducts.map((productId:{id:number,label:string,qty:number,price:number})=>{
       const product = productRepository.getProductById(productId.id);
       if(!product){
-        throw new NotFoundError(`Product not found`)
+        throw new NotFoundError("error.noAllProductsFound")
       }
     })
     promotion.idproducts = data.idproducts;
@@ -237,7 +237,7 @@ export const updatePromotion = async (id:number, data: PromotionDto, files: Mult
     idexperiences.map((experienceId:{id:number,label:string,qty:number,price:number})=>{
       const experience = experienceRepository.getExperienceById(experienceId.id);
       if(!experience){
-        throw new NotFoundError(`Experience not found`)
+        throw new NotFoundError("error.noAllExperiencesFound")
       }
     })
     promotion.idexperiences = data.idexperiences;

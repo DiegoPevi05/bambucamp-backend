@@ -95,7 +95,7 @@ export const updateExperienceImages = async (experienceId: number, images: strin
       data: { images: images }
     });
   } catch (error) {
-    throw new BadRequestError('Failed to update experience images');
+    throw new BadRequestError('error.noUpdateImages');
   }
 };
 

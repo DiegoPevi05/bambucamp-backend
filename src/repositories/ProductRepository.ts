@@ -94,7 +94,7 @@ export const updateProductImages = async (productId: number, images: string) => 
       data: { images: images }
     });
   } catch (error) {
-    throw new BadRequestError('Failed to update product images');
+    throw new BadRequestError("error.noUpdateImages");
   }
 };
 

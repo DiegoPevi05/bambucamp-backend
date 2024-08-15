@@ -171,7 +171,7 @@ export const updatePromotionImages = async (promotionId: number, images: string)
       data: { images: images }
     });
   } catch (error) {
-    throw new BadRequestError('Failed to update promotion images');
+    throw new BadRequestError("error.noUpdateImages");
   }
 };
 

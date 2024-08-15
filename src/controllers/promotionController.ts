@@ -9,9 +9,9 @@ export const getAllPublicPromotions = async (req: Request, res: Response) => {
     res.json(promotions);
   } catch (error) {
     if (error instanceof CustomError) {
-      res.status(error.statusCode).json({ error: error.message });
+      res.status(error.statusCode).json({ error: req.t(error.message) });
     } else {
-      res.status(500).json({ error: 'Failed to fetch promotions' });
+      res.status(500).json({ error: req.t("error.failedToFetchPromotions") });
     }
   }
 };
@@ -22,9 +22,9 @@ export const getAllPromotionOptions = async( req:Request, res:Response ) => {
     res.json(promotionsOptions);
   } catch (error) {
     if (error instanceof CustomError) {
-      res.status(error.statusCode).json({ error: error.message });
+      res.status(error.statusCode).json({ error: req.t(error.message) });
     } else {
-      res.status(500).json({ error: 'Failed to fetch promotions options' });
+      res.status(500).json({ error: req.t("error.failedToFetchPromotionOptions") });
     }
   }
 }
@@ -49,25 +49,25 @@ export const getAllPromotions = async (req: Request, res: Response) => {
 
   } catch (error) {
     if (error instanceof CustomError) {
-      res.status(error.statusCode).json({ error: error.message });
+      res.status(error.statusCode).json({ error: req.t(error.message) });
     } else {
-     res.status(500).json({ error: 'Failed to fetch promotions' });
+     res.status(500).json({ error: req.t("error.failedToFetchPromotions") });
     }
   }
 };
 
 export const createPromotion = [
-  body('title').notEmpty().withMessage('Titulo is required'),
-  body('description').notEmpty().withMessage('Description is required'),
-  body('expiredDate').notEmpty().withMessage('Expired Date is required'),
-  body('status').notEmpty().withMessage('Status is required'),
-  body('qtypeople').notEmpty().withMessage('Quantity of people is required'),
-  body('qtykids').notEmpty().withMessage('Quantity of kids is required'),
-  body('netImport').notEmpty().withMessage('Net Import is required'),
-  body('discount').notEmpty().withMessage('Discount is required'),
-  body('grossImport').notEmpty().withMessage('Gross Import is required'),
-  body('stock').notEmpty().withMessage('Stock is required'),
-  body('idtents').notEmpty().withMessage('Id tents is required'),
+  body('title').notEmpty().withMessage(req => req.t("titleRequired")),
+  body('description').notEmpty().withMessage(req => req.t("descriptionRequired")),
+  body('expiredDate').notEmpty().withMessage(req => req.t("expiredDateRequired")),
+  body('status').notEmpty().withMessage(req => req.t("statusRequired")),
+  body('qtypeople').notEmpty().withMessage(req => req.t("qtypeopleRequired")),
+  body('qtykids').notEmpty().withMessage(req => req.t("qtykidsRequired")),
+  body('netImport').notEmpty().withMessage(req => req.t("netImportRequired")),
+  body('discount').notEmpty().withMessage(req => req.t("discountRequired")),
+  body('grossImport').notEmpty().withMessage(req => req.t("grossImportRequired")),
+  body('stock').notEmpty().withMessage(req => req.t("stockRequired")),
+  body('idtents').notEmpty().withMessage(req => req.t("idtentsRequired")),
 
   async (req: Request, res: Response) => {
 
@@ -78,19 +78,19 @@ export const createPromotion = [
 
     try {
       await promotionService.createPromotion(req.body, req.files);
-      res.status(201).json({ message: 'Promotion created' });
+      res.status(201).json({ message: req.t("message.promotionCreated") });
     } catch (error) {
       if (error instanceof CustomError) {
-        res.status(error.statusCode).json({ error: error.message });
+        res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
-        res.status(500).json({ error: 'Failed to create promotion' });
+        res.status(500).json({ error: req.t("error.failedToCreatePromotion") });
       }
     }
   }
 ];
 
 export const updatePromotion = [
-  param('id').notEmpty().withMessage('Id is required'),
+  param('id').notEmpty().withMessage(req => req.t("idRequired")),
 
   async (req: Request, res: Response) => {
 
@@ -101,12 +101,12 @@ export const updatePromotion = [
 
     try {
       await promotionService.updatePromotion(Number(req.params.id), req.body ,req.files);
-      res.json({ message: 'Promotion updated' });
+      res.json({ message: req.t("message.promotionUpdated") });
     } catch (error) {
       if (error instanceof CustomError) {
-        res.status(error.statusCode).json({ error: error.message });
+        res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
-        res.status(500).json({ error: 'Failed to update promotion' });
+        res.status(500).json({ error: req.t("failedToUpdatePromotion") });
       }
     }
   }
@@ -115,12 +115,12 @@ export const updatePromotion = [
 export const deletePromotion = async (req: Request, res: Response) => {
   try {
     await promotionService.deletePromotion(Number(req.params.id));
-    res.json({ message: 'Promotion deleted' });
+    res.json({ message: req.t("message.promotionDeleted") });
   } catch (error) {
     if (error instanceof CustomError) {
-      res.status(error.statusCode).json({ error: error.message });
+      res.status(error.statusCode).json({ error: req.t(error.message) });
     } else {
-      res.status(500).json({ error: 'Failed to delete promotion' });
+      res.status(500).json({ error: req.t("error.failedToDeletePromotion") });
     }
   }
 };

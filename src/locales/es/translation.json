@@ -35,6 +35,7 @@
 		"failedToDeleteProduct": "Error al eliminar el producto",
 		"noProductFoundInDB": "Producto no encontrado en la base de datos",
 		"failedToFetchPromotions": "Error al obtener las promociones",
+		"failedToFetchPromotionOptions": "Error al obtener las opciones de las promociones",
 		"failedToCreatePromotion": "Error al crear la promoción",
 		"failedToUpdatePromotion": "Error al actualizar la promoción",
 		"failedToDeletePromotion": "Error al eliminar la promoción",
@@ -57,7 +58,8 @@
 		"discountCodeExpired": "Codigo de descuento expirado",
 		"discountCodeOutOfStock": "Codigo de descuento se encuentra sin stock",
 		"discountCodeisNotValid": "Codigo de descuento no es valido",
-		"expiredDateGreaterThanToday": "La fecha de expiracion debe ser mayor al dia de hoy"
+		"expiredDateGreaterThanToday": "La fecha de expiracion debe ser mayor al dia de hoy",
+		"noPromotionFoundInDB": "Promocion no encontrada en la base de datos"
 	},
 	"message": {
 		"reserveCreated": "Reserva creada",

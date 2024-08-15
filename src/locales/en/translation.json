@@ -48,6 +48,7 @@
 		"failedToUpdateDiscountCode": "Failed to update discount code",
 		"failedToDeleteDiscountCode": "Failed to delete discount code",
 		"failedToFetchPromotions": "Failed to fetch promotions",
+		"failedToFetchPromotionOptions": "Failed to fetch promotion options",
 		"failedToCreatePromotion": "Failed to create promotion",
 		"failedToUpdatePromotion": "Failed to update promotion",
 		"failedToDeletePromotion": "Failed to delete promotion",
@@ -57,7 +58,15 @@
 		"discountCodeExpired": "Discount code expired",
 		"discountCodeOutOfStock": "Discount code is out of stock",
 		"discountCodeisNotValid": "Discount code is not valid anymore",
-		"expiredDateGreaterThanToday": "Expired date must be greater than current date"
+		"expiredDateGreaterThanToday": "Expired date must be greater than current date",
+		"noPromotionFoundInDB": "Promotion not found in the database",
+		"noUpdateImages": "Failed to update images",
+		"failedToCreateUser": "Failed to create user",
+		"failedToVerifyUser": "Failed to verify Account",
+		"failedToGenerateResetCode": "Failed to generate password reset code",
+		"failedToVerifyPasswordResetCode": "Failed to verify password reset code",
+		"passwordChangeFailed": "Failed to change password",
+		"loginFailed": "Failed to log in"
 	},
 	"message": {
 		"reserveCreated": "Reserve created",
@@ -78,7 +87,12 @@
 		"promotionCreated": "Promotion created",
 		"promotionUpdated": "Promotion updated",
 		"promotionDeleted": "Promotion deleted",
-		"validCode": "Codigo de descuento valido"
+		"validCode": "Codigo de descuento valido",
+		"emailVerificationSent": "Email verification link has been sent to your email",
+		"emailVerified": "Email successfully verified",
+		"passwordResetSent": "Password reset link has been sent to your email",
+		"passwordResetCodeGenerated": "Code successfully verified",
+		"passwordUpdateSuccess": "Password successfully updated"
 	},
 	"validation": {
 		"headerRequired": "Header of Tent is required",
@@ -106,6 +120,14 @@
 		"statusRequired": "Status is required",
 		"netImportRequired": "Net Import is required",
 		"grossImportRequired": "Gross Import is required",
-		"idtentsRequired": "Id tents is required"
+		"idtentsRequired": "Id tents is required",
+		"lastNameRequired": "Last name is required",
+		"phoneNumberRequired": "Phone number is required",
+		"emailInvalid": "Must be a valid email",
+		"passwordLength": "Password must be at least 8 characters long",
+		"passwordLetter": "Password must contain at least one letter",
+		"passwordNumber": "Password must contain at least one number",
+		"passwordSpecial": "Password must contain at least one special character",
+		"passwordRequired": "Password is Required"
 	}
 }

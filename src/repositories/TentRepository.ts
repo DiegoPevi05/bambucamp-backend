@@ -94,7 +94,7 @@ export const updateTentImages = async (tentId: number, images: string) => {
     });
   } catch (error) {
     console.error('Error updating tent images:', error);
-    throw new BadRequestError('Failed to update tent images');
+    throw new BadRequestError("error.noUpdateImages");
   }
 };
 

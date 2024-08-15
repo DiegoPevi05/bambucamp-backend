@@ -7,15 +7,15 @@ import {CustomError} from '../middleware/errors';
 
 export const signUp = [
 
-  body('firstName').notEmpty().withMessage('Name is required'),
-  body('lastName').notEmpty().withMessage('Last name is required'),
-  body('phoneNumber').notEmpty().withMessage('Phone number is required'),
-  body('email').isEmail().withMessage('Must be a valid email'),
+  body('firstName').notEmpty().withMessage(req => req.t("validation.nameRequired")),
+  body('lastName').notEmpty().withMessage(req => req.t("validation.lastNameRequired")),
+  body('phoneNumber').notEmpty().withMessage(req => req.t("validation.phoneNumberRequired")),
+  body('email').isEmail().withMessage(req => req.t("validation.emailInvalid")),
   body('password')
-    .isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
-    .matches(/[a-zA-Z]/).withMessage('Password must contain at least one letter')
-    .matches(/[0-9]/).withMessage('Password must contain at least one number')
-    .matches(/[^a-zA-Z0-9]/).withMessage('Password must contain at least one special character'),
+    .isLength({ min: 8 }).withMessage(req => req.t("validation.passwordLength"))
+    .matches(/[a-zA-Z]/).withMessage('validation.passwordLetter')
+    .matches(/[0-9]/).withMessage('validation.passwordNumber')
+    .matches(/[^a-zA-Z0-9]/).withMessage('validation.passwordSpecial'),
 
   async (req: Request, res: Response) => {
 
@@ -26,13 +26,13 @@ export const signUp = [
 
     try {
       await authService.signUp(req.body);
-      res.status(201).json({ message: "Email verification link has been sent to your email" });
+      res.status(201).json({ message:req.t("message.emailVerificationSent") });
     } catch (error) {
 
       if (error instanceof CustomError) {
-        res.status(error.statusCode).json({ error: error.message });
+        res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
-        res.status(500).json({ error: 'Failed to create user' });
+        res.status(500).json({ error: req.t("error.failedToCreateUser") });
       }
     }
   }
@@ -40,8 +40,8 @@ export const signUp = [
 
 export const verifyAccount = [
 
-  query('email').isEmail().withMessage('Must be a valid email'),
-  query('code').notEmpty().withMessage('Code is required'),
+  query('email').isEmail().withMessage(req => req.t("validation.emailInvalid")),
+  query('code').notEmpty().withMessage(req => req.t("validation.codeRequired")),
 
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
@@ -52,12 +52,12 @@ export const verifyAccount = [
     try {
       const { email, code } = req.query;
       await authService.verifyEmail(email as string, code as string);
-      res.status(200).json({ message: "Email successfully verified" });
+      res.status(200).json({ message: req.t("message.emailVerified") });
     } catch (error) {
       if (error instanceof CustomError) {
-        res.status(error.statusCode).json({ error: error.message });
+        res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
-        res.status(500).json({ error: 'Failed to verify Account' });
+        res.status(500).json({ error: req.t("error.failedToVerifyUser") });
       }
     }
   }
@@ -65,7 +65,7 @@ export const verifyAccount = [
 
 export const forgotPassword = [
 
-  body('email').isEmail().withMessage('Must be a valid email'),
+  body('email').isEmail().withMessage(req => req.t("error.emailInvalid")),
 
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
@@ -75,12 +75,12 @@ export const forgotPassword = [
 
     try {
       await authService.resetPassword(req.body.email);
-      res.status(200).json({ message: "Password reset link has been sent to your email" });
+      res.status(200).json({ message: req.t("message.passwordResetSent") });
     } catch (error) {
       if (error instanceof CustomError) {
-        res.status(error.statusCode).json({ error: error.message });
+        res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
-        res.status(500).json({ error: 'Failed to generate password reset code' });
+        res.status(500).json({ error: req.t("error.failedToGenerateResetCode") });
       }
     }
   }
@@ -88,8 +88,8 @@ export const forgotPassword = [
 
 export const verifyPasswordResetCode = [
   
-  body('email').isEmail().withMessage('Must be a valid email'),
-  body('code').notEmpty().withMessage('Code is required'),
+  body('email').isEmail().withMessage(req => req.t("validation.emailInvalid")),
+  body('code').notEmpty().withMessage(req => req.t("validation.codeRequired")),
 
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
@@ -100,25 +100,25 @@ export const verifyPasswordResetCode = [
     try {
       const { email, code } = req.body;
       await authService.verifyPasswordResetCode(email, code);
-      res.status(200).json({ message: "Code successfully verified" });
+      res.status(200).json({ message: "message.passwordResetCodeGenerated" });
     } catch (error) {
       if (error instanceof CustomError) {
-        res.status(error.statusCode).json({ error: error.message });
+        res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
-        res.status(500).json({ error: 'Failed to verify password reset code' });
+        res.status(500).json({ error: 'error.failedToVerifyPasswordResetCode' });
       }
     }
   }
 ];
 
 export const updatePassword = [
-  body('email').isEmail().withMessage('Must be a valid email'),
+  body('email').isEmail().withMessage(req => req.t("validation.emailInvalid")),
   body('password')
-    .isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
-    .matches(/[a-zA-Z]/).withMessage('Password must contain at least one letter')
-    .matches(/[0-9]/).withMessage('Password must contain at least one number')
-    .matches(/[^a-zA-Z0-9]/).withMessage('Password must contain at least one special character'),
-  body('code').notEmpty().withMessage('Code is required'),
+    .isLength({ min: 8 }).withMessage(req => req.t("validation.passwordLength"))
+    .matches(/[a-zA-Z]/).withMessage(req => req.t('validation.passwordLetter'))
+    .matches(/[0-9]/).withMessage(req => req.t("validation.passwordNumber"))
+    .matches(/[^a-zA-Z0-9]/).withMessage(req => req.t("validation.passwordSpecial")),
+  body('code').notEmpty().withMessage(req => req.t("validation.codeRequired")),
 
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
@@ -129,12 +129,12 @@ export const updatePassword = [
     try {
       const { email, password, code } = req.body;
       await authService.updatePassword(email, password, code);
-      res.status(200).json({ message: "Password successfully updated" });
+      res.status(200).json({ message: req.t("message.passwordUpdateSuccess") });
     } catch (error) {
       if (error instanceof CustomError) {
-        res.status(error.statusCode).json({ error: error.message });
+        res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
-        res.status(500).json({ error: 'Failed to change password' });
+        res.status(500).json({ error: req.t("error.passwordChangeFailed") });
       }
     }
   }
@@ -142,8 +142,8 @@ export const updatePassword = [
 
 export const signIn = [
 
-  body('email').isEmail().withMessage('Must be a valid email'),
-  body('password').notEmpty().withMessage('Password is required'),
+  body('email').isEmail().withMessage(req => req.t("validation.emailInvalid")),
+  body('password').notEmpty().withMessage(req => req.t("validation.passwordRequired")),
 
   async (req: Request<{}, {}, SignInRequest>, res: Response) => {
     try {
@@ -153,9 +153,9 @@ export const signIn = [
       res.json(signInResponse);
     } catch (error) {
       if (error instanceof CustomError) {
-        res.status(error.statusCode).json({ error: error.message });
+        res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
-        res.status(500).json({ error: 'Failed to log in' });
+        res.status(500).json({ error: req.t("error.loginFailed") });
       }
     }
   }
