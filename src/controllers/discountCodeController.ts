@@ -4,7 +4,7 @@ import { body, query, param, validationResult } from 'express-validator';
 import {CustomError} from '../middleware/errors';
 
 export const validateDiscountCode = [
-  query('code').notEmpty().withMessage('Code is required'),
+  query('code').notEmpty().withMessage(req => req.t("validation.codeRequired")),
 
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
@@ -14,12 +14,12 @@ export const validateDiscountCode = [
 
     try {
       await discountCodeService.getDiscountCodeByCode(req.query.code as string);
-      res.json({ message: 'Valid promotion code' });
+      res.json({ message: req.t("message.validCode") });
     } catch (error) {
       if (error instanceof CustomError) {
-        res.status(error.statusCode).json({ error: error.message });
+        res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
-        res.status(500).json({ error: 'Failed to validate promotion code' });
+        res.status(500).json({ error: req.t('error.failedToValidateCode') });
       }
     }
   }
@@ -46,16 +46,16 @@ export const getAllDiscountCodes = async (req: Request, res: Response) => {
   } catch (error) {
 
     if (error instanceof CustomError) {
-      res.status(error.statusCode).json({ error: error.message });
+      res.status(error.statusCode).json({ error: req.t(error.message) });
     } else {
-      res.status(500).json({ error: 'Failed to fetch discountCodes' });
+      res.status(500).json({ error: req.t("erro.failedToFetchDiscountCodes") });
     }
   }
 };
 
 export const createDiscountCode = [
-  body('code').notEmpty().withMessage('Codigo es requerido'),
-  body('discount').notEmpty().withMessage('Descuento es requerido'),
+  body('code').notEmpty().withMessage(req => req.t("codeRequired")),
+  body('discount').notEmpty().withMessage(req => req.t("discountRequired")),
 
   async (req: Request, res: Response) => {
 
@@ -66,19 +66,19 @@ export const createDiscountCode = [
 
     try {
       await discountCodeService.createDiscountCode(req.body);
-      res.status(201).json({ message: 'DiscountCode created' });
+      res.status(201).json({ message: req.t("message.discountCodeCreated") });
     } catch (error) {
       if (error instanceof CustomError) {
-        res.status(error.statusCode).json({ error: error.message });
+        res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
-        res.status(500).json({ error: 'Failed to create discountCode' });
+        res.status(500).json({ error: req.t("error.failedToCreateDiscountCode") });
       }
     }
   }
 ];
 
 export const updateDiscountCode = [
-  param('id').notEmpty().withMessage('Id is required'),
+  param('id').notEmpty().withMessage(req => req.t("idRequired")),
 
   async (req: Request, res: Response) => {
 
@@ -89,12 +89,12 @@ export const updateDiscountCode = [
 
     try {
       await discountCodeService.updateDiscountCode(Number(req.params.id), req.body);
-      res.json({ message: 'DiscountCode updated' });
+      res.json({ message: req.t("message.discountCodeUpdated") });
     } catch (error) {
       if (error instanceof CustomError) {
-        res.status(error.statusCode).json({ error: error.message });
+        res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
-        res.status(500).json({ error: 'Failed to update discountCode' });
+        res.status(500).json({ error: req.t("error.failedToUpdateDiscountCode")});
       }
     }
   }
@@ -103,12 +103,12 @@ export const updateDiscountCode = [
 export const deleteDiscountCode = async (req: Request, res: Response) => {
   try {
     await discountCodeService.deleteDiscountCode(Number(req.params.id));
-    res.json({ message: 'DiscountCode deleted' });
+    res.json({ message: req.t("message.discountCodeDeleted") });
   } catch (error) {
       if (error instanceof CustomError) {
-        res.status(error.statusCode).json({ error: error.message });
+        res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
-        res.status(500).json({ error: 'Failed to delete discountCode' });
+        res.status(500).json({ error: req.t("error.failedToDeleteDiscountCode") });
       }
   }
 };

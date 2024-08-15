@@ -10,9 +10,9 @@ export const getAllPublicExperiences = async (req: Request, res: Response) => {
   } catch (error) {
 
     if (error instanceof CustomError) {
-      res.status(error.statusCode).json({ error: error.message });
+      res.status(error.statusCode).json({ error: req.t(error.message) });
     } else {
-      res.status(500).json({ error: 'Failed to fetch experiences' });
+      res.status(500).json({ error: req.t("error.failedToFetchExperiences") });
     }
   }
 };
@@ -36,22 +36,22 @@ export const getAllExperiences = async (req: Request, res: Response) => {
     res.json(PaginatedExperiences);
   } catch (error) {
     if (error instanceof CustomError) {
-      res.status(error.statusCode).json({ error: error.message });
+      res.status(error.statusCode).json({ error: req.t(error.message) });
     } else {
-      res.status(500).json({ error: 'Failed to fetch experiences' });
+      res.status(500).json({ error: req.t("error.failedToFetchExperiences") });
     }
   }
 };
 
 export const createExperience = [
-  body('categoryId').notEmpty().withMessage('Category is required'),
-  body('header').notEmpty().withMessage('Header is required'),
-  body('name').notEmpty().withMessage('Name is required'),
-  body('description').notEmpty().withMessage('Description is required'),
-  body('price').notEmpty().withMessage('Price is required'),
-  body('duration').notEmpty().withMessage('Duration is required'),
-  body('qtypeople').notEmpty().withMessage('Cantidad de personas es requerido'),
-  body('limit_age').notEmpty().withMessage('Limite de edad requerido'),
+  body('categoryId').notEmpty().withMessage(req => req.t("validation.categoryIdRequired")),
+  body('header').notEmpty().withMessage(req => req.t("validation.headerRequired")),
+  body('name').notEmpty().withMessage(req => req.t("validation.nameRequired")),
+  body('description').notEmpty().withMessage(req => req.t("validation.descriptionRequired")),
+  body('price').notEmpty().withMessage(req => req.t("validation.priceRequired")),
+  body('duration').notEmpty().withMessage(req => req.t("validation.durationRequired")),
+  body('qtypeople').notEmpty().withMessage(req => req.t("validation.qtypeopleRequired")),
+  body('limit_age').notEmpty().withMessage(req => req.t("validation.limit_ageRequired")),
 
   async (req: Request, res: Response) => {
 
@@ -62,19 +62,19 @@ export const createExperience = [
 
     try {
       await experienceService.createExperience(req.body, req.files);
-      res.status(201).json({ message: 'Experience created' });
+      res.status(201).json({ message: req.t("message.experienceCreated") });
     } catch (error) {
       if (error instanceof CustomError) {
-        res.status(error.statusCode).json({ error: error.message });
+        res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
-        res.status(500).json({ error: 'Failed to create experience' });
+        res.status(500).json({ error: req.t("error.failedToCreateExperience") });
       }
     }
   }
 ];
 
 export const updateExperience = [
-  param('id').notEmpty().withMessage('Id is required'),
+  param('id').notEmpty().withMessage(req => req.t("validation.idRequired")),
 
   async (req: Request, res: Response) => {
 
@@ -85,12 +85,12 @@ export const updateExperience = [
 
     try {
       await experienceService.updateExperience(Number(req.params.id), req.body ,req.files );
-      res.json({ message: 'Experience updated' });
+      res.json({ message: req.t("message.experienceUpdated") });
     } catch (error) {
       if (error instanceof CustomError) {
-        res.status(error.statusCode).json({ error: error.message });
+        res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
-        res.status(500).json({ error: 'Failed to update experience' });
+        res.status(500).json({ error: req.t("error.failedToUpdateExperience") });
       }
     }
   }
@@ -99,12 +99,12 @@ export const updateExperience = [
 export const deleteExperience = async (req: Request, res: Response) => {
   try {
     await experienceService.deleteExperience(Number(req.params.id));
-    res.json({ message: 'Experience deleted' });
+    res.json({ message: req.t("message.experienceDeleted") });
   } catch (error) {
     if (error instanceof CustomError) {
-      res.status(error.statusCode).json({ error: error.message });
+      res.status(error.statusCode).json({ error: req.t(error.message) });
     } else {
-      res.status(500).json({ error: 'Failed to delete experience' });
+      res.status(500).json({ error: req.t("error.failedToDeleteExperience") });
     }
   }
 };

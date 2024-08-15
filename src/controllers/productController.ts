@@ -9,9 +9,9 @@ export const getAllPublicProducts = async (req: Request, res: Response) => {
     res.json(products);
   } catch (error) {
     if (error instanceof CustomError) {
-      res.status(error.statusCode).json({ error: error.message });
+      res.status(error.statusCode).json({ error: req.t(error.message) });
     } else {
-      res.status(500).json({ error: 'Failed to fetch products' });
+      res.status(500).json({ error: req.t("error.failedToFetchProducts") });
     }
   }
 };
@@ -36,19 +36,19 @@ export const getAllProducts = async (req: Request, res: Response) => {
 
   } catch (error) {
     if (error instanceof CustomError) {
-      res.status(error.statusCode).json({ error: error.message });
+      res.status(error.statusCode).json({ error: req.t(error.message) });
     } else {
-      res.status(500).json({ error: 'Failed to fetch products' });
+      res.status(500).json({ error: req.t("error.failedToFetchProducts") });
     }
   }
 };
 
 export const createProduct = [
-  body('categoryId').notEmpty().withMessage('Category is required'),
-  body('name').notEmpty().withMessage('Name is required'),
-  body('description').notEmpty().withMessage('Description is required'),
-  body('price').notEmpty().withMessage('Price is required'),
-  body('stock').notEmpty().withMessage('Stock is required'),
+  body('categoryId').notEmpty().withMessage(req => req.t("validation.categoryIdRequired")),
+  body('name').notEmpty().withMessage(req => req.t("validation.nameRequired")),
+  body('description').notEmpty().withMessage(req => req.t("validation.descriptionRequired")),
+  body('price').notEmpty().withMessage(req => req.t("validation.priceRequired")),
+  body('stock').notEmpty().withMessage(req => req.t("validation.stockRequired")),
 
   async (req: Request, res: Response) => {
 
@@ -59,19 +59,19 @@ export const createProduct = [
 
     try {
       await productService.createProduct(req.body, req.files);
-      res.status(201).json({ message: 'Product created' });
+      res.status(201).json({ message: req.t("message.productCreated") });
     } catch (error) {
       if (error instanceof CustomError) {
-        res.status(error.statusCode).json({ error: error.message });
+        res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
-        res.status(500).json({ error: 'Failed to create product' });
+        res.status(500).json({ error: req.t("error.failedToCreateProduct") });
       }
     }
   }
 ];
 
 export const updateProduct = [
-  param('id').notEmpty().withMessage('Id is required'),
+  param('id').notEmpty().withMessage(req => req.t("validation.idRequired")),
 
   async (req: Request, res: Response) => {
 
@@ -82,12 +82,12 @@ export const updateProduct = [
 
     try {
       await productService.updateProduct(Number(req.params.id), req.body  , req.files );
-      res.json({ message: 'Product updated' });
+      res.json({ message: req.t("message.productCreated") });
     } catch (error) {
       if (error instanceof CustomError) {
-        res.status(error.statusCode).json({ error: error.message });
+        res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
-        res.status(500).json({ error: 'Failed to update product' });
+        res.status(500).json({ error: req.t("error.failedToUpdateProduct") });
       }
     }
   }
@@ -96,13 +96,13 @@ export const updateProduct = [
 export const deleteProduct = async (req: Request, res: Response) => {
   try {
     await productService.deleteProduct(Number(req.params.id));
-    res.json({ message: 'Product deleted' });
+    res.json({ message: req.t("message.productDeleted") });
   } catch (error) {
 
     if (error instanceof CustomError) {
-      res.status(error.statusCode).json({ error: error.message });
+      res.status(error.statusCode).json({ error: req.t(error.message) });
     } else {
-      res.status(500).json({ error: 'Failed to delete product' });
+      res.status(500).json({ error: req.t("failedToDeleteProduct") });
     }
   }
 };

@@ -68,7 +68,7 @@ export const updateProduct = async (id:number, data: ProductDto, files: MulterFi
   const product = await productRepository.getProductById(id);
 
   if(!product){
-    throw new NotFoundError("Product not found in the database");
+    throw new NotFoundError("error.noProductFoundInDB");
   }
 
   if(data.categoryId &&  Number(data.categoryId) != product.categoryId ){

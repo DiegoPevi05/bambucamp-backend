@@ -9,9 +9,9 @@ export const getAllPublicTents = async (req: Request, res: Response) => {
     res.json(tents);
   } catch (error) {
     if (error instanceof CustomError) {
-      res.status(error.statusCode).json({ error: error.message });
+      res.status(error.statusCode).json({ error: req.t(error.message) });
     } else {
-      res.status(500).json({ error: 'Failed to fetch tents' });
+      res.status(500).json({ error: req.t("error.failedToFetchTents") });
     }
   }
 };
@@ -36,22 +36,22 @@ export const getAllTents = async (req: Request, res: Response) => {
   } catch (error) {
 
     if (error instanceof CustomError) {
-      res.status(error.statusCode).json({ error: error.message });
+      res.status(error.statusCode).json({ error: req.t(error.message) });
     } else {
-      res.status(500).json({ error: 'Failed to fetch tents' });
+      res.status(500).json({ error: req.t("error.failedToFetchTents") });
     }
 
   }
 };
 
 export const createTent = [
-  body('header').notEmpty().withMessage('Header is required'),
-  body('title').notEmpty().withMessage('Title is required'),
-  body('description').notEmpty().withMessage('Description is required'),
-  body('services').notEmpty().withMessage('Services is required'),
-  body('qtypeople').notEmpty().withMessage('Quantity of people is required'),
-  body('qtykids').notEmpty().withMessage('Quantity of kids is required'),
-  body('price').notEmpty().withMessage('Price is required'),
+  body('header').notEmpty().withMessage(req => req.t("validation.headerRequired")),
+  body('title').notEmpty().withMessage(req => req.t("validation.titleRequired")),
+  body('description').notEmpty().withMessage(req => req.t("validation.descriptionRequired")),
+  body('services').notEmpty().withMessage(req => req.t("validation.servicesRequired")),
+  body('qtypeople').notEmpty().withMessage(req => req.t("validation.qtypeopleRequired")),
+  body('qtykids').notEmpty().withMessage(req => req.t("validation.qtykidsRequired")),
+  body('price').notEmpty().withMessage(req => req.t("validation.priceRequired")),
 
   async (req: Request, res: Response) => {
 
@@ -65,19 +65,19 @@ export const createTent = [
       // Create the tent
       await tentService.createTent(req.body, req.files);
 
-      res.status(201).json({ message: 'Tent created' });
+      res.status(201).json({ message: req.t("message.tentCreated") });
     } catch (error) {
       if (error instanceof CustomError) {
-        res.status(error.statusCode).json({ error: error.message });
+        res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
-        res.status(500).json({ error: 'Failed to create promotion' });
+        res.status(500).json({ error: req.t("error.failedToCreateTent") });
       }
     }
   }
 ];
 
 export const updateTent = [
-  param('id').notEmpty().withMessage('Id is required'),
+  param('id').notEmpty().withMessage(req => req.t("validation.idRequired")),
 
   async (req: Request, res: Response) => {
 
@@ -90,13 +90,13 @@ export const updateTent = [
 
       await tentService.updateTent(Number(req.params.id), req.body , req.files);
 
-      res.json({ message: 'Tent updated' });
+      res.json({ message: req.t("message.tentUpdated") });
 
     } catch (error) {
       if (error instanceof CustomError) {
-        res.status(error.statusCode).json({ error: error.message });
+        res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
-        res.status(500).json({ error: 'Failed to update tent' });
+        res.status(500).json({ error: req.t("error.failedToUpdateTent") });
       }
     }
   }
@@ -106,12 +106,12 @@ export const deleteTent = async (req: Request, res: Response) => {
   try {
     await tentService.deleteTent(Number(req.params.id));
 
-    res.json({ message: 'Tent deleted' });
+    res.json({ message: req.t("message.tentDeleted") });
   } catch (error) {
     if (error instanceof CustomError) {
-      res.status(error.statusCode).json({ error: error.message });
+      res.status(error.statusCode).json({ error: req.t(error.message) });
     } else {
-      res.status(500).json({ error: 'Failed to delete tent' });
+      res.status(500).json({ error: req.t("error.failedToDeleteTent") });
     }
   }
 };

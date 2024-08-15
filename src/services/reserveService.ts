@@ -58,13 +58,13 @@ export const createReserveByUser = async (data: ReserveDto, userId: number) => {
 
 
 export const createReserve = async (data: ReserveDto) => {
-  if(!data.dateFrom) throw new BadRequestError("Input date From to create a Reserve")
+  if(!data.dateFrom) throw new BadRequestError("error.noDateFromInReserveRequest")
 
   const checkInTime = new Date(data.dateFrom);
   checkInTime.setUTCHours(17, 0, 0, 0);
   data.dateFrom = checkInTime;
 
-  if(!data.dateTo) throw new BadRequestError(" Input date To to create a Reserve");
+  if(!data.dateTo) throw new BadRequestError("error.noDateToInReserveRequest");
 
   const checkOutTime = new Date(data.dateTo);
   checkOutTime.setUTCHours(17, 0, 0, 0);
@@ -84,12 +84,12 @@ export const createReserve = async (data: ReserveDto) => {
     // Check Availability
     const TentsAreAvialble = await utils.checkAvailability(checkInTime,checkOutTime,tentsDb);
     if(!TentsAreAvialble){
-      throw new BadRequestError("Tents have no Availability for the days selected");
+      throw new BadRequestError("error.noTentsAvailable");
     }
 
     const isRoomSizeCorrect = utils.checkRoomSize(tentsDb, data.qtypeople, data.qtykids, data.aditionalPeople);
     if(!isRoomSizeCorrect){
-      throw new BadRequestError("The room size is not correct");
+      throw new BadRequestError("error.noRoomSizeCorrect");
     }
 
     if(data.price_is_calculated){
@@ -130,17 +130,17 @@ export const createReserve = async (data: ReserveDto) => {
     let promotion = await promotionRepository.getPromotionById(Number(data.promotionId));
 
     if (!promotion) {
-      throw new NotFoundError(`Promotion not found`);
+      throw new NotFoundError(`error.promotionNotFound`);
     }
 
     if(promotion.expiredDate){
       if(promotion.expiredDate < new Date()){
-        throw new BadRequestError("Promotion is expired");
+        throw new BadRequestError("error.promotionIsExpired");
       }
     }
 
     if(promotion.stock || promotion.stock !== null){
-      if(promotion.stock <= 0) throw new BadRequestError("Promotion is out of stock");
+      if(promotion.stock <= 0) throw new BadRequestError("error.promotionIsOutOfStock");
     }
 
     data.promotionId  = Number(promotion.id);
@@ -165,12 +165,12 @@ export const createReserve = async (data: ReserveDto) => {
 
     const tentsDb = await utils.getTents(promotionTents);
     if(tentsDb.length != promotionTents.length){
-      throw new NotFoundError("Not found all Tents in promotion");
+      throw new NotFoundError("error.notFoundAllTentsInPromotion");
     }
     // Check Availability
     const TentsAreAvialble = await utils.checkAvailability(checkInTime,checkOutTime,tentsDb);
     if(!TentsAreAvialble){
-      throw new BadRequestError("Tents have no Availability for the days selected");
+      throw new BadRequestError("errror.noTentsAvailable");
     }
 
     // Convert idproducts to ReserveProduct structure
@@ -210,21 +210,21 @@ export const updateReserve = async (id:number, data: ReserveDto) => {
   const reserve = await reserveRepository.getReserveById(id);
 
   if(!reserve){
-    throw new NotFoundError('The reserve is not found in the database.');
+    throw new NotFoundError('error.noReservefoundInDB');
   }
 
 
   const user = await userRepository.getUserById(data.userId);
 
   if(!user){
-    throw new NotFoundError('The user in the database does not exist.');
+    throw new NotFoundError('error.noUserFoundInDB');
   }
 
   if(reserve.userId != user.id){
     reserve.userId = user.id;
   }
 
-  if(!data.dateFrom)  throw new BadRequestError(" Input date From to create a Reserve");
+  if(!data.dateFrom)  throw new BadRequestError("error.noDateFromInReserveRequest");
 
   let checkInTime = new Date();
 
@@ -236,7 +236,7 @@ export const updateReserve = async (id:number, data: ReserveDto) => {
     checkInTime = new Date(reserve.dateFrom);
   }
 
-  if(!data.dateTo) throw new BadRequestError(" Input date To to create a Reserve");
+  if(!data.dateTo) throw new BadRequestError("error.noDateToInReserveRequest");
 
   let checkOutTime = new Date(data.dateTo);
 
@@ -279,12 +279,12 @@ export const updateReserve = async (id:number, data: ReserveDto) => {
     // Check Availability
     const TentsAreAvialble = await utils.checkAvailability(checkInTime,checkOutTime,tentsDb);
     if(!TentsAreAvialble){
-      throw new BadRequestError( "Tents have no Availability for the days selected");
+      throw new BadRequestError("error.noTentsAvailable");
     }
 
     const isRoomSizeCorrect = utils.checkRoomSize(tentsDb, data.qtypeople, data.qtykids, data.aditionalPeople);
     if(!isRoomSizeCorrect){
-      throw new BadRequestError("The room size is not correct");
+      throw new BadRequestError("error.noRoomSizeCorrect");
     }
 
     reserve.price_is_calculated = data.price_is_calculated;
@@ -331,17 +331,17 @@ export const updateReserve = async (id:number, data: ReserveDto) => {
     let promotion = await promotionRepository.getPromotionById(Number(data.promotionId));
 
     if (!promotion) {
-      throw new NotFoundError(`Promotion not found`);
+      throw new NotFoundError(`error.promotionNotFound`);
     }
 
     if(promotion.expiredDate){
       if(promotion.expiredDate < new Date()){
-        throw new BadRequestError("Promotion is expired");
+        throw new BadRequestError("error.promotionIsExpired");
       }
     }
 
     if(promotion.stock || promotion.stock !== null){
-      if(promotion.stock <= 0) throw new BadRequestError("Promotion is out of stock");
+      if(promotion.stock <= 0) throw new BadRequestError("error.promotionIsOutOfStock");
     }
 
     reserve.promotionId  = Number(promotion.id);
@@ -355,7 +355,7 @@ export const updateReserve = async (id:number, data: ReserveDto) => {
     // Check Availability
     const TentsAreAvialble = await utils.checkAvailability(checkInTime,checkOutTime,tentsDb);
     if(TentsAreAvialble){
-      throw new BadRequestError( "Tents have no Availability for the days selected");
+      throw new BadRequestError("error.noTentsAvailable");
     }
 
     const idtents = JSON.parse(promotion.idtents) as { id:number; label:string; qty:number; price:number; }[];

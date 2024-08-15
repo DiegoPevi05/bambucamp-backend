@@ -11,9 +11,12 @@ import tentRoutes from './routes/tentRoutes';
 import reserveRoutes from './routes/reserveRoutes';
 import discountRoutes from './routes/discountCodesRoutes';
 import path from 'path';
+import i18nextMiddleware from 'i18next-http-middleware';
+import i18next from './config/i18n';
 
 const app = express();
 
+app.use(i18nextMiddleware.handle(i18next));
 app.use(cors());
 app.use(bodyParser.json());
 // Serve static files

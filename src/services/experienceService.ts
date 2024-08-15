@@ -68,7 +68,7 @@ export const updateExperience = async (id:number, data: ExperienceDto, files: Mu
   const experience = await experienceRepository.getExperienceById(id);
 
   if(!experience){
-    throw new BadRequestError('Experience not found in the database');
+    throw new BadRequestError('error.noExperienceFoundInDB');
   }
 
   if(data.categoryId &&  Number(data.categoryId) != experience.categoryId ){

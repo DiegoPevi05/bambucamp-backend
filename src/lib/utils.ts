@@ -161,9 +161,9 @@ export const applyDiscount = async (grossImport: number, discountCodeId: number 
 
 export const getTents = async (tents: { idTent:number, name:string, price:number, quantity:number }[]): Promise<Tent[]> => {
 
-  if(!tents) throw new BadRequestError( "Input at least one tent" );
+  if(!tents) throw new BadRequestError("error.noTentsInArray");
 
-  if(tents.length <= 0) throw new BadRequestError("No tents to validate");
+  if(tents.length <= 0) throw new BadRequestError("error.noTentsToValidate");
 
   const tentsIds = tents.map(tent => tent.idTent);
   let tentsDb = await tentRepository.getTentsByIds(tentsIds);
@@ -174,7 +174,7 @@ export const getTents = async (tents: { idTent:number, name:string, price:number
   );
 
   if (missingTentIds.length > 0) {
-    throw new NotFoundError(`Not all Tents found`);
+    throw new NotFoundError("error.noAllTentsFound");
   }
 
   return tentsDb;
@@ -195,7 +195,7 @@ export const getProducts = async (products: { idProduct: number, name:string, pr
   );
 
   if (missingProductIds.length > 0) {
-    throw new NotFoundError(`Not all Products found`);
+    throw new NotFoundError("error.noAllProductsFound");
   }
 
   return productsDb;
@@ -216,7 +216,7 @@ export const getExperiences = async (experiences: { idExperience: number, name:s
   );
 
   if (missingExperienceIds.length > 0) {
-    throw new NotFoundError(`Not all Experiences found`);
+    throw new NotFoundError("error.noAllExperiencesFound");
   }
   
   return experiencesDb;

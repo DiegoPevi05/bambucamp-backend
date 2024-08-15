@@ -68,7 +68,7 @@ export const updateTent = async (id:number, data: TentDto, files: MulterFile[] |
   const tent = await tentRepository.getTentById(id);
 
   if(!tent){
-    throw new NotFoundError("Glamping not found in the databsae");
+    throw new NotFoundError("error.noTentFoundInDB");
   }
 
   if(data.header &&  data.header != tent.header){
