@@ -144,12 +144,12 @@ model Reserve {
   qtykids           Int             @default(0)
   userId            Int
   user              User            @relation(fields: [userId], references: [id])
-  tents             ReserveTent[]   @relation(onDelete: Cascade)
-  products          ReserveProduct[] @relation(onDelete: Cascade)
-  experiences       ReserveExperience[] @relation(onDelete: Cascade)
-  dateFrom          DateTime        @db.Date
-  dateTo            DateTime        @db.Date
-  dateSale          DateTime        @db.Date
+  tents             ReserveTent[]   
+  products          ReserveProduct[] 
+  experiences       ReserveExperience[]
+  dateFrom          DateTime        
+  dateTo            DateTime        
+  dateSale          DateTime        @default(now())
   promotionId       Int             @default(0)            
   price_is_calculated Boolean       @default(false)
   discountCodeId    Int             @default(0)         

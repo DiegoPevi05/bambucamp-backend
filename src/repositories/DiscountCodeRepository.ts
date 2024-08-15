@@ -66,6 +66,15 @@ export const updateDiscountCode = async (id:number, data: DiscountCodeDto): Prom
   });
 };
 
+export const updateDiscountCodeStock = async(id:number, newStock:number):Promise<DiscountCode> => {
+  return await prisma.discountCode.update({
+    where: { id },
+    data:{
+      stock:newStock
+    }
+  });
+}
+
 export const deleteDiscountCode = async (id: number): Promise<DiscountCode> => {
   return await prisma.discountCode.delete({
     where: { id }

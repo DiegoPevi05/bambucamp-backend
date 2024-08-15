@@ -132,11 +132,12 @@ export const createPromotion = async (data: PromotionDto, files: MulterFile[] | 
 
   if(data.expiredDate){
     const expiredDate = new Date(data.expiredDate);
+    expiredDate.setUTCHours(5, 0, 0, 0);
 
     if(expiredDate < new Date()){
       throw new Error('Expired date must be greater than current date');
     }
-    data.expiredDate = new Date(data.expiredDate);
+    data.expiredDate = expiredDate;
   }
 
   const promotion = await promotionRepository.createPromotion(data);
@@ -170,6 +171,7 @@ export const updatePromotion = async (id:number, data: PromotionDto, files: Mult
 
   if(data.expiredDate){
     const expiredDate = new Date(data.expiredDate);
+    expiredDate.setUTCHours(5, 0, 0, 0);
 
     if(expiredDate < new Date()){
       throw new Error('Expired date must be greater than current date');

@@ -3,6 +3,7 @@ import { PaginatedReserve, ReserveDto, ReserveFilters, ReserveTentDto,ReservePro
 import * as promotionRepository from '../repositories/PromotionRepository';
 import *  as userRepository from '../repositories/userRepository';
 import * as utils from '../lib/utils';
+import { BadRequestError } from "../middleware/errors";
 
 export const searchAvailableTents = async (dateFrom: Date, dateTo: Date) => {
   return await reserveRepository.searchAvailableTents(dateFrom, dateTo);
@@ -57,17 +58,18 @@ export const createReserveByUser = async (data: ReserveDto, userId: number) => {
 
 
 export const createReserve = async (data: ReserveDto) => {
-  if(!data.dateFrom)  throw new Error(" Input date From to create a Reserve");
+  if(!data.dateFrom) throw new BadRequestError("Input date From to create a Reserve")
 
   const checkInTime = new Date(data.dateFrom);
-  checkInTime.setHours(12, 0, 0, 0);
+  checkInTime.setUTCHours(17, 0, 0, 0);
   data.dateFrom = checkInTime;
 
   if(!data.dateTo) throw new Error(" Input date To to create a Reserve");
 
   const checkOutTime = new Date(data.dateTo);
-  checkOutTime.setHours(12, 0, 0, 0);
+  checkOutTime.setUTCHours(17, 0, 0, 0);
   data.dateTo = checkOutTime;
+
 
   data.dateSale = new Date();
   data.qtypeople = Number(data.qtypeople);
@@ -76,13 +78,12 @@ export const createReserve = async (data: ReserveDto) => {
   data.userId = Number(data.userId);
 
 
-
-  if(!data.promotionId){
+  if(data.promotionId == undefined ||  data.promotionId == null  || data.promotionId == 0){
 
     const tentsDb = await utils.getTents(data.tents);
     // Check Availability
     const TentsAreAvialble = await utils.checkAvailability(checkInTime,checkOutTime,tentsDb);
-    if(TentsAreAvialble){
+    if(!TentsAreAvialble){
       throw new Error ( "Tents have no Availability for the days selected");
     }
 
@@ -120,7 +121,7 @@ export const createReserve = async (data: ReserveDto) => {
 
     }else{
 
-        data.grossImport = await utils.applyDiscount(data.netImport, data.discountCodeId);
+        data.grossImport = await utils.applyDiscount(data.netImport, data.discountCodeId, data.discount);
 
     }
 
@@ -152,7 +153,7 @@ export const createReserve = async (data: ReserveDto) => {
     const tentsDb = await utils.getTents(promotion.idtents as any);
     // Check Availability
     const TentsAreAvialble = await utils.checkAvailability(checkInTime,checkOutTime,tentsDb);
-    if(TentsAreAvialble){
+    if(!TentsAreAvialble){
       throw new Error ( "Tents have no Availability for the days selected");
     }
 
@@ -187,6 +188,8 @@ export const createReserve = async (data: ReserveDto) => {
     data.tents = promotionTents;
     data.products = promotionProducts;
     data.experiences = promotionExperiences;
+
+    await promotionRepository.updatePromotionStock(promotion.id,promotion.stock - 1);
 
   }
 
@@ -261,12 +264,12 @@ export const updateReserve = async (id:number, data: ReserveDto) => {
   }
 
 
-  if(!data.promotionId ){
+  if(data.promotionId == undefined ||  data.promotionId == null  || data.promotionId == 0){
 
     const tentsDb = await utils.getTents(data.tents);
     // Check Availability
     const TentsAreAvialble = await utils.checkAvailability(checkInTime,checkOutTime,tentsDb);
-    if(TentsAreAvialble){
+    if(!TentsAreAvialble){
       throw new Error ( "Tents have no Availability for the days selected");
     }
 

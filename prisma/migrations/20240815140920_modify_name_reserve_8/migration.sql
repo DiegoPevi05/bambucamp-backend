@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "DiscountCode" ALTER COLUMN "expiredDate" SET DEFAULT CURRENT_TIMESTAMP;
+
+-- AlterTable
+ALTER TABLE "Promotion" ALTER COLUMN "expiredDate" SET DEFAULT CURRENT_TIMESTAMP;

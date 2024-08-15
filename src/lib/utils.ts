@@ -98,19 +98,10 @@ export const getCurrentCustomPrice = (customPrices: string): number => {
 
 export const checkAvailability = async (checkInTime: Date, checkOutTime:Date, tents:Tent[]): Promise<boolean> => {
   // Find reservations that overlap with the given date range for the specified tents
-  const overlappingReserves = await reserveRepository.getAvailableTents(checkInTime, checkOutTime, tents)
-
-  // Filter out reservations that only overlap on the allowed edge case
-  const validOverlaps = overlappingReserves.filter((reserveTent) => {
-    const reserve = reserveTent.reserve;
-    return !(
-      (reserve.dateTo.getTime() === checkInTime.getTime() ||
-        reserve.dateFrom.getTime() === checkOutTime.getTime())
-    );
-  });
+  const overlappingReserves = await reserveRepository.getAvailableReserves(checkInTime, checkOutTime, tents)
 
   // If there are any overlapping reservations that don't match the allowed edge case, return false
-  if (validOverlaps.length > 0) {
+  if (overlappingReserves.length > 0) {
     return false;
   }
 
@@ -137,7 +128,7 @@ export const checkRoomSize = (tents: Tent[], qtypeople:number, qtyKids:number, a
   return true;
 };
 
-export const applyDiscount = async (grossImport: number, discountCodeId: number | undefined): Promise<number> => {
+export const applyDiscount = async (grossImport: number, discountCodeId: number | undefined, discountRaw?: number|undefined): Promise<number> => {
 
   if (!discountCodeId) {
     return grossImport;
@@ -145,11 +136,25 @@ export const applyDiscount = async (grossImport: number, discountCodeId: number 
 
   const discount = await discountCodeRepository.getDiscountCodeById(discountCodeId);
 
-  if (!discount) {
-    return grossImport;
-  }
+  if (discount) {
 
-  return grossImport - (grossImport * discount.discount) / 100;
+    const newStock = discount.stock - 1;  
+
+    await discountCodeRepository.updateDiscountCodeStock(discountCodeId,newStock);
+
+    return grossImport - (grossImport * discount.discount) / 100;
+
+  }else{
+
+    if(discountRaw && discountRaw >= 0 && discountRaw <= 100){
+
+      return grossImport - (grossImport * discountRaw) / 100;
+
+    }else{
+
+      return grossImport;
+    }
+  }
 };
 
 

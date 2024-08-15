@@ -230,7 +230,8 @@ export const createReserve = async (data: ReserveDto): Promise<Reserve> => {
 };
 
 
-export const getAvailableTents = async (checkInTime: Date, checkOutTime: Date, tents: Tent[]): Promise<any[]> => {
+export const getAvailableReserves = async (checkInTime: Date, checkOutTime: Date, tents: Tent[]): Promise<{ reserveId:number, idTent:number }[]> => {
+  // Step 1: Find all ReserveTent entries that have a conflict in the given date range
   return await prisma.reserveTent.findMany({
     where: {
       idTent: {
@@ -240,21 +241,41 @@ export const getAvailableTents = async (checkInTime: Date, checkOutTime: Date, t
         AND: [
           {
             dateFrom: {
-              lt: checkOutTime,
+              lt: checkOutTime, // Reserve ends after check-in
             },
           },
           {
             dateTo: {
-              gt: checkInTime,
+              gt: checkInTime, // Reserve starts before check-out
             },
           },
         ],
       },
     },
     select: {
-      idTent: true,
+      reserveId: true, // Fetch reserveId instead of idTent
+      idTent:true
     },
   });
+
+  /*// Step 2: Extract the reserveIds
+  const reserveIds = reservedTents.map(reservedTent => reservedTent.reserveId);
+
+  // Step 3: Fetch all Reserve records that match the reserveIds
+  const reserves = await prisma.reserve.findMany({
+    where: {
+      id: {
+        in: reserveIds, // Fetch reserves by reserveIds
+      },
+    },
+    include: {
+      tents: true, // Include related ReserveTent records
+      products: true, // Optionally include related products
+      experiences: true, // Optionally include related experiences
+    },
+  });
+
+  return reserves;*/
 };
 
 export const upsertReserveDetails = async (
@@ -330,6 +351,7 @@ export const updateReserve = async (id:number, data: Reserve): Promise<Reserve> 
 };
 
 export const deleteReserve = async (id: number): Promise<Reserve> => {
+  console.log("this is the tent to delete",id);
   return await prisma.reserve.delete({
     where: { id }
   });

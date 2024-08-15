@@ -40,12 +40,15 @@ export const getDiscountCodeById = async (id: number) => {
 
 export const createDiscountCode = async (data: DiscountCodeDto) => {
 
+
   if(data.expiredDate){
     const expiredDate = new Date(data.expiredDate);
+    expiredDate.setUTCHours(5, 0, 0, 0);
 
     if(expiredDate < new Date()){
       throw new Error('Expired date must be greater than current date');
     }
+    data.expiredDate = expiredDate;
   }
 
   data.discount = Number(data.discount);
@@ -67,6 +70,7 @@ export const updateDiscountCode = async (id:number, data: DiscountCodeDto) => {
 
   if(data.expiredDate){
     const expiredDate = new Date(data.expiredDate);
+    expiredDate.setUTCHours(5, 0, 0, 0);
 
     if(expiredDate < new Date()){
       throw new Error('Expired date must be greater than current date');

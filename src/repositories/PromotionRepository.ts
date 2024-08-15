@@ -146,6 +146,15 @@ export const updatePromotion = async (id:number, data: PromotionDto): Promise<Pr
   });
 };
 
+export const updatePromotionStock = async(id:number, newStock:number): Promise<Promotion> => {
+  return await prisma.promotion.update({
+    where: { id },
+    data:{
+      stock:newStock
+    }
+  });
+}
+
 export const deletePromotion = async (id: number): Promise<Promotion> => {
   return await prisma.promotion.delete({
     where: { id }
