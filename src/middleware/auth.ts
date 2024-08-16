@@ -26,10 +26,10 @@ export const checkRole = (...roles: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const userRole = req.role;
     if (!userRole) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return res.status(401).json({ error: req.t("error.unauthorized") });
     }
     if (!roles.includes(userRole)) {
-      return res.status(403).json({ error: 'Unauthorized' });
+      return res.status(403).json({ error: req.t("error.unauthorized") });
     }
     next();
   };
