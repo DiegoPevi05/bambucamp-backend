@@ -4,12 +4,17 @@ import { body, query, param, validationResult } from 'express-validator';
 import {CustomError} from '../middleware/errors';
 
 export const validateDiscountCode = [
-  query('code').notEmpty().withMessage(req => req.t("validation.codeRequired")),
+  query('code').notEmpty().withMessage("validation.codeRequired"),
 
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array() });
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
     }
 
     try {
@@ -54,14 +59,19 @@ export const getAllDiscountCodes = async (req: Request, res: Response) => {
 };
 
 export const createDiscountCode = [
-  body('code').notEmpty().withMessage(req => req.t("codeRequired")),
-  body('discount').notEmpty().withMessage(req => req.t("discountRequired")),
+  body('code').notEmpty().withMessage("codeRequired"),
+  body('discount').notEmpty().withMessage("discountRequired"),
 
   async (req: Request, res: Response) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array() });
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
     }
 
     try {
@@ -78,13 +88,18 @@ export const createDiscountCode = [
 ];
 
 export const updateDiscountCode = [
-  param('id').notEmpty().withMessage(req => req.t("idRequired")),
+  param('id').notEmpty().withMessage("idRequired"),
 
   async (req: Request, res: Response) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array() });
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
     }
 
     try {

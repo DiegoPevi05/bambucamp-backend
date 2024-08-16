@@ -63,11 +63,11 @@ export const verifyEmail = async(email:string,token:string) => {
 export const resetPassword = async (email: string) => {
   const user = await userRepository.getUserByEmail(email);
   if (!user) {
-    throw new NotFoundError('User not found');
+    throw new NotFoundError('error.noUserFoundInDB');
   };
 
   if (!user.emailVerified) {
-    throw new BadRequestError('Email not verified');
+    throw new BadRequestError('error.emailNotVerified');
   };
 
   const token = randomUUID().slice(0, 6);
@@ -83,7 +83,7 @@ export const verifyPasswordResetCode = async (email: string, token: string) => {
   const user = await userRepository.getUserByEmail(email);
 
   if (!user) {
-    throw new NotFoundError('User not found');
+    throw new NotFoundError('error.noUserFoundInDB');
   }
 
   if(user.passwordResetCodeExpiry){
@@ -91,12 +91,12 @@ export const verifyPasswordResetCode = async (email: string, token: string) => {
     const expiryDate = user.passwordResetCodeExpiry;
 
     if(expiryDate.getTime() <= now.getTime()){
-      throw new BadRequestError('Token is already Expired, request another one')
+      throw new BadRequestError("error.verificationCodeIsAlreadyExpired")
     }
   }
 
   if(user.passwordResetCode != token){
-     throw new BadRequestError('Token is invalid')
+     throw new BadRequestError("error.codeInvalid")
   }
 
   return;
@@ -114,16 +114,16 @@ export const updatePassword = async (email: string, password: string, token:stri
 export const signIn = async (email: string, password: string) => {
   const user = await userRepository.getUserByEmail(email);
   if (!user) {
-    throw new BadRequestError('Invalid email or password');
+    throw new BadRequestError('error.InvalidEmailOrPassword');
   }
 
   if (!user.emailVerified) {
-    throw new BadRequestError('Email not verified');
+    throw new BadRequestError('error.emailNotVerified');
   }
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
-    throw new BadRequestError('Invalid email or password');
+    throw new BadRequestError('error.InvalidEmailOrPassword');
   }
 
   // Update the lastLogin field

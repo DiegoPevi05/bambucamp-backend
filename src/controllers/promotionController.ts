@@ -57,23 +57,28 @@ export const getAllPromotions = async (req: Request, res: Response) => {
 };
 
 export const createPromotion = [
-  body('title').notEmpty().withMessage(req => req.t("titleRequired")),
-  body('description').notEmpty().withMessage(req => req.t("descriptionRequired")),
-  body('expiredDate').notEmpty().withMessage(req => req.t("expiredDateRequired")),
-  body('status').notEmpty().withMessage(req => req.t("statusRequired")),
-  body('qtypeople').notEmpty().withMessage(req => req.t("qtypeopleRequired")),
-  body('qtykids').notEmpty().withMessage(req => req.t("qtykidsRequired")),
-  body('netImport').notEmpty().withMessage(req => req.t("netImportRequired")),
-  body('discount').notEmpty().withMessage(req => req.t("discountRequired")),
-  body('grossImport').notEmpty().withMessage(req => req.t("grossImportRequired")),
-  body('stock').notEmpty().withMessage(req => req.t("stockRequired")),
-  body('idtents').notEmpty().withMessage(req => req.t("idtentsRequired")),
+  body('title').notEmpty().withMessage("titleRequired"),
+  body('description').notEmpty().withMessage("descriptionRequired"),
+  body('expiredDate').notEmpty().withMessage("expiredDateRequired"),
+  body('status').notEmpty().withMessage("statusRequired"),
+  body('qtypeople').notEmpty().withMessage("qtypeopleRequired"),
+  body('qtykids').notEmpty().withMessage("qtykidsRequired"),
+  body('netImport').notEmpty().withMessage("netImportRequired"),
+  body('discount').notEmpty().withMessage("discountRequired"),
+  body('grossImport').notEmpty().withMessage("grossImportRequired"),
+  body('stock').notEmpty().withMessage("stockRequired"),
+  body('idtents').notEmpty().withMessage("idtentsRequired"),
 
   async (req: Request, res: Response) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array() });
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
     }
 
     try {
@@ -90,13 +95,18 @@ export const createPromotion = [
 ];
 
 export const updatePromotion = [
-  param('id').notEmpty().withMessage(req => req.t("idRequired")),
+  param('id').notEmpty().withMessage("idRequired"),
 
   async (req: Request, res: Response) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array() });
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
     }
 
     try {

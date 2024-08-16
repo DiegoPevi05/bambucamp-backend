@@ -44,17 +44,22 @@ export const getAllProducts = async (req: Request, res: Response) => {
 };
 
 export const createProduct = [
-  body('categoryId').notEmpty().withMessage(req => req.t("validation.categoryIdRequired")),
-  body('name').notEmpty().withMessage(req => req.t("validation.nameRequired")),
-  body('description').notEmpty().withMessage(req => req.t("validation.descriptionRequired")),
-  body('price').notEmpty().withMessage(req => req.t("validation.priceRequired")),
-  body('stock').notEmpty().withMessage(req => req.t("validation.stockRequired")),
+  body('categoryId').notEmpty().withMessage("validation.categoryIdRequired"),
+  body('name').notEmpty().withMessage("validation.nameRequired"),
+  body('description').notEmpty().withMessage("validation.descriptionRequired"),
+  body('price').notEmpty().withMessage("validation.priceRequired"),
+  body('stock').notEmpty().withMessage("validation.stockRequired"),
 
   async (req: Request, res: Response) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array() });
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
     }
 
     try {
@@ -71,13 +76,18 @@ export const createProduct = [
 ];
 
 export const updateProduct = [
-  param('id').notEmpty().withMessage(req => req.t("validation.idRequired")),
+  param('id').notEmpty().withMessage("validation.idRequired"),
 
   async (req: Request, res: Response) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array() });
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
     }
 
     try {

@@ -44,20 +44,25 @@ export const getAllExperiences = async (req: Request, res: Response) => {
 };
 
 export const createExperience = [
-  body('categoryId').notEmpty().withMessage(req => req.t("validation.categoryIdRequired")),
-  body('header').notEmpty().withMessage(req => req.t("validation.headerRequired")),
-  body('name').notEmpty().withMessage(req => req.t("validation.nameRequired")),
-  body('description').notEmpty().withMessage(req => req.t("validation.descriptionRequired")),
-  body('price').notEmpty().withMessage(req => req.t("validation.priceRequired")),
-  body('duration').notEmpty().withMessage(req => req.t("validation.durationRequired")),
-  body('qtypeople').notEmpty().withMessage(req => req.t("validation.qtypeopleRequired")),
-  body('limit_age').notEmpty().withMessage(req => req.t("validation.limit_ageRequired")),
+  body('categoryId').notEmpty().withMessage("validation.categoryIdRequired"),
+  body('header').notEmpty().withMessage("validation.headerRequired"),
+  body('name').notEmpty().withMessage("validation.nameRequired"),
+  body('description').notEmpty().withMessage("validation.descriptionRequired"),
+  body('price').notEmpty().withMessage("validation.priceRequired"),
+  body('duration').notEmpty().withMessage("validation.durationRequired"),
+  body('qtypeople').notEmpty().withMessage("validation.qtypeopleRequired"),
+  body('limit_age').notEmpty().withMessage("validation.limit_ageRequired"),
 
   async (req: Request, res: Response) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array() });
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
     }
 
     try {
@@ -74,13 +79,18 @@ export const createExperience = [
 ];
 
 export const updateExperience = [
-  param('id').notEmpty().withMessage(req => req.t("validation.idRequired")),
+  param('id').notEmpty().withMessage("validation.idRequired"),
 
   async (req: Request, res: Response) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array() });
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
     }
 
     try {

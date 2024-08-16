@@ -45,19 +45,24 @@ export const getAllTents = async (req: Request, res: Response) => {
 };
 
 export const createTent = [
-  body('header').notEmpty().withMessage(req => req.t("validation.headerRequired")),
-  body('title').notEmpty().withMessage(req => req.t("validation.titleRequired")),
-  body('description').notEmpty().withMessage(req => req.t("validation.descriptionRequired")),
-  body('services').notEmpty().withMessage(req => req.t("validation.servicesRequired")),
-  body('qtypeople').notEmpty().withMessage(req => req.t("validation.qtypeopleRequired")),
-  body('qtykids').notEmpty().withMessage(req => req.t("validation.qtykidsRequired")),
-  body('price').notEmpty().withMessage(req => req.t("validation.priceRequired")),
+  body('header').notEmpty().withMessage("validation.headerRequired"),
+  body('title').notEmpty().withMessage("validation.titleRequired"),
+  body('description').notEmpty().withMessage("validation.descriptionRequired"),
+  body('services').notEmpty().withMessage("validation.servicesRequired"),
+  body('qtypeople').notEmpty().withMessage("validation.qtypeopleRequired"),
+  body('qtykids').notEmpty().withMessage("validation.qtykidsRequired"),
+  body('price').notEmpty().withMessage("validation.priceRequired"),
 
   async (req: Request, res: Response) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array() });
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
     }
 
     try {
@@ -77,13 +82,18 @@ export const createTent = [
 ];
 
 export const updateTent = [
-  param('id').notEmpty().withMessage(req => req.t("validation.idRequired")),
+  param('id').notEmpty().withMessage("validation.idRequired"),
 
   async (req: Request, res: Response) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array() });
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
     }
 
     try {

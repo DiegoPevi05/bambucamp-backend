@@ -70,7 +70,30 @@
 		"userAlreadyExist": "User already Exist",
 		"emailAlreadyVerified": "Email already verified",
 		"verificationCodeIsAlreadyExpired": "Verification code is already Expired, request another one",
-		"codeInvalid": "Verificaiton Code is invalid"
+		"codeInvalid": "Verification Code is invalid",
+		"emailNotVerified": "Email is not verified",
+		"InvalidEmailOrPassword": "Invalid email or password",
+		"failedToFetchExperienceCategories": "Failed to fetch experience categories",
+		"failedToCreateExperienceCategory": "Failed to create experience category",
+		"failedToUpdateExperienceCategory": "Failed to update experience category",
+		"failedToDeleteExperienceCategory": "Failed to delete experience category",
+		"failedToFetchProductCategories": "Failed to fetch product categories",
+		"failedToCreateProductCategory": "Failed to create product category",
+		"failedToUpdateProductCategory": "Failed to update product category",
+		"failedToDeleteProductCategory": "Failed to delete product category",
+		"failedToFetchUsers": "Failed to fetch users",
+		"failedToFetchUser": "Failed to fetch user",
+		"failedToUpdateUser": "Failed to update user",
+		"failedToDeleteUser": "Failed to delete user",
+		"failedToDeleteYourself": "You cannot delete yourself",
+		"failedToDisableUser": "Failed to disable user",
+		"failedToEnableUser": "Failed to enable user",
+		"failedToDisabledYourself": "You cannot disable yourself",
+		"failedToDisabledUser": "You cannot disable an already disabled user",
+		"failedToDisableAdmin": "You cannot disable an admin",
+		"failedToEnabledYourself": "You cannot enable yourself",
+		"failedToEnabledUser": "User already enabled",
+		"failedToEnableAdmin": "You cannot enable an admin"
 	},
 	"message": {
 		"reserveCreated": "Reserve created",
@@ -96,7 +119,18 @@
 		"emailVerified": "Email successfully verified",
 		"passwordResetSent": "Password reset link has been sent to your email",
 		"passwordResetCodeGenerated": "Code successfully verified",
-		"passwordUpdateSuccess": "Password successfully updated"
+		"passwordUpdateSuccess": "Password successfully updated",
+		"categoryExperienceCreated": "Experience Categoy created",
+		"categoryExperienceUpdated": "Experience Categoy updated",
+		"categoryExperienceDeleted": "Experience Categoy deleted",
+		"categoryProductCreated": "Product Category created",
+		"categoryProductUpdated": "Product Category updated",
+		"categoryProductDeleted": "Product Category deleted",
+		"userCreated": "User created",
+		"userUpdated": "User updated",
+		"userDeleted": "User deleted",
+		"userDisabled": "User is disabled",
+		"userEnabled": "User is enabled"
 	},
 	"validation": {
 		"headerRequired": "Header of Tent is required",
@@ -132,6 +166,7 @@
 		"passwordLetter": "Password must contain at least one letter",
 		"passwordNumber": "Password must contain at least one number",
 		"passwordSpecial": "Password must contain at least one special character",
-		"passwordRequired": "Password is Required"
+		"passwordRequired": "Password is Required",
+		"roleInvalid": "Role must be either SUPERVISOR or CLIENT"
 	}
 }

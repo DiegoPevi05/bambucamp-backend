@@ -65,19 +65,24 @@ export const getAllReserves = async (req: Request, res: Response) => {
 };
 
 export const createReserveByUser = [
-  body('qtypeople').notEmpty().withMessage(req => req.t('validation.qtypeopleRequired')),
-  body('qtykids').notEmpty().withMessage(req => req.t('validation.qtykidsRequired')),
-  body('tents').isArray().withMessage(req => req.t('validation.tentsMustBeArray')),
-  body('products').isArray().withMessage(req => req.t('validation.productsMustBeArray')),
-  body('experiences').isArray().withMessage(req => req.t('validation.experiencesMustBeArray')),
-  body('dateFrom').notEmpty().withMessage(req => req.t('validation.dateFromRequired')),
-  body('dateTo').notEmpty().withMessage(req => req.t('validation.dateToRequired')),
+  body('qtypeople').notEmpty().withMessage('validation.qtypeopleRequired'),
+  body('qtykids').notEmpty().withMessage('validation.qtykidsRequired'),
+  body('tents').isArray().withMessage('validation.tentsMustBeArray'),
+  body('products').isArray().withMessage('validation.productsMustBeArray'),
+  body('experiences').isArray().withMessage('validation.experiencesMustBeArray'),
+  body('dateFrom').notEmpty().withMessage('validation.dateFromRequired'),
+  body('dateTo').notEmpty().withMessage('validation.dateToRequired'),
 
   async (req: Request, res: Response) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array() });
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
     }
 
     try {
@@ -97,20 +102,26 @@ export const createReserveByUser = [
 ];
 
 export const createReserve = [
-  body('qtypeople').notEmpty().withMessage(req => req.t('validation.qtypeopleRequired')),
-  body('qtykids').notEmpty().withMessage(req => req.t('validation.qtykidsRequired')),
-  body('userId').notEmpty().withMessage(req => req.t('validation.userIdRequired')),
-  body('tents').isArray().withMessage(req => req.t('validation.tentsMustBeArray')),
-  body('products').isArray().withMessage(req => req.t('validation.productsMustBeArray')),
-  body('experiences').isArray().withMessage(req => req.t('validation.experiencesMustBeArray')),
-  body('dateFrom').notEmpty().withMessage(req => req.t('validation.dateFromRequired')),
-  body('dateTo').notEmpty().withMessage(req => req.t('validation.dateToRequired')),
+
+  body('qtypeople').notEmpty().withMessage('validation.qtypeopleRequired'),
+  body('qtykids').notEmpty().withMessage('validation.qtykidsRequired'),
+  body('userId').notEmpty().withMessage('validation.userIdRequired'),
+  body('tents').isArray().withMessage('validation.tentsMustBeArray'),
+  body('products').isArray().withMessage('validation.productsMustBeArray'),
+  body('experiences').isArray().withMessage('validation.experiencesMustBeArray'),
+  body('dateFrom').notEmpty().withMessage('validation.dateFromRequired'),
+  body('dateTo').notEmpty().withMessage('validation.dateToRequired'),
 
   async (req: Request, res: Response) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array() });
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
     }
 
     try {
@@ -128,13 +139,18 @@ export const createReserve = [
 ];
 
 export const updateReserve = [
-  param('id').notEmpty().withMessage(req => req.t('validation.idRequired')),
+  param('id').notEmpty().withMessage('validation.idRequired'),
 
   async (req: Request, res: Response) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array() });
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
     }
 
     try {

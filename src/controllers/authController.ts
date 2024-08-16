@@ -7,12 +7,12 @@ import {CustomError} from '../middleware/errors';
 
 export const signUp = [
 
-  body('firstName').notEmpty().withMessage(req => req.t("validation.nameRequired")),
-  body('lastName').notEmpty().withMessage(req => req.t("validation.lastNameRequired")),
-  body('phoneNumber').notEmpty().withMessage(req => req.t("validation.phoneNumberRequired")),
-  body('email').isEmail().withMessage(req => req.t("validation.emailInvalid")),
+  body('firstName').notEmpty().withMessage("validation.nameRequired"),
+  body('lastName').notEmpty().withMessage("validation.lastNameRequired"),
+  body('phoneNumber').notEmpty().withMessage("validation.phoneNumberRequired"),
+  body('email').isEmail().withMessage("validation.emailInvalid"),
   body('password')
-    .isLength({ min: 8 }).withMessage(req => req.t("validation.passwordLength"))
+    .isLength({ min: 8 }).withMessage("validation.passwordLength")
     .matches(/[a-zA-Z]/).withMessage('validation.passwordLetter')
     .matches(/[0-9]/).withMessage('validation.passwordNumber')
     .matches(/[^a-zA-Z0-9]/).withMessage('validation.passwordSpecial'),
@@ -21,7 +21,12 @@ export const signUp = [
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array() });
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
     }
 
     try {
@@ -40,13 +45,18 @@ export const signUp = [
 
 export const verifyAccount = [
 
-  query('email').isEmail().withMessage(req => req.t("validation.emailInvalid")),
-  query('code').notEmpty().withMessage(req => req.t("validation.codeRequired")),
+  query('email').isEmail().withMessage("validation.emailInvalid"),
+  query('code').notEmpty().withMessage("validation.codeRequired"),
 
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array() });
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
     }
 
     try {
@@ -65,12 +75,17 @@ export const verifyAccount = [
 
 export const forgotPassword = [
 
-  body('email').isEmail().withMessage(req => req.t("error.emailInvalid")),
+  body('email').isEmail().withMessage("error.emailInvalid"),
 
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array() });
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
     }
 
     try {
@@ -88,13 +103,18 @@ export const forgotPassword = [
 
 export const verifyPasswordResetCode = [
   
-  body('email').isEmail().withMessage(req => req.t("validation.emailInvalid")),
-  body('code').notEmpty().withMessage(req => req.t("validation.codeRequired")),
+  body('email').isEmail().withMessage("validation.emailInvalid"),
+  body('code').notEmpty().withMessage("validation.codeRequired"),
 
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array() });
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
     }
 
     try {
@@ -112,18 +132,23 @@ export const verifyPasswordResetCode = [
 ];
 
 export const updatePassword = [
-  body('email').isEmail().withMessage(req => req.t("validation.emailInvalid")),
+  body('email').isEmail().withMessage("validation.emailInvalid"),
   body('password')
-    .isLength({ min: 8 }).withMessage(req => req.t("validation.passwordLength"))
-    .matches(/[a-zA-Z]/).withMessage(req => req.t('validation.passwordLetter'))
-    .matches(/[0-9]/).withMessage(req => req.t("validation.passwordNumber"))
-    .matches(/[^a-zA-Z0-9]/).withMessage(req => req.t("validation.passwordSpecial")),
-  body('code').notEmpty().withMessage(req => req.t("validation.codeRequired")),
+    .isLength({ min: 8 }).withMessage("validation.passwordLength")
+    .matches(/[a-zA-Z]/).withMessage('validation.passwordLetter')
+    .matches(/[0-9]/).withMessage("validation.passwordNumber")
+    .matches(/[^a-zA-Z0-9]/).withMessage("validation.passwordSpecial"),
+  body('code').notEmpty().withMessage("validation.codeRequired"),
 
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array() });
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
     }
 
     try {
@@ -142,10 +167,21 @@ export const updatePassword = [
 
 export const signIn = [
 
-  body('email').isEmail().withMessage(req => req.t("validation.emailInvalid")),
-  body('password').notEmpty().withMessage(req => req.t("validation.passwordRequired")),
+  body('email').isEmail().withMessage("validation.emailInvalid"),
+  body('password').notEmpty().withMessage("validation.passwordRequired"),
 
   async (req: Request<{}, {}, SignInRequest>, res: Response) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
+    }
+
     try {
       const { email, password } = req.body;
       const { token, user } = await authService.signIn(email, password);

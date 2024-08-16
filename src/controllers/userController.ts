@@ -30,7 +30,7 @@ export const getAllUsers = async (req: Request, res: Response) => {
     if (error instanceof CustomError) {
       res.status(error.statusCode).json({ error: error.message });
     } else {
-      res.status(500).json({ error: 'Failed to fetch users' });
+      res.status(500).json({ error: req.t("error.failedToFetchUsers") });
     }
   }
 };
@@ -41,28 +41,28 @@ export const getUserById = async (req: Request, res: Response) => {
     if (user) {
       res.json(user);
     } else {
-      res.status(404).json({ error: 'User not found' });
+      res.status(404).json({ error: req.t("error.noUserFoundInDB") });
     }
   } catch (error) {
     if (error instanceof CustomError) {
       res.status(error.statusCode).json({ error: error.message });
     } else {
-      res.status(500).json({ error: 'Failed to fetch user' });
+      res.status(500).json({ error: "error.failedToFetchUser" });
     }
   }
 };
 
 export const createUser = [
-  body('firstName').notEmpty().withMessage('Name is required'),
-  body('lastName').notEmpty().withMessage('Last name is required'),
-  body('phoneNumber').notEmpty().withMessage('Phone number is required'),
-  body('email').isEmail().withMessage('Must be a valid email'),
-  body('role').isIn(['SUPERVISOR','CLIENT']).withMessage('Role must be either SUPERVISOR or CLIENT'),
+  body('firstName').notEmpty().withMessage('validation.nameRequired'),
+  body('lastName').notEmpty().withMessage('validation.lastNameRequired'),
+  body('phoneNumber').notEmpty().withMessage('validation.phoneNumberRequired'),
+  body('email').isEmail().withMessage('validation.emailInvalid'),
+  body('role').isIn(['SUPERVISOR','CLIENT']).withMessage('validation.roleInvalid'),
   body('password')
-    .isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
-    .matches(/[a-zA-Z]/).withMessage('Password must contain at least one letter')
-    .matches(/[0-9]/).withMessage('Password must contain at least one number')
-    .matches(/[^a-zA-Z0-9]/).withMessage('Password must contain at least one special character'),
+    .isLength({ min: 8 }).withMessage('validation.passwordLength')
+    .matches(/[a-zA-Z]/).withMessage('validation.passwordLetter')
+    .matches(/[0-9]/).withMessage('validation.passwordNumber')
+    .matches(/[^a-zA-Z0-9]/).withMessage('validation.passwordSpecial'),
 
   async (req: Request, res: Response) => {
 
@@ -74,33 +74,33 @@ export const createUser = [
     try {
 
       if(req?.user?.role == "SUPERVISOR" && req.body.role == "SUPERVISOR"){
-        return res.status(400).json({ error: 'You cannot create a supervisor' });
+        return res.status(400).json({ error: req.t("error.unauthorized") });
       }
 
-      const user = await userService.createUser(req.body);
-      res.status(201).json(user);
+      await userService.createUser(req.body);
+      res.status(201).json({ message: req.t("message.userCreated") });
     } catch (error) {
       if (error instanceof CustomError) {
         res.status(error.statusCode).json({ error: error.message });
       } else {
-        res.status(500).json({ error: 'Failed to create user' });
+        res.status(500).json({ error: req.t("error.failedToCreateUser") });
       }
     }
   }
 ]
 
 export const updateUser = [
-  body('firstName').notEmpty().withMessage('Name is required'),
-  body('lastName').notEmpty().withMessage('Last name is required'),
-  body('phoneNumber').notEmpty().withMessage('Phone number is required'),
-  body('email').isEmail().withMessage('Must be a valid email'),
-  body('role').isIn(['SUPERVISOR','CLIENT']).withMessage('Role must be either SUPERVISOR or CLIENT'),
+  body('firstName').notEmpty().withMessage('validation.nameRequired'),
+  body('lastName').notEmpty().withMessage('validation.lastNameRequired'),
+  body('phoneNumber').notEmpty().withMessage('validation.phoneNumberRequired'),
+  body('email').isEmail().withMessage('validation.emailInvalid'),
+  body('role').isIn(['SUPERVISOR','CLIENT']).withMessage('validation.roleInvalid'),
   body('password')
     .optional()
-    .isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
-    .matches(/[a-zA-Z]/).withMessage('Password must contain at least one letter')
-    .matches(/[0-9]/).withMessage('Password must contain at least one number')
-    .matches(/[^a-zA-Z0-9]/).withMessage('Password must contain at least one special character'),
+    .isLength({ min: 8 }).withMessage('validation.passwordLength')
+    .matches(/[a-zA-Z]/).withMessage('validation.passwordLetter')
+    .matches(/[0-9]/).withMessage('validation.passwordNumber')
+    .matches(/[^a-zA-Z0-9]/).withMessage('validation.passwordSpecial'),
 
   async (req: Request, res: Response) => {
 
@@ -112,17 +112,17 @@ export const updateUser = [
     try {
 
       if(req?.user?.role == "SUPERVISOR" && (req.body.role == "SUPERVISOR" || req.body.role == "ADMIN")){
-        return res.status(400).json({ error: 'You cannot update a supervisor' });
+        return res.status(400).json({ error: req.t("error.unauthorized") });
       }
 
       const IdUser  = Number(req.params.id);
       const user = await userService.updateUser(IdUser,req.body);
-      res.status(200).json(user);
+      res.status(200).json({ message: req.t("message.userUpdated") });
     } catch (error) {
       if (error instanceof CustomError) {
         res.status(error.statusCode).json({ error: error.message });
       } else {
-        res.status(500).json({ error: 'Failed to update user' });
+        res.status(500).json({ error: req.t("error.failedToUpdateUser") });
       }
     }
   }
@@ -134,21 +134,21 @@ export const disableUser = async (req: Request, res: Response) => {
     const IdUser  = Number(req.params.id);
     const user = await userService.getUserById(IdUser);
 
-    if(!user) return res.status(404).json({ error: 'User not found' });
+    if(!user) return res.status(404).json({ error: req.t("error.noUserFoundInDB") });
 
-    if(req?.user?.id === IdUser) return res.status(400).json({ error: 'You cannot disable yourself' });
+    if(req?.user?.id === IdUser) return res.status(400).json({ error: req.t("error.failedToDisabledYourself") });
 
-    if(user.isDisabled === true) return res.status(400).json({ error: 'You cannot disable an already disabled user' });
+    if(user.isDisabled === true) return res.status(400).json({ error: req.t("error.failedToDisableUser") });
 
-    if(user.role === 'ADMIN') return res.status(400).json({ error: 'You cannot disable an admin' });
+    if(user.role === 'ADMIN') return res.status(400).json({ error: req.t("error.failedToDisableAdmin") });
 
     await userService.disableUser(IdUser);
-    res.status(200).json({ message: 'User disabled' });
+    res.status(200).json({ message: req.t("message.userDisabled") });
   } catch (error) {
     if (error instanceof CustomError) {
       res.status(error.statusCode).json({ error: error.message });
     } else {
-      res.status(500).json({ error: 'Failed to disable user' });
+      res.status(500).json({ error:req.t("error.failedToDisableUser") });
     }
   }
 }
@@ -158,21 +158,21 @@ export const enableUser = async (req: Request, res: Response) => {
     const IdUser  = Number(req.params.id);
     const user = await userService.getUserById(IdUser);
 
-    if(!user) return res.status(404).json({ error: 'User not found' });
+    if(!user) return res.status(404).json({ error: req.t("error.noUserFoundInDB") });
 
-    if(req?.user?.id === IdUser) return res.status(400).json({ error: 'You cannot disable yourself' });
+    if(req?.user?.id === IdUser) return res.status(400).json({ error: req.t("error.failedToEnabledYourself") });
 
-    if(user.isDisabled === false) return res.status(400).json({ error: 'User already enabled' });
+    if(user.isDisabled === false) return res.status(400).json({ error: req.t("error.failedToEnableUser") });
 
-    if(user.role === 'ADMIN') return res.status(400).json({ error: 'You cannot enable an admin' });
+    if(user.role === 'ADMIN') return res.status(400).json({ error: req.t("error.failedToEnableAdmin") });
 
     await userService.enableUser(IdUser);
-    res.status(200).json({ message: 'User enabled' });
+    res.status(200).json({ message: req.t("message.userEnabled") });
   } catch (error) {
     if (error instanceof CustomError) {
       res.status(error.statusCode).json({ error: error.message });
     } else {
-      res.status(500).json({ error: 'Failed to enable user' });
+      res.status(500).json({ error: req.t("error.failedToEnableUser") });
     }
   }
 }
@@ -182,17 +182,17 @@ export const deleteUser = async (req: Request, res: Response) => {
     const IdUser  = Number(req.params.id);
     const user = await userService.getUserById(IdUser);
 
-    if(!user) return res.status(404).json({ error: 'User not found' });
+    if(!user) return res.status(404).json({ error: req.t("error.noUserFoundInDB") });
 
-    if(req?.user?.id === IdUser) return res.status(400).json({ error: 'You cannot delete yourself' });
+    if(req?.user?.id === IdUser) return res.status(400).json({ error: req.t("error.failedToDeleteYourself") });
 
     await userService.deleteUser(IdUser);
-    res.status(200).json({ message: 'User deleted' });
+    res.status(200).json({ message: req.t("message.userDeleted") });
   } catch (error) {
     if (error instanceof CustomError) {
       res.status(error.statusCode).json({ error: error.message });
     } else {
-      res.status(500).json({ error: 'Failed to delete user' });
+      res.status(500).json({ error: req.t("error.failedToDeleteUser") });
     }
   }
 }
