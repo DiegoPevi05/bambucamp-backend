@@ -3,13 +3,14 @@ import { TentDto } from './tent';
 import { ProductPublicDto } from './product';
 import { ExperiencePublicDto } from './experience';
 import { PromotionDto } from './promotion';
-import { DiscountCodeDto } from './discountcode'; }
+import { DiscountCodeDto } from './discountcode'; 
 
 export interface ReserveTentDto {
   idTent:number;
   name:string;
   price:number;
   quantity:number;
+  tentDB?:Tent;
 }
 
 export interface ReserveProductDto {
@@ -17,6 +18,7 @@ export interface ReserveProductDto {
   name:string;
   price:number;
   quantity:number;
+  productDB?:Product;
 }
 
 export interface ReserveExperienceDto {
@@ -24,6 +26,7 @@ export interface ReserveExperienceDto {
   name:string;
   price:number;
   quantity:number;
+  experienceDB?:Experience;
 }
 
 export interface ReserveOptions {
@@ -39,11 +42,8 @@ export interface ReserveDto {
   qtykids: number;
   userId: number;
   tents: ReserveTentDto[];
-  tentsDB?:Tent[];
   products: ReserveProductDto[];
-  productsDB?:Product[];
   experiences: ReserveExperienceDto[];
-  experiencesDB?:Experience[];
   dateFrom: Date;
   dateTo: Date;
   dateSale: Date;

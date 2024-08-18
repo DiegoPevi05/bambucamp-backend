@@ -56,9 +56,24 @@ export const searchAvailableTents = async (dateFrom: Date, dateTo: Date): Promis
   return tents;
 };
 
-export const getMyReserves = async (userId:number): Promise<{reserves:ReserveDto[]}> => {
+export const getMyReserves = async (pagination: Pagination, userId?: number): Promise<PaginatedReserve> => {
+  const { page, pageSize } = pagination;
+  const skip = (page - 1) * pageSize;
+  const take = pageSize;
+
+  // Get the total count of reserves for the user
+  const totalCount = await prisma.reserve.count({
+    where: {
+      ...(userId && { userId: userId }),
+    },
+  });
+
   const reserves = await prisma.reserve.findMany({
-    where: { userId },
+    where: {
+      ...(userId && { userId: userId }),
+    },
+    skip,
+    take,
     include: {
       tents: true,
       products: true,
@@ -72,19 +87,19 @@ export const getMyReserves = async (userId:number): Promise<{reserves:ReserveDto
       const productIds = reserve.products.map((p) => p.idProduct);
       const experienceIds = reserve.experiences.map((e) => e.idExperience);
 
-      const tents = await prisma.tent.findMany({
+      const tentsDB = await prisma.tent.findMany({
         where: {
           id: { in: tentIds },
         },
       });
 
-      const products = await prisma.product.findMany({
+      const productsDB = await prisma.product.findMany({
         where: {
           id: { in: productIds },
         },
       });
 
-      const experiences = await prisma.experience.findMany({
+      const experiencesDB = await prisma.experience.findMany({
         where: {
           id: { in: experienceIds },
         },
@@ -92,17 +107,29 @@ export const getMyReserves = async (userId:number): Promise<{reserves:ReserveDto
 
       return {
         ...reserve,
-        tentsDB : tents,
-        productsDB: products,
-        experiencesDB: experiences,
+        tents: reserve.tents.map((tent) => ({
+          ...tent,
+          tentDB: tentsDB.find((dbTent) => dbTent.id === tent.idTent),
+        })),
+        products: reserve.products.map((product) => ({
+          ...product,
+          productDB: productsDB.find((dbProduct) => dbProduct.id === product.idProduct),
+        })),
+        experiences: reserve.experiences.map((experience) => ({
+          ...experience,
+          experienceDB: experiencesDB.find((dbExperience) => dbExperience.id === experience.idExperience),
+        })),
       };
     })
   );
 
-  return {
-    reserves:enrichedReserves,
-  }
+  const totalPages = Math.ceil(totalCount / pageSize);
 
+  return {
+    reserves: enrichedReserves,
+    totalPages,
+    currentPage: page,
+  };
 };
 
 export const getAllReserveOptions = async():Promise<ReserveOptions> => {
@@ -351,7 +378,6 @@ export const updateReserve = async (id:number, data: Reserve): Promise<Reserve> 
 };
 
 export const deleteReserve = async (id: number): Promise<Reserve> => {
-  console.log("this is the tent to delete",id);
   return await prisma.reserve.delete({
     where: { id }
   });

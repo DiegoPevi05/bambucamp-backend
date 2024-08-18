@@ -5,13 +5,34 @@ import *  as userRepository from '../repositories/userRepository';
 import * as utils from '../lib/utils';
 import { BadRequestError, NotFoundError } from "../middleware/errors";
 
+interface Pagination {
+  page: number;
+  pageSize: number;
+}
+
 export const searchAvailableTents = async (dateFrom: Date, dateTo: Date) => {
   return await reserveRepository.searchAvailableTents(dateFrom, dateTo);
 };
 
-export const getAllMyReserves = async (userId:number) => {
-  return await reserveRepository.getMyReserves(userId);
-}
+export const getAllMyReservesUser = async (pagination: Pagination, userId: number) => {
+  const MyReserves = await reserveRepository.getMyReserves(pagination, userId);
+  
+  if (MyReserves?.reserves) {
+    utils.parseImagesInReserves(MyReserves.reserves);
+  }
+
+  return MyReserves;
+};
+
+export const getAllMyReserves = async (pagination: Pagination, userId?: number) => {
+  const MyReserves = await reserveRepository.getMyReserves(pagination, userId);
+
+  if (MyReserves?.reserves) {
+    utils.parseImagesInReserves(MyReserves.reserves);
+  }
+
+  return MyReserves;
+};
 
 export const getAllReseveOptions = async():Promise<ReserveOptions> => {
   const reserveOptions = await reserveRepository.getAllReserveOptions();
@@ -37,10 +58,7 @@ export const getAllReseveOptions = async():Promise<ReserveOptions> => {
 
 }
 
-interface Pagination {
-  page: number;
-  pageSize: number;
-}
+
 
 export const getAllReserves = async (filters:ReserveFilters, pagination:Pagination):Promise<PaginatedReserve> => {
   return await reserveRepository.getAllReserves(filters,pagination);

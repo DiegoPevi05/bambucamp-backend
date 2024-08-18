@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { Tent , Product, Experience } from '@prisma/client';
+import { ReserveDto } from '../dto/reserve';
 import * as reserveRepository from '../repositories/ReserveRepository';
 import * as discountCodeRepository from '../repositories/DiscountCodeRepository';
 import * as tentRepository from '../repositories/TentRepository';
@@ -248,5 +249,24 @@ export const calculateReservePrice = (tents: { tent: Tent; quantity: number }[],
 }
 
 
+export const parseImagesInReserves = (reserves: ReserveDto[]) => {
+  reserves.forEach((reserve) => {
+    reserve?.tents?.forEach((tent) => {
+      if (tent?.tentDB) {
+        tent.tentDB.images = JSON.parse(tent.tentDB.images ? tent.tentDB.images : '[]');
+      }
+    });
+    
+    reserve?.products?.forEach((product) => {
+      if (product?.productDB) {
+        product.productDB.images = JSON.parse(product.productDB.images ? product.productDB.images : '[]');
+      }
+    });
 
-
+    reserve?.experiences?.forEach((experience) => {
+      if (experience?.experienceDB) {
+        experience.experienceDB.images = JSON.parse(experience.experienceDB.images ? experience.experienceDB.images : '[]');
+      }
+    });
+  });
+};

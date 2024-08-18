@@ -4,7 +4,8 @@ import { authenticateToken, checkRole } from '../middleware/auth';
 const router = express.Router();
 
 
-router.get('/me',authenticateToken,checkRole('CLIENT'),reserveController.getAllMyReserves);
+router.get('/me',authenticateToken,checkRole('CLIENT'),reserveController.getAllMyReservesUser);
+router.get('/me/admin',authenticateToken,checkRole('ADMIN','SUPERVISOR'),reserveController.getAllMyReservesAdmin);
 router.get('/',authenticateToken,checkRole('ADMIN','SUPERVISOR'),reserveController.getAllReserves);
 router.get('/options',authenticateToken,checkRole('ADMIN','SUPERVISOR'),reserveController.getAllReserveOptions);
 router.post('/reserve',authenticateToken,checkRole('CLIENT'), reserveController.createReserveByUser);

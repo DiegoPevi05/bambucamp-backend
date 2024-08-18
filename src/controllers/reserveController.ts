@@ -4,14 +4,23 @@ import { body, param, validationResult } from 'express-validator';
 import {CustomError} from '../middleware/errors';
 
 
-export const getAllMyReserves = [
-  async (req: Request, res: Response) => {
+export const getAllMyReservesUser = async (req: Request, res: Response) => {
     try {
+      const { page = '1', pageSize = '10' } = req.query;
+
       if (!req.user) {
         return res.status(401).json({ error: req.t('error.unauthorized') });
-      }
-      const reserves = await reserveService.getAllMyReserves(req.user.id);
-      res.json(reserves);
+      };
+
+      const pagination = {
+        page: parseInt(page as string, 10),
+        pageSize: parseInt(pageSize as string, 10),
+      };
+
+      const PaginatedReserves = await reserveService.getAllMyReserves(pagination, req.user.id);
+
+      res.json(PaginatedReserves);
+
     } catch (error) {
       if (error instanceof CustomError) {
         res.status(error.statusCode).json({ error: error.message });
@@ -19,8 +28,30 @@ export const getAllMyReserves = [
         res.status(500).json({ error: req.t('error.failedToFetchReserves') });
       }
     }
-  }
-] 
+}
+
+
+export const getAllMyReservesAdmin = async (req: Request, res: Response) => {
+    try {
+      const { page = '1', pageSize = '10' } = req.query;
+
+      const pagination = {
+        page: parseInt(page as string, 10),
+        pageSize: parseInt(pageSize as string, 10),
+      };
+
+      const PaginatedReserves = await reserveService.getAllMyReserves(pagination);
+
+      res.json(PaginatedReserves);
+
+    } catch (error) {
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: req.t('error.failedToFetchReserves') });
+      }
+    }
+}
 
 export const getAllReserveOptions = async( req:Request, res:Response ) => {
   try {
