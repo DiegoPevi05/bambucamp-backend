@@ -14,6 +14,14 @@ export const searchAvailableTents = async (dateFrom: Date, dateTo: Date) => {
   return await reserveRepository.searchAvailableTents(dateFrom, dateTo);
 };
 
+export const getAllMyReservesCalendarUser = async(page:number,userId:number) => {
+  return reserveRepository.getMyReservesByMonth(page,userId);
+}
+
+export const getAllMyReservesCalendar = async(page:number,userId?:number) => {
+  return reserveRepository.getMyReservesByMonth(page,userId);
+}
+
 export const getAllMyReservesUser = async (pagination: Pagination, userId: number) => {
   const MyReserves = await reserveRepository.getMyReserves(pagination, userId);
   
@@ -207,6 +215,7 @@ export const createReserve = async (data: ReserveDto) => {
       name: experience.label,
       price: experience.price,
       quantity: experience.qty,
+      day: new Date()
     }));
 
     await utils.getExperiences(promotionExperiences);
@@ -402,6 +411,7 @@ export const updateReserve = async (id:number, data: ReserveDto) => {
       name: experience.label,
       price: experience.price,
       quantity: experience.qty,
+      day: new Date()
     }));
 
     // Now pass these to your upsert function

@@ -13,7 +13,10 @@ export const getAllPublicPromotions = async (): Promise<Promotion[]> => {
   return await prisma.promotion.findMany({
     where: {
       status: 'ACTIVE'
-    }
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
   });
 };
 
@@ -64,12 +67,18 @@ export const getAllPromotions = async (filters:PromotionFilters, pagination:Pagi
       ...(title && { title: { contains: title, mode: 'insensitive' } }),
       ...(status && { status: { contains: status, mode: 'insensitive' } }),
     },
+    orderBy: {
+      createdAt: 'desc',
+    },
   });
 
   const promotions = await prisma.promotion.findMany({
     where: {
       ...(title && { title: { contains: title, mode: 'insensitive' } }),
       ...(status && { status: { contains: status, mode: 'insensitive' } }),
+    },
+    orderBy: {
+      createdAt: 'desc',
     },
     skip,
     take,

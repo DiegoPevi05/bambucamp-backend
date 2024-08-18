@@ -3,6 +3,52 @@ import * as reserveService from '../services/reserveService';
 import { body, param, validationResult } from 'express-validator';
 import {CustomError} from '../middleware/errors';
 
+export const getAllMyReservesCalendarUser = async (req: Request, res: Response) => {
+    try {
+      const { page = '0' } = req.query;
+
+      if (!req.user) {
+        return res.status(401).json({ error: req.t('error.unauthorized') });
+      };
+
+      const pageParsed = parseInt(page as string, 10);
+
+      const PaginatedReserves = await reserveService.getAllMyReservesCalendarUser(pageParsed, req.user.id);
+
+      res.json(PaginatedReserves);
+
+    } catch (error) {
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: req.t('error.failedToFetchReserves') });
+      }
+    }
+}
+
+export const getAllMyReservesCalendar = async (req: Request, res: Response) => {
+    try {
+      const { page = '0' } = req.query;
+
+      if (!req.user) {
+        return res.status(401).json({ error: req.t('error.unauthorized') });
+      };
+
+      const pageParsed = parseInt(page as string, 10);
+
+      const PaginatedReserves = await reserveService.getAllMyReservesCalendar(pageParsed);
+
+      res.json(PaginatedReserves);
+
+    } catch (error) {
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: req.t('error.failedToFetchReserves') });
+      }
+    }
+}
+
 
 export const getAllMyReservesUser = async (req: Request, res: Response) => {
     try {

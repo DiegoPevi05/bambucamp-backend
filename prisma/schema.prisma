@@ -195,6 +195,7 @@ model ReserveExperience {
   name            String    @db.Text
   price           Float     @default(0)
   quantity        Int       @default(1)
+  day             DateTime  @default(now())
   reserve         Reserve   @relation(fields: [reserveId], references: [id], onDelete: Cascade)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt @default(now())

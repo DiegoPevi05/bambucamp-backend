@@ -22,6 +22,9 @@ export const getAllUsers = async (filters: UserFilters, pagination: Pagination):
       ...(email && { email: { contains: email, mode: 'insensitive' } }),
       ...(role && { role }), // Direct equality check for enum
     },
+    orderBy: {
+      createdAt: 'desc',
+    },
   });
 
   const users = await prisma.user.findMany({
@@ -30,6 +33,9 @@ export const getAllUsers = async (filters: UserFilters, pagination: Pagination):
       ...(lastName && { lastName: { contains: lastName, mode: 'insensitive' } }),
       ...(email && { email: { contains: email, mode: 'insensitive' } }),
       ...(role && { role }), // Direct equality check for enum
+    },
+    orderBy: {
+      createdAt: 'desc',
     },
     skip,
     take,

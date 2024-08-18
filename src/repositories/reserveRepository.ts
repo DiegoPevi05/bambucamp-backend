@@ -56,6 +56,43 @@ export const searchAvailableTents = async (dateFrom: Date, dateTo: Date): Promis
   return tents;
 };
 
+export const getMyReservesByMonth = async (page: number, userId?: number): Promise<{ reserves: { id:number, dateFrom:Date, dateTo:Date }[] }> => {
+  const currentDate = new Date();
+
+  // Calculate the target month and year based on the page
+  const targetDate = new Date(currentDate.setMonth(currentDate.getMonth() + page));
+  const startOfMonth = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1, 0, 0, 0);
+  const endOfMonth = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0, 23, 59, 59);
+
+ // Query reserves that either start or end in the month or overlap with the month
+  const reserves = await prisma.reserve.findMany({
+    where: {
+      ...(userId && { userId: userId }),
+      AND: [
+        {
+          dateFrom: { lte: endOfMonth },
+        },
+        {
+          dateTo: { gte: startOfMonth },
+        },
+      ],
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    select: {
+      id: true,
+      dateFrom: true,
+      dateTo: true,
+    },
+  });
+
+
+  return {
+    reserves,
+  };
+};
+
 export const getMyReserves = async (pagination: Pagination, userId?: number): Promise<PaginatedReserve> => {
   const { page, pageSize } = pagination;
   const skip = (page - 1) * pageSize;
@@ -66,11 +103,17 @@ export const getMyReserves = async (pagination: Pagination, userId?: number): Pr
     where: {
       ...(userId && { userId: userId }),
     },
+    orderBy: {
+      createdAt: 'desc',
+    },
   });
 
   const reserves = await prisma.reserve.findMany({
     where: {
       ...(userId && { userId: userId }),
+    },
+    orderBy: {
+      createdAt: 'desc',
     },
     skip,
     take,
@@ -192,12 +235,18 @@ export const getAllReserves = async ( filters: ReserveFilters, pagination: Pagin
       ...(dateFrom && { dateFrom: { gte: dateFrom } }),
       ...(dateTo && { dateTo: { lte: dateTo } }),
     },
+    orderBy: {
+      createdAt: 'desc',
+    },
   });
 
   const reserves = await prisma.reserve.findMany({
     where: {
       ...(dateFrom && { dateFrom: { gte: dateFrom } }),
       ...(dateTo && { dateTo: { lte: dateTo } }),
+    },
+    orderBy: {
+      createdAt: 'desc',
     },
     skip,
     take,

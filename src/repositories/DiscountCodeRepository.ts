@@ -26,12 +26,18 @@ export const getAllDiscountCodes = async (filters:DiscountCodeFilters,pagination
       ...(code && { code: { contains: code, mode: 'insensitive' } }),
       ...(status && { status: { contains: status, mode: 'insensitive' } }),
     },
+    orderBy: {
+      createdAt: 'desc',
+    },
   });
 
   const discountCodes = await prisma.discountCode.findMany({
     where: {
       ...(code && { code: { contains: code, mode: 'insensitive' } }),
       ...(status && { status: { contains: status, mode: 'insensitive' } }),
+    },
+    orderBy: {
+      createdAt: 'desc',
     },
     skip,
     take,

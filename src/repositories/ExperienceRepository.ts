@@ -29,12 +29,18 @@ export const getAllExperiences = async (filters:ExperienceFilters, pagination:Pa
       ...(name && { name: { contains: name, mode: 'insensitive' } }),
       ...(status && { status: { contains: status, mode: 'insensitive' } }),
     },
+    orderBy: {
+      createdAt: 'desc',
+    },
   });
 
   const experiences = await prisma.experience.findMany({
     where: {
       ...(name && { name: { contains: name, mode: 'insensitive' } }),
       ...(status && { status: { contains: status, mode: 'insensitive' } }),
+    },
+    orderBy: {
+      createdAt: 'desc',
     },
     skip,
     take,

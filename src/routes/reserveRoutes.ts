@@ -5,7 +5,9 @@ const router = express.Router();
 
 
 router.get('/me',authenticateToken,checkRole('CLIENT'),reserveController.getAllMyReservesUser);
+router.get('/me/calendar',authenticateToken,checkRole('CLIENT'),reserveController.getAllMyReservesCalendarUser);
 router.get('/me/admin',authenticateToken,checkRole('ADMIN','SUPERVISOR'),reserveController.getAllMyReservesAdmin);
+router.get('/me/admin/calendar',authenticateToken,checkRole('ADMIN','SUPERVISOR'),reserveController.getAllMyReservesCalendar);
 router.get('/',authenticateToken,checkRole('ADMIN','SUPERVISOR'),reserveController.getAllReserves);
 router.get('/options',authenticateToken,checkRole('ADMIN','SUPERVISOR'),reserveController.getAllReserveOptions);
 router.post('/reserve',authenticateToken,checkRole('CLIENT'), reserveController.createReserveByUser);

@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "ReserveExperience" ADD COLUMN     "day" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

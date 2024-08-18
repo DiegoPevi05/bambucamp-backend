@@ -13,7 +13,10 @@ export const getAllPublicTents = async (): Promise<Tent[]> => {
   return await prisma.tent.findMany({
     where: {
       status: 'ACTIVE'
-    }
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
   });
 };
 
@@ -30,12 +33,18 @@ export const getAllTents = async (filters: TentFilters, pagination: Pagination):
       ...(title && { title: { contains: title, mode: 'insensitive' } }),
       ...(status && { status: { contains: status, mode: 'insensitive' } }),
     },
+    orderBy: {
+      createdAt: 'desc',
+    },
   });
 
   const tents = await prisma.tent.findMany({
     where: {
       ...(title && { title: { contains: title, mode: 'insensitive' } }),
       ...(status && { status: { contains: status, mode: 'insensitive' } }),
+    },
+    orderBy: {
+      createdAt: 'desc',
     },
     skip,
     take
