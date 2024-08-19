@@ -224,8 +224,10 @@ model Notification {
   createdAt         DateTime           @default(now())
   isRead            Boolean            @default(false)
   userId            Int?               
+  userName          String?
   user              User?              @relation(fields: [userId], references: [id])
   target            NotificationTarget 
   relatedEntityId   Int?               
   relatedEntityType String?            
+  relatedEntityName String?
 }

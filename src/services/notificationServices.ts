@@ -1,4 +1,3 @@
-
 import * as notificationRepository from "../repositories/NotificationRepository";
 import { NotificationDto, PaginatedNotifications, notifcationFilters } from "../dto/notification";
 import { Request } from "express";
@@ -9,12 +8,9 @@ interface Pagination {
   pageSize: number;
 }
 
-export const getAllNotifications = async (filters: notifcationFilters, pagination: Pagination): Promise<PaginatedNotifications> => {
-  const notificationsPaginated = await notificationRepository.getAllNotifications(filters,pagination);
-  /*productsPaginated.products.forEach((product) => {
-    product.images = JSON.parse(product.images ? product.images : '[]');
-  });*/
-  return notificationsPaginated;
+
+export const getAllNotifications = async (t: any, filters: notifcationFilters, pagination: Pagination): Promise<PaginatedNotifications> => {
+  return await notificationRepository.getAllNotifications(t ,filters, pagination);
 };
 
 export const notificationIsRead = async(notificationId:number) => {
@@ -32,8 +28,10 @@ export const  notifyProductCreation = async (req: Request, product: any): Promis
     type: NotificationType.SUCCESS,
     target: NotificationTarget.ADMIN,
     userId: req.user.id,
+    userName:req.user.firstName,
     relatedEntityId: product.id,
     relatedEntityType: 'PRODUCT',
+    relatedEntityName: product.name,
     date: new Date(),
     isRead: false
   };
@@ -52,8 +50,10 @@ export const notifyProductUpdate = async (req: Request, product: any): Promise<v
     type: NotificationType.INFORMATION,
     target: NotificationTarget.ADMIN,
     userId: req.user.id,
+    userName:req.user.firstName,
     relatedEntityId: product.id,
     relatedEntityType: 'PRODUCT',
+    relatedEntityName: product.name,
     date: new Date(),
     isRead: false
   };
@@ -72,8 +72,10 @@ export const  notifyProductDeletion = async(req: Request, productId: number): Pr
       type: NotificationType.ERROR,
       target: NotificationTarget.ADMIN,
       userId: req.user.id,
+      userName:req.user.firstName,
       relatedEntityId: productId,
       relatedEntityType: 'PRODUCT',
+      relatedEntityName: "",
       date: new Date(),
       isRead: false
     };

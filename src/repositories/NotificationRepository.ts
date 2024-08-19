@@ -2,6 +2,7 @@ import { PrismaClient, Notification   } from "@prisma/client";
 import { NotificationDto, PaginatedNotifications } from "../dto/notification";
 import {BadRequestError} from "../middleware/errors";
 import {notifcationFilters} from "../dto/notification";
+import { createPublicNotification } from "../lib/utils";
 
 const prisma = new PrismaClient();
 
@@ -10,7 +11,7 @@ interface Pagination {
   pageSize: number;
 }
 
-export const getAllNotifications = async (filters: notifcationFilters, pagination: Pagination): Promise<PaginatedNotifications> => {
+export const getAllNotifications = async (t:any, filters: notifcationFilters, pagination: Pagination): Promise<PaginatedNotifications> => {
   const { date, target, type } = filters; // Adjusted to match the filters in notifcationFilters
   const { page, pageSize } = pagination;
 
@@ -48,9 +49,13 @@ export const getAllNotifications = async (filters: notifcationFilters, paginatio
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
+  const publicNotifications = notifications.map((notification) => {
+    return createPublicNotification(t,notification);
+  });
+
   // Returning notifications with pagination details
   return {
-    products: notifications as NotificationDto[], // Map results to NotificationDto if needed
+    notifications: publicNotifications, // Map results to NotificationDto if needed
     totalPages,
     currentPage: page,
   };

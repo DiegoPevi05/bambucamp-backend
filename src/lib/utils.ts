@@ -1,13 +1,15 @@
 import fs from 'fs';
 import path from 'path';
-import { Tent , Product, Experience } from '@prisma/client';
+import { Tent , Product, Experience, Notification } from '@prisma/client';
 import { ReserveDto } from '../dto/reserve';
+import { PublicNotification } from '../dto/notification';
 import * as reserveRepository from '../repositories/ReserveRepository';
 import * as discountCodeRepository from '../repositories/DiscountCodeRepository';
 import * as tentRepository from '../repositories/TentRepository';
 import * as productRepository from '../repositories/ProductRepository';
 import * as experienceRepository from '../repositories/ExperienceRepository';
 import {BadRequestError, NotFoundError} from '../middleware/errors';
+import i18next from "i18next";
 
 // Define a custom type for the Multer file
 type MulterFile = Express.Multer.File;
@@ -269,4 +271,28 @@ export const parseImagesInReserves = (reserves: ReserveDto[]) => {
       }
     });
   });
+};
+
+export const createPublicNotification = (t:any,notification: Notification): PublicNotification => {
+  const { title, preview, description, userName, relatedEntityId } = notification;
+
+  // Translate and apply placeholders using i18next
+  const translatedTitle = t(title);
+  const translatedPreview = t(preview, {
+    name: notification.relatedEntityName,
+  });
+  const translatedDescription = t(description, {
+    id: relatedEntityId,
+    user: userName
+  });
+
+  // Return the public notification with translations
+  return {
+    title: translatedTitle,
+    preview: translatedPreview,
+    description: translatedDescription,
+    type: notification.type,
+    date: notification.date,
+    isRead: notification.isRead
+  };
 };
