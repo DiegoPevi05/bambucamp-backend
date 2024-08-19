@@ -130,7 +130,18 @@
 		"userUpdated": "User updated",
 		"userDeleted": "User deleted",
 		"userDisabled": "User is disabled",
-		"userEnabled": "User is enabled"
+		"userEnabled": "User is enabled",
+		"NotificationProductCreated": "Product created",
+		"NotificationProductCreatedPreview": "A new product named {{name}} was created.",
+		"NotificationProductCreatedDescription": "Product with ID {{id}} was created by {{user}}.",
+		"NotificationProductUpdated": "Product updated",
+		"NotificationProductUpdatedPreview": "Product {{name}} was updated.",
+		"NotificationProductUpdatedDescription": "Product with ID {{id}} was updated by {{user}}.",
+		"NotificationProductDeleted": "Product deleted",
+		"NotificationProductDeletedPreview": "A product with ID {{id}} was deleted.",
+		"NotificationProductDeletedDescription": "Product with ID {{id}} was deleted by {{user}}.",
+		"failedToFetchNotifications": "Failed to fetch Notifications",
+		"failedToUpdateNotification": "Failed to update Notifications"
 	},
 	"validation": {
 		"headerRequired": "Header of Tent is required",
@@ -167,6 +178,7 @@
 		"passwordNumber": "Password must contain at least one number",
 		"passwordSpecial": "Password must contain at least one special character",
 		"passwordRequired": "Password is Required",
-		"roleInvalid": "Role must be either SUPERVISOR or CLIENT"
+		"roleInvalid": "Role must be either SUPERVISOR or CLIENT",
+		"notificationIsRead": "Notification was read"
 	}
 }

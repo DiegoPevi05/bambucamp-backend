@@ -130,7 +130,18 @@
 		"userUpdated": "Usuario actualizado",
 		"userDeleted": "Usuario eliminado",
 		"userDisabled": "Usuario deshabilitado",
-		"userEnabled": "Usuario habilitado"
+		"userEnabled": "Usuario habilitado",
+		"NotificationProductCreated": "Producto creado",
+		"NotificationProductCreatedPreview": "Se creó un nuevo producto llamado {{name}}.",
+		"NotificationProductCreatedDescription": "El producto con ID {{id}} fue creado por {{user}}.",
+		"NotificationProductUpdated": "Producto actualizado",
+		"NotificationProductUpdatedPreview": "El producto {{name}} fue actualizado.",
+		"NotificationProductUpdatedDescription": "El producto con ID {{id}} fue actualizado por {{user}}.",
+		"NotificationProductDeleted": "Producto eliminado",
+		"NotificationProductDeletedPreview": "Se eliminó un producto con ID {{id}}.",
+		"NotificationProductDeletedDescription": "El producto con ID {{id}} fue eliminado por {{user}}.",
+		"failedToFetchNotifications": "Error al traer las notificaciones.",
+		"failedToUpdateNotification": "Error al actualizar las notificaciones"
 	},
 	"validation": {
 		"headerRequired": "El encabezado del glamping es obligatorio",
@@ -167,6 +178,7 @@
 		"passwordNumber": "La contraseña debe contener al menos un número",
 		"passwordSpecial": "La contraseña debe contener al menos un carácter especial",
 		"passwordRequired": "La contraseña es requerida",
-		"roleInvalid": "El Rol debe ser SUPERVISOR or CLIENTE"
+		"roleInvalid": "El Rol debe ser SUPERVISOR or CLIENTE",
+		"notificationIsRead": "La notificacion esta marcada como leida"
 	}
 }

@@ -32,6 +32,7 @@ model User {
   createdAt                   DateTime @default(now())
   updatedAt                   DateTime @updatedAt @default(now())
   reserves                    Reserve[]
+  notifications               Notification[]
 }
 
 model Tent {
@@ -201,3 +202,30 @@ model ReserveExperience {
   updatedAt       DateTime  @updatedAt @default(now())
 }
 
+enum NotificationType {
+  SUCCESS
+  ERROR 
+  INFORMATION
+}
+
+enum NotificationTarget {
+  ADMIN
+  SUPERVISOR
+  USER
+}
+
+model Notification {
+  id                Int                @id @default(autoincrement())
+  title             String
+  preview           String
+  description       String             @db.Text
+  type              NotificationType   @default(INFORMATION)
+  date              DateTime           @default(now())
+  createdAt         DateTime           @default(now())
+  isRead            Boolean            @default(false)
+  userId            Int?               
+  user              User?              @relation(fields: [userId], references: [id])
+  target            NotificationTarget 
+  relatedEntityId   Int?               
+  relatedEntityType String?            
+}

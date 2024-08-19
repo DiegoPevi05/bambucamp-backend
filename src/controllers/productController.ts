@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import * as productService from '../services/productService';
+import * as notificationService from '../services/notificationServices';
 import { body, param, validationResult } from 'express-validator';
 import {CustomError} from '../middleware/errors';
 
@@ -63,7 +64,10 @@ export const createProduct = [
     }
 
     try {
-      await productService.createProduct(req.body, req.files);
+      const product = await productService.createProduct(req.body, req.files);
+
+      await notificationService.notifyProductCreation(req, product)
+
       res.status(201).json({ message: req.t("message.productCreated") });
     } catch (error) {
       if (error instanceof CustomError) {
@@ -91,7 +95,10 @@ export const updateProduct = [
     }
 
     try {
-      await productService.updateProduct(Number(req.params.id), req.body  , req.files );
+      const product = await productService.updateProduct(Number(req.params.id), req.body  , req.files );
+
+      await notificationService.notifyProductUpdate(req, product)
+
       res.json({ message: req.t("message.productCreated") });
     } catch (error) {
       if (error instanceof CustomError) {
@@ -106,6 +113,9 @@ export const updateProduct = [
 export const deleteProduct = async (req: Request, res: Response) => {
   try {
     await productService.deleteProduct(Number(req.params.id));
+
+    await notificationService.notifyProductDeletion(req, parseInt(req.params.id));
+
     res.json({ message: req.t("message.productDeleted") });
   } catch (error) {
 
