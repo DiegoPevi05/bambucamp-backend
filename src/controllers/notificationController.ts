@@ -9,8 +9,6 @@ export const getAllNotifications = async (req: Request, res: Response) => {
   try {
     const { date, target, type , page = '1', pageSize = '10' } = req.query;
 
-    console.log("header in request",req.header('accept-language'))
-
     const filters = {
       date: date as Date | undefined,
       target: target as NotificationTarget[] | undefined,

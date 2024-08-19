@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { Tent , Product, Experience, Notification } from '@prisma/client';
+import { Tent , Product, Experience, Notification, NotificationType } from '@prisma/client';
 import { ReserveDto } from '../dto/reserve';
 import { PublicNotification } from '../dto/notification';
 import * as reserveRepository from '../repositories/ReserveRepository';
@@ -274,18 +274,36 @@ export const parseImagesInReserves = (reserves: ReserveDto[]) => {
 };
 
 export const createPublicNotification = (t:any,notification: Notification): PublicNotification => {
-  const { title, preview, description, userName, relatedEntityId } = notification;
+  const { title, relatedEntityType ,preview, description, userName, relatedEntityId } = notification;
 
-  // Translate and apply placeholders using i18next
-  const translatedTitle = t(title);
-  const translatedPreview = t(preview, {
-    name: notification.relatedEntityName,
-  });
-  const translatedDescription = t(description, {
-    id: relatedEntityId,
-    user: userName
-  });
+  let translatedTitle = "";
+  let translatedPreview = "";
+  let translatedDescription  = "";
 
+  const TypesSupervisor = ["RESERVE","PRODUCT","EXPERIENCE","DISCOUNT_CODE","PROMOTION","TENT"]
+  if(relatedEntityType){
+    if(TypesSupervisor.includes(relatedEntityType)){
+
+      // Translate and apply placeholders using i18next
+      translatedTitle = t(title);
+      translatedPreview = t(preview, {
+        name: notification.relatedEntityName,
+      });
+      translatedDescription = t(description, {
+        id: relatedEntityId,
+        user: userName
+      });
+    }else{
+      translatedTitle = t(title);
+      translatedPreview = t(preview, {
+        date: notification.relatedEntityName,
+      });
+      translatedDescription = t(description, {
+        date: notification.relatedEntityName,
+      });
+
+    }
+  }
   // Return the public notification with translations
   return {
     title: translatedTitle,
