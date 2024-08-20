@@ -45,6 +45,7 @@ export const chatHandler = (io: SocketIOServer) => {
       let channel = await chatRepository.getChannel(currentChannel.toString());
       if (!channel) {
         channel = await chatRepository.createChannel(currentChannel);
+        io.emit('newChatMessage', channel);
       }
       socket.join(currentChannel);
     });
