@@ -23,7 +23,7 @@ const server = http.createServer(app);
 
 const io = new SocketIOServer(server, {
   cors: {
-    origin: process.env.CLIENT_HOSTNAME || 'http://localhost:5173', // Replace with your client’s origin
+    origin: [process.env.ADMIN_HOSTNAME || 'http://localhost:5173' , process.env.CLIENT_HOSTNAME || 'http://localhost:5174'], // Replace with your client’s origin
     methods: ['GET', 'POST'], // Include additional methods
     allowedHeaders: ['Content-Type', 'Authorization'],
   },
@@ -32,7 +32,7 @@ const io = new SocketIOServer(server, {
 app.use(i18nextMiddleware.handle(i18next));
 
 app.use(cors({
-  origin: process.env.CLIENT_HOSTNAME || 'http://localhost:5173', // Replace with your client’s origin
+  origin: [process.env.ADMIN_HOSTNAME || 'http://localhost:5173' , process.env.CLIENT_HOSTNAME || 'http://localhost:5174'], // Replace with your client’s origin
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Include additional methods
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept-Language'],
 }));
