@@ -1,6 +1,8 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import http from 'http';
+import { Server as SocketIOServer } from 'socket.io';
 import userRoutes from './routes/userRoutes';
 import authRoutes from './routes/authRoutes';
 import categoryRoutes from './routes/categoryRoutes';
@@ -14,11 +16,27 @@ import discountRoutes from './routes/discountCodesRoutes';
 import path from 'path';
 import i18nextMiddleware from 'i18next-http-middleware';
 import i18next from './config/i18n';
+import chatHandler from './services/chatService';
 
 const app = express();
+const server = http.createServer(app);
+
+const io = new SocketIOServer(server, {
+  cors: {
+    origin: process.env.CLIENT_HOSTNAME || 'http://localhost:5173', // Replace with your client’s origin
+    methods: ['GET', 'POST'], // Include additional methods
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  },
+});
 
 app.use(i18nextMiddleware.handle(i18next));
-app.use(cors());
+
+app.use(cors({
+  origin: process.env.CLIENT_HOSTNAME || 'http://localhost:5173', // Replace with your client’s origin
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Include additional methods
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept-Language'],
+}));
+
 app.use(bodyParser.json());
 // Serve static files
 app.use('/public/images', express.static(path.join(__dirname, '../public/images')));
@@ -34,4 +52,6 @@ app.use('/tents', tentRoutes);
 app.use('/reserves', reserveRoutes);
 app.use('/notifications', notificationRoutes);
 
-export default app;
+chatHandler(io);
+
+export default server;
