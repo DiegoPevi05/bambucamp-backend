@@ -241,6 +241,8 @@ model ChatChannel {
 model ChatMessage {
   id        String    @id @default(cuid())
   user      String
+  username  String
+  user_type String
   message   String
   timestamp DateTime  @default(now())
   channelId String
