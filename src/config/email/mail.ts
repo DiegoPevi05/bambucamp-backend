@@ -4,6 +4,7 @@ import path from 'path';
 
 // Load SMTP configuration from environment variables
 const HOSTNAME = process.env.HOSTNAME || `http://localhost:${process.env.PORT}`;
+const CLIENT_HOSTNAME =  process.env.CLIENT_HOSTNAME || 'http://localhost:5173';
 
 const smtpHost = process.env.SMTP_HOST;
 const smtpPort = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 465;
@@ -53,7 +54,7 @@ const sendEmail = async (to: string, subject: string, html: string) => {
 
 // Function to send verification email
 const sendVerificationEmail = async (user: { email: string; firstName: string }, verificationCode: string) => {
-  const verificationLink = `${HOSTNAME}/auth/verify-email?email=${user.email}&code=${verificationCode}`;
+  const verificationLink = `${CLIENT_HOSTNAME}/validated-account?email=${user.email}&code=${verificationCode}`;
   const templatePath = path.join(__dirname, 'templates/verification-email.html');
   let emailTemplate = fs.readFileSync(templatePath, 'utf8');
 
@@ -66,13 +67,12 @@ const sendVerificationEmail = async (user: { email: string; firstName: string },
 
 // Function to send password reset email
 const sendPasswordResetEmail = async (user: { email: string; firstName: string }, resetCode: string) => {
-  const resetLink = `${HOSTNAME}/auth/reset-password?email=${user.email}&code=${resetCode}`;
-  const templatePath = path.join(__dirname, 'templates/reset-password-email.html');
+  const templatePath = path.join(__dirname, 'templates/reset-password.html');
   let emailTemplate = fs.readFileSync(templatePath, 'utf8');
 
   // Replace placeholders with actual values
   emailTemplate = emailTemplate.replace('{{name}}', user.firstName);
-  emailTemplate = emailTemplate.replace('{{resetLink}}', resetLink);
+  emailTemplate = emailTemplate.replace('{{code}}', resetCode);
 
   await sendEmail(user.email, 'Reset Your Password', emailTemplate);
 };

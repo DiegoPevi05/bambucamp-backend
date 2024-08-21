@@ -95,6 +95,7 @@ export const forgotPassword = [
       if (error instanceof CustomError) {
         res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
+        console.log(error)
         res.status(500).json({ error: req.t("error.failedToGenerateResetCode") });
       }
     }
