@@ -53,28 +53,34 @@ const sendEmail = async (to: string, subject: string, html: string) => {
 };
 
 // Function to send verification email
-const sendVerificationEmail = async (user: { email: string; firstName: string }, verificationCode: string) => {
+const sendVerificationEmail = async (user: { email: string; firstName: string }, verificationCode: string, language:string) => {
   const verificationLink = `${CLIENT_HOSTNAME}/validated-account?email=${user.email}&code=${verificationCode}`;
-  const templatePath = path.join(__dirname, 'templates/verification-email.html');
+  const chosenLanguage = language === 'es' ? 'es' : 'en'; 
+  const templatePath = path.join(__dirname, `templates/verification-email-${chosenLanguage}.html`);
   let emailTemplate = fs.readFileSync(templatePath, 'utf8');
 
   // Replace placeholders with actual values
   emailTemplate = emailTemplate.replace('{{name}}', user.firstName);
   emailTemplate = emailTemplate.replace('{{verificationLink}}', verificationLink);
+  emailTemplate = emailTemplate.replace('{{currentYear}}', new Date().getFullYear().toString());
 
-  await sendEmail(user.email, 'Verify Your Email', emailTemplate);
+  await sendEmail(user.email, language === 'en' ? 'Verify Your Email' : 'Validar Correo Electronico', emailTemplate);
 };
 
 // Function to send password reset email
-const sendPasswordResetEmail = async (user: { email: string; firstName: string }, resetCode: string) => {
-  const templatePath = path.join(__dirname, 'templates/reset-password.html');
+const sendPasswordResetEmail = async (user: { email: string; firstName: string }, resetCode: string, language:string) => {
+
+  const chosenLanguage = language === 'es' ? 'es' : 'en'; 
+
+  const templatePath = path.join(__dirname, `templates/reset-password-${chosenLanguage}.html`);
   let emailTemplate = fs.readFileSync(templatePath, 'utf8');
 
   // Replace placeholders with actual values
   emailTemplate = emailTemplate.replace('{{name}}', user.firstName);
   emailTemplate = emailTemplate.replace('{{code}}', resetCode);
+  emailTemplate = emailTemplate.replace('{{currentYear}}', new Date().getFullYear().toString());
 
-  await sendEmail(user.email, 'Reset Your Password', emailTemplate);
+  await sendEmail(user.email, language === 'en' ? 'Reset Your Password' : 'Recuperar contraseña', emailTemplate);
 };
 
 export {

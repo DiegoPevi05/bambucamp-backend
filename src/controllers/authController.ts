@@ -30,7 +30,9 @@ export const signUp = [
     }
 
     try {
-      await authService.signUp(req.body);
+
+      const language = req.language || 'en';
+      await authService.signUp(req.body, language);
       res.status(201).json({ message:req.t("message.emailVerificationSent") });
     } catch (error) {
 
@@ -89,7 +91,8 @@ export const forgotPassword = [
     }
 
     try {
-      await authService.resetPassword(req.body.email);
+      const language = req.language || 'en';
+      await authService.resetPassword(req.body.email, language);
       res.status(200).json({ message: req.t("message.passwordResetSent") });
     } catch (error) {
       if (error instanceof CustomError) {

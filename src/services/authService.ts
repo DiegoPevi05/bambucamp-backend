@@ -10,9 +10,9 @@ import {BadRequestError, NotFoundError} from '../middleware/errors';
 const JWT_SECRET = process.env.JWT_SECRET || 'default_secret';
 
 /*************************SIGN UP FUNCTION************************************/
-export const signUp = async (data: UserDto) => {
+export const signUp = async (data: UserDto, language:string) => {
 
-  const userExistant = await userRepository.getUserByEmail(data.email);
+  const userExistant = await userRepository.getUserByEmail(data.email.toLowerCase());
 
   if(userExistant){
     throw new BadRequestError('error.userAlreadyExist');
@@ -20,19 +20,19 @@ export const signUp = async (data: UserDto) => {
 
   const hashedPassword = await bcrypt.hash(data.password, 10);
 
-  const user =  await userRepository.createUser({ ...data, password: hashedPassword });
+  const user =  await userRepository.createUser({ ...data, email: data.email.toLowerCase(),  password: hashedPassword });
 
   const token = randomUUID().slice(0, 6);
 
   await userRepository.updateVerificationToken(user.email,token)
 
-  await sendVerificationEmail({email:data.email, firstName:data.firstName}, token);
+  await sendVerificationEmail({email:data.email, firstName:data.firstName}, token, language);
 
 };
 
 /*************************VERIFY EMAIL FUNCTION************************************/
 export const verifyEmail = async(email:string,token:string) => {
-  const user = await userRepository.getUserByEmail(email);
+  const user = await userRepository.getUserByEmail(email.toLowerCase());
 
   if(!user){
     throw new NotFoundError('error.noUserFoundInDB')
@@ -60,8 +60,8 @@ export const verifyEmail = async(email:string,token:string) => {
   return;
 }
 /*************************RESET PASSWORD FUNCTION************************************/
-export const resetPassword = async (email: string) => {
-  const user = await userRepository.getUserByEmail(email);
+export const resetPassword = async (email: string, language:string) => {
+  const user = await userRepository.getUserByEmail(email.toLowerCase());
   if (!user) {
     throw new NotFoundError('error.noUserFoundInDB');
   };
@@ -70,17 +70,17 @@ export const resetPassword = async (email: string) => {
     throw new BadRequestError('error.emailNotVerified');
   };
 
-  const token = randomUUID().slice(0, 6);
+  const token = randomUUID().slice(0, 6).toUpperCase();
   await userRepository.updatePasswordResetToken(email, token);
 
-  await sendPasswordResetEmail({ email: user.email, firstName: user.firstName }, token);
+  await sendPasswordResetEmail({ email: user.email, firstName: user.firstName }, token, language);
 
   return;
 };
 
 /*************************VERIFY PASSWORD RESET CODE************************************/
 export const verifyPasswordResetCode = async (email: string, token: string) => {
-  const user = await userRepository.getUserByEmail(email);
+  const user = await userRepository.getUserByEmail(email.toLowerCase());
 
   if (!user) {
     throw new NotFoundError('error.noUserFoundInDB');
@@ -105,14 +105,14 @@ export const verifyPasswordResetCode = async (email: string, token: string) => {
 /*************************UPDATE PASSWORD FUNCTION************************************/
 export const updatePassword = async (email: string, password: string, token:string) => {
   const hashedPassword = await bcrypt.hash(password, 10);
-  await userRepository.updatePassword(email, hashedPassword, token);
+  await userRepository.updatePassword(email.toLowerCase(), hashedPassword, token);
   return;
 };
 
 
 /*************************SIGN IN FUNCTION************************************/
 export const signIn = async (email: string, password: string) => {
-  const user = await userRepository.getUserByEmail(email);
+  const user = await userRepository.getUserByEmail(email.toLowerCase());
   if (!user) {
     throw new BadRequestError('error.InvalidEmailOrPassword');
   }
