@@ -10,8 +10,16 @@ interface Pagination {
   pageSize: number;
 }
 
-export const searchAvailableTents = async (dateFrom: Date, dateTo: Date) => {
-  return await reserveRepository.searchAvailableTents(dateFrom, dateTo);
+export const searchAvailableTents = async (dateFromInput:string,dateToInput:string) => {
+  const dateFrom = new Date(dateFromInput);
+  const dateTo = new Date(dateToInput);
+  const tents = await reserveRepository.searchAvailableTents(dateFrom, dateTo);
+
+  tents.forEach((tent) => {
+    tent.images = JSON.parse(tent.images ? tent.images : '[]');
+  });
+
+  return tents;
 };
 
 export const getAllMyReservesCalendarUser = async(page:number,userId:number) => {

@@ -124,12 +124,12 @@ export const verifyPasswordResetCode = [
     try {
       const { email, code } = req.body;
       await authService.verifyPasswordResetCode(email, code);
-      res.status(200).json({ message: "message.passwordResetCodeGenerated" });
+      res.status(200).json({ message: req.t("message.passwordResetCodeGenerated") });
     } catch (error) {
       if (error instanceof CustomError) {
         res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
-        res.status(500).json({ error: 'error.failedToVerifyPasswordResetCode' });
+        res.status(500).json({ error: req.t('error.failedToVerifyPasswordResetCode') });
       }
     }
   }

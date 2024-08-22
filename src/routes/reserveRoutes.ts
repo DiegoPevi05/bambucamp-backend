@@ -4,6 +4,7 @@ import { authenticateToken, checkRole } from '../middleware/auth';
 const router = express.Router();
 
 
+router.get('/tents',reserveController.getAllPublicTentsForReservation);
 router.get('/me',authenticateToken,checkRole('CLIENT'),reserveController.getAllMyReservesUser);
 router.get('/me/calendar',authenticateToken,checkRole('CLIENT'),reserveController.getAllMyReservesCalendarUser);
 router.get('/me/admin',authenticateToken,checkRole('ADMIN','SUPERVISOR'),reserveController.getAllMyReservesAdmin);

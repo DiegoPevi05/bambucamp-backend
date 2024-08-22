@@ -66,12 +66,18 @@ export const resetPassword = async (email: string, language:string) => {
     throw new NotFoundError('error.noUserFoundInDB');
   };
 
+
   if (!user.emailVerified) {
     throw new BadRequestError('error.emailNotVerified');
   };
 
+  if(user.passwordResetCodeExpiry != undefined && user.passwordResetCodeExpiry != null && user.passwordResetCodeExpiry > new Date() ){
+    throw new BadRequestError('error.resetCodeSent');
+  }
+
+
   const token = randomUUID().slice(0, 6).toUpperCase();
-  await userRepository.updatePasswordResetToken(email, token);
+  await userRepository.updatePasswordResetToken(user.email, token);
 
   await sendPasswordResetEmail({ email: user.email, firstName: user.firstName }, token, language);
 

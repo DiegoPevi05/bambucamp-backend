@@ -72,6 +72,7 @@
 		"verificationCodeIsAlreadyExpired": "Codigo de verificacion ya ha expirado, solicita otro codigo",
 		"codeInvalid": "Codigo de verificacion es invalido",
 		"emailNotVerified": "El Email no esta verificado",
+		"resetCodeSent": "Ya se ha generado el codigo para recuperar contraseña, ingresalo o espera 1 hora para poder solicitar otro",
 		"InvalidEmailOrPassword": "Contraseña o email invalido",
 		"failedToFetchExperienceCategories": "Error al obtener las categorías de experiencias",
 		"failedToCreateExperienceCategory": "Error al crear la categoría de experiencia",

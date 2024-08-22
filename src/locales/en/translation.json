@@ -72,6 +72,7 @@
 		"verificationCodeIsAlreadyExpired": "Verification code is already Expired, request another one",
 		"codeInvalid": "Verification Code is invalid",
 		"emailNotVerified": "Email is not verified",
+		"resetCodeSent": "The reset password code has been created, search in your email or wait one hour to request another one",
 		"InvalidEmailOrPassword": "Invalid email or password",
 		"failedToFetchExperienceCategories": "Failed to fetch experience categories",
 		"failedToCreateExperienceCategory": "Failed to create experience category",
