@@ -1,5 +1,5 @@
 import { PrismaClient, Experience   } from "@prisma/client";
-import { ExperienceDto, ExperienceFilters, PaginatedExperiences } from "../dto/experience";
+import { ExperienceDto, ExperienceFilters, ExperiencePublicDto, PaginatedExperiences } from "../dto/experience";
 import {BadRequestError} from "../middleware/errors";
 
 const prisma = new PrismaClient();
@@ -9,11 +9,14 @@ interface Pagination {
   pageSize: number;
 }
 
-export const getAllPublicExperiences = async (): Promise<Experience[]> => {
+export const getAllPublicExperiences = async (): Promise<ExperiencePublicDto[]> => {
   return await prisma.experience.findMany({
     where: {
       status: 'ACTIVE'
-    }
+    },
+    include: {
+      category: true, // Include the category object
+    },
   });
 };
 

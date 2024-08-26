@@ -1,4 +1,5 @@
 import * as productRepository from '../repositories/ProductRepository';
+import * as utils from '../lib/utils';
 import { ProductDto, ProductFilters, PaginatedProducts } from "../dto/product";
 import { deleteSubFolder, serializeImagesTodb, moveImagesToSubFolder, deleteImages } from '../lib/utils';
 import {NotFoundError} from '../middleware/errors';
@@ -8,10 +9,12 @@ export const getAllPublicProducts = async () => {
 
   return products.map((product) => ({
     categoryId: product.categoryId,
+    category:product.category,
     name: product.name,
     description: product.description,
     price: product.price,
-    images : JSON.parse(product.images ? product.images : '[]')
+    images : JSON.parse(product.images ? product.images : '[]'),
+    custom_price: product.custom_price != undefined ? utils.calculatePrice(product.price,product.custom_price) :product.price 
   }));
 
 };

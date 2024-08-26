@@ -18,8 +18,8 @@ export const validateDiscountCode = [
     }
 
     try {
-      await discountCodeService.getDiscountCodeByCode(req.query.code as string);
-      res.json({ message: req.t("message.validCode") });
+      const discountedCode = await discountCodeService.getDiscountCodeByCode(req.query.code as string);
+      res.json({...discountedCode, message: req.t("message.validCode") });
     } catch (error) {
       if (error instanceof CustomError) {
         res.status(error.statusCode).json({ error: req.t(error.message) });

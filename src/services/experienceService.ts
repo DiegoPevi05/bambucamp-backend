@@ -1,4 +1,5 @@
 import * as experienceRepository from '../repositories/ExperienceRepository';
+import * as utils from '../lib/utils';
 import { ExperienceDto, ExperienceFilters, PaginatedExperiences } from '../dto/experience';
 import { deleteSubFolder, serializeImagesTodb, moveImagesToSubFolder, deleteImages } from '../lib/utils';
 import {BadRequestError} from '../middleware/errors';
@@ -7,12 +8,18 @@ export const getAllPublicExperiences = async () => {
   const experiences = await experienceRepository.getAllPublicExperiences();
 
   return experiences.map((experience) => ({
+    categoryId:experience.categoryId,
+    category:experience.category,
     header: experience.header,
     name: experience.name,
     description: experience.description,
     price: experience.price,
     duration: experience.duration,
-    images : JSON.parse(experience.images ? experience.images : '[]')
+    images : JSON.parse(experience.images ? experience.images : '[]'),
+    limit_age:experience.limit_age,
+    qtypeople:experience.qtypeople,
+    suggestions:experience.suggestions,
+    custom_price: experience.custom_price != undefined ? utils.calculatePrice(experience.price,experience.custom_price) :experience.price 
   }));
 
 };

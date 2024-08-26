@@ -23,7 +23,9 @@ export const getDiscountCodeByCode = async (code: string) => {
   if(discountCode.status === 'INACTIVE'){
     throw new BadRequestError("error.discountCodeisNotValid");
   };
-  return discountCode;
+
+  return { code: discountCode.code , discount:discountCode.discount, id:discountCode.id  };
+
 };
 
 interface Pagination {

@@ -1,5 +1,5 @@
 import { PrismaClient, Product   } from "@prisma/client";
-import { ProductDto, ProductFilters, PaginatedProducts } from "../dto/product";
+import { ProductDto, ProductFilters, PaginatedProducts, ProductPublicDto } from "../dto/product";
 import {BadRequestError} from "../middleware/errors";
 
 const prisma = new PrismaClient();
@@ -9,13 +9,16 @@ interface Pagination {
   pageSize: number;
 }
 
-export const getAllPublicProducts = async (): Promise<Product[]> => {
+export const getAllPublicProducts = async (): Promise<ProductPublicDto[]> => {
   return await prisma.product.findMany({
     where: {
       status: 'ACTIVE'
     },
     orderBy: {
       createdAt: 'desc',
+    },
+    include: {
+      category: true, // Include the category object
     },
   });
 };
