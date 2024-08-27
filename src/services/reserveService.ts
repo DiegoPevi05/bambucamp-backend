@@ -4,6 +4,8 @@ import * as promotionRepository from '../repositories/PromotionRepository';
 import *  as userRepository from '../repositories/userRepository';
 import * as utils from '../lib/utils';
 import { BadRequestError, NotFoundError } from "../middleware/errors";
+import {sendReservationEmail} from '../config/email/mail';
+import { User} from '@prisma/client';
 
 interface Pagination {
   page: number;
@@ -84,14 +86,16 @@ export const getReserveById = async (id: number) => {
   return await reserveRepository.getReserveById(id);
 };
 
-export const createReserveByUser = async (data: ReserveDto, userId: number) => {
-  data.userId = userId;
+export const createReserveByUser = async (data: ReserveDto, user: User, language:string) => {
+  data.userId = user.id;
   data.price_is_calculated = true;
-  await createReserve(data);
+  const reserve = await createReserve(data);
+  if(reserve == null) throw new BadRequestError("error.failedToCreateReserve")
+  await sendReservationEmail({ email:user.email, firstName:user.firstName}, reserve, language );
 };
 
 
-export const createReserve = async (data: ReserveDto) => {
+export const createReserve = async (data: ReserveDto):Promise<ReserveDto|null> => {
   if(!data.dateFrom) throw new BadRequestError("error.noDateFromInReserveRequest")
 
   const checkInTime = new Date(data.dateFrom);
@@ -249,7 +253,7 @@ export const createReserve = async (data: ReserveDto) => {
   }
   data.canceled_reason = "";
 
-  await reserveRepository.createReserve(data);
+  return await reserveRepository.createReserve(data);
 };
 
 export const updateReserve = async (id:number, data: ReserveDto) => {

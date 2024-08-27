@@ -18,6 +18,185 @@
 			font-style: normal;
 		}
 
+		.email-reserve-content{
+			text-align:center;
+			margin:auto;
+		}
+
+		.email-reserve-line{
+			text-align:center;
+		}
+
+		.email-reserve-header-body{
+			text-align:center;
+			background:#ffffff;
+			width:600px;
+			border:3px solid #00AAA9;
+			border-radius:15px;
+			padding:4px;
+		}
+
+		.email-reserve-header-structure{
+			padding-top:20px;
+			text-align:left;
+			background-color:#ffffff;
+		}
+
+		.email-reserve-header-frame{
+			text-align:center;
+			width:594px;
+		}
+
+		.email-reserve-header-text{
+			display:block;
+			text-align:center;
+			color:#00AAA9;
+		}
+		.email-reserve-header-block-spacer{
+			display:block;
+			text-align:center;
+			padding-top:10px;
+			padding-bottom:10px;
+		}
+
+		.email-reserve-block-table-spacer{
+			display:inline-table;
+			border:none;
+			width:100%;
+			height:100%;
+		}
+
+		.email-reserve-block-td-spacer{
+			border-bottom:1px solid #ffffff;
+			background:none;
+			height:1px;
+			width:100%;
+			margin: 0px;
+		}
+
+
+		.email-reserve-content-structure{
+			padding:0px;
+			text-align:left;
+			background-color:#ffffff;
+		}
+
+		.email-reserve-content-left, .email-reserve-content-right {
+				display: inline-block;
+				vertical-align: top;
+		}
+
+		.email-reserve-content-structure-product, .email-reserve-content-structure-experience{
+			padding:15px 0px;
+			text-align:left;
+			background-color:#ffffff;
+		}
+
+		.email-reserve-content-experience, .email-reserve-content-product{
+				display:inline-block;
+				text-align:center;
+				width:100%;
+				padding:0px 20px;
+		}
+
+		.email-reserve-content-experience-header, .email-reserve-content-product-header{
+			padding:0px;
+			text-align:left;
+			color:#00AAA9;
+			border-bottom:1px solid #00AAA9;
+		}
+
+		.email-reserve-content-experience-header h3 , .email-reserve-content-product-header h3{
+			margin:0px;
+		}
+
+		.email-reserve-content-left {
+				text-align: left;
+				width:48%;
+		}
+
+		.email-reserve-content-right {
+				text-align: right;
+				width:48%;
+		}
+
+		.email-reserve-content-structure-frame{
+			width:100%;
+			padding-bottom:20px;
+			text-align:center;
+		}
+		.email-reserve-block-image{
+			display:block;
+			padding:20px;
+		}
+		.email-reserve-block-image-img{
+			display:block;
+			border-radius:15px;
+			width:100%;
+		}
+
+		.email-reserve-content-container-frame{
+			width:100%;
+			text-align:left;
+		}
+		.email-reserve-content-header{
+			padding:10px 0px 10px 0px;
+			text-align:left;
+			color:#00AAA9;
+		}
+
+		.email-reserve-content-label{
+			color:#00AAA9;
+
+		}
+		.email-reserve-content-paragraph{
+			color:#eab485;
+			font-size:14px;
+			font-weight:500;
+		}
+		.email-reserve-content-experience-paragraph, .email-reserve-content-product-paragraph{
+			margin:0;
+			color:#eab485;
+			font-size:14px;
+			font-weight:500;
+		}
+
+		.email-reserve-content-footer-structure{
+			width:100%;
+			text-align:left;
+			background-color:#ffeace;
+			display:block;
+		}
+
+		.email-reserve-content-column-left, .email-reserve-content-column-right {
+				padding:0px 20px;
+				width: 48%;
+				display: inline-block; 
+				vertical-align: top; 
+		}
+
+		.email-reserve-content-column-left, .email-reserve-content-frame-left{
+			text-align:left;
+		}
+
+		.email-reserve-content-column-right {
+			text-align:right;
+		}
+		.email-reserve-content-frame-right{
+			text-align:left;
+		}
+
+		.email-reserve-content-frame-left, .email-reserve-content-frame-right{
+			width:267px;
+			display:block;
+		}
+
+		.email-reserve-content-frame-left{
+			text-align:center;
+			padding-bottom:20px;
+		}
+
+
 
 		.email-header-body {
 			background-color: #fff;
@@ -375,13 +554,13 @@
 																							<tbody>
 																								<tr class="block-structure-container-menu">
 																									<td align="center" valign="top" width="25%" class="menu-item"><a
-																											target="_blank" href="https://viewstripo.email">BOOKING</a>
+																											target="_blank" href="https://viewstripo.email">RESERVAR</a>
 																									</td>
 																									<td align="center" valign="top" width="25%" class="menu-item"><a
 																											target="_blank" href="https://viewstripo.email">GLAMPINGS</a>
 																									</td>
 																									<td align="center" valign="top" width="25%" class="menu-item"><a
-																											target="_blank" href="https://viewstripo.email">EXPERIENCES</a>
+																											target="_blank" href="https://viewstripo.email">EXPERIENCIAS</a>
 																									</td>
 																									<td align="center" valign="top" width="25%" class="menu-item"><a
 																											target="_blank" href="https://viewstripo.email">BLOG</a>
@@ -409,7 +588,7 @@
 																			<tbody>
 																				<tr>
 																					<td align="center" class="email-container-content-message-header">
-																						<h1>Restoration of Account</h1>
+																						<h1>Gracias por tu confianza</h1>
 																					</td>
 																				</tr>
 																				<tr>
@@ -427,10 +606,7 @@
 																				</tr>
 																				<tr>
 																					<td class="email-container-content-message-body">
-																						<p>Hi {{name}} .<br>Here’s your
-																							restoration password
-																							code <span
-																								class="email-container-content-message-body-span">{{code}}</span>.
+																						<p>Esperamos disfrutes tu reserva.<br>Aqui estan los detalles de tu reserva.
 																						</p>
 																					</td>
 																				</tr>
@@ -448,6 +624,176 @@
 								</tr>
 							</tbody>
 						</table>
+
+						<table cellpadding="0" cellspacing="0" align="center">
+							<tbody>
+								<tr>
+									<td align="center">
+										<table bgcolor="#ffffff" align="center" cellpadding="0" cellspacing="0" width="600">
+											<tbody>
+												<tr>
+													<td class="block-spacer-structure-padding">
+														<table cellpadding="0" cellspacing="0" width="100%">
+															<tbody>
+																<tr>
+																	<td class="block-spacer-structure-frame">
+																		<table cellpadding="0" cellspacing="0" width="100%">
+																			<tbody>
+																				<tr>
+																					<td class="block-spacer"></td>
+																				</tr>
+																			</tbody>
+																		</table>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+
+						<table cellpadding="0" cellspacing="0" class="email-reserve-content">
+							<tbody>
+								<tr>
+									<td class="email-reserve-line">
+										<table  class="email-reserve-header-body" cellpadding="0" cellspacing="0">
+											<tbody>
+												<tr>
+													<td class="email-reserve-header-structure">
+														<table cellpadding="0" cellspacing="0" width="100%">
+															<tbody>
+																<tr>
+																	<td  class="email-reserve-header-frame">
+																		<table cellpadding="0" cellspacing="0" width="100%">
+																			<tbody>
+																				<tr>
+																					<td class="email-reserve-header-text">
+																						<h3><b>RESERVA {{idReserve}}</b></h3>
+																					</td>
+																				</tr>
+																				<tr>
+																					<td class="email-reserve-header-block-spacer">
+																						<table class="email-reserve-block-table-spacer" cellpadding="0" cellspacing="0">
+																							<tbody>
+																								<tr>
+																									<td class="email-reserve-block-td-spacer">
+																									</td>
+																								</tr>
+																							</tbody>
+																						</table>
+																					</td>
+																				</tr>
+																			</tbody>
+																		</table>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+													</td>
+												</tr>
+												{{tents}}
+												<tr>
+													<td class="email-reserve-content-structure-experience">
+														<table cellpadding="0" cellspacing="0" class="email-reserve-content-experience">
+															<tbody>
+																<tr>
+																	<td class="email-reserve-content-container-frame">
+																		<table cellpadding="0" cellspacing="0" width="100%">
+																			<tbody>
+																				<tr>
+																					<td class="email-reserve-content-experience-header">
+																						<h3>Experiencias</h3>
+																					</td>
+																				</tr>
+																				{{experiences}}
+																			</tbody>
+																		</table>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+													</td>
+												</tr>
+
+												<tr>
+													<td class="email-reserve-content-structure-product">
+														<table cellpadding="0" cellspacing="0" class="email-reserve-content-product">
+															<tbody>
+																<tr>
+																	<td class="email-reserve-content-container-frame">
+																		<table cellpadding="0" cellspacing="0" width="100%">
+																			<tbody>
+																				<tr>
+																					<td class="email-reserve-content-product-header">
+																						<h3>Productos</h3>
+																					</td>
+																				</tr>
+																				{{products}}
+																			</tbody>
+																		</table>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+													</td>
+												</tr>
+												<tr>
+													<td class="email-reserve-content-footer-structure">
+														<table cellpadding="0" cellspacing="0" class="email-reserve-content-column-left">
+															<tbody>
+																<tr>
+																	<td class="email-reserve-content-frame-left">
+																		<table cellpadding="0" cellspacing="0" width="100%">
+																			<tbody>
+																				<tr>
+																					<td align="left" class="esd-block-text">
+																						<p><strong></strong>Subtotal<br>Descuento<strong><br>Total</strong><br></p>
+																					</td>
+																				</tr>
+																			</tbody>
+																		</table>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+														<table cellpadding="0" cellspacing="0" class="email-reserve-content-column-right">
+															<tbody>
+																<tr>
+																	<td class="email-reserve-content-frame-right">
+																		<table cellpadding="0" cellspacing="0" width="100%">
+																			<tbody>
+																				<tr>
+																					<td align="left" class="esd-block-text">
+																						<p>{{netImport}}<br>{{discounted}}<br><strong>{{grossImport}}</strong></p>
+																					</td>
+																				</tr>
+																			</tbody>
+																		</table>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+
+
+
+
+
+
+
+
 						<table cellpadding="0" cellspacing="0" align="center">
 							<tbody>
 								<tr>
@@ -533,11 +879,11 @@
 																				</tr>
 																				<tr>
 																					<td class="footer-block-text">
-																						<p><a href="https://viewstripo.email" target="_blank">Home</a>
+																						<p><a href="https://viewstripo.email" target="_blank">Inicio</a>
 																						</p>
-																						<p><a href="https://viewstripo.email" target="_blank">About Us</a></p>
-																						<p><a href="https://viewstripo.email" target="_blank">Activities</a></p>
-																						<p><a href="https://viewstripo.email" target="_blank">Contact Us</a><br></p>
+																						<p><a href="https://viewstripo.email" target="_blank">Nosotros</a></p>
+																						<p><a href="https://viewstripo.email" target="_blank">Actividades</a></p>
+																						<p><a href="https://viewstripo.email" target="_blank">Contactanos</a><br></p>
 																						<p><a href="https://viewstripo.email" target="_blank">Checkout</a></p>
 																					</td>
 																				</tr>
@@ -617,15 +963,14 @@
 																			<tbody>
 																				<tr>
 																					<td class="footer-foot-block-text">
-																						<p>You are receiving this email
-																							because you have visited our site or asked us about the regular
-																							newsletter. Make sure our messages get to your Inbox (and not your bulk or
-																							junk folders).<br><a class="footer-foot-block-text-link" target="_blank"
-																								href="https://viewstripo.email">Privacy police</a> | <a target="_blank"
-																								class="footer-foot-block-text-link">Unsubscribe</a></p>
+																						<p>Estas recibiendo este correo
+																							por que has visitado nuestro sitio web o nos has pedido el newsletter
+																							regular. Asegurate que nuestros mensajes te lleguen a tu bandeja principal
+																							( y no se vayan a la bandeja de spam o no deseado ).<br><a class="footer-foot-block-text-link" target="_blank"
+																								href="https://viewstripo.email">Politica de Privacidad</a> | <a target="_blank"
+																								class="footer-foot-block-text-link">Des-suscbribirse</a></p>
 																						<p class="footer-foot-block-text-link">© {{currentYear}} Bambucamp
-																							Glamping All
-																							rights reserved.
+																							Glamping Todos los derechos reservados.
 																						</p>
 																					</td>
 																	</td>

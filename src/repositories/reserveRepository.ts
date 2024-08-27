@@ -273,8 +273,9 @@ export const getReserveById = async (id: number): Promise<Reserve | null> => {
 };
 
 
-export const createReserve = async (data: ReserveDto): Promise<Reserve> => {
-  return await prisma.reserve.create({
+export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null> => {
+  // Create the reserve first
+  const createdReserve = await prisma.reserve.create({
     data: {
       ...data,
       tents: {
@@ -302,6 +303,16 @@ export const createReserve = async (data: ReserveDto): Promise<Reserve> => {
         }))
       }
     }
+  });
+
+  // Query the newly created reserve to include related data
+  return await prisma.reserve.findUnique({
+    where: { id: createdReserve.id },
+    include: {
+      tents: true,
+      products: true,
+      experiences: true,
+    },
   });
 };
 

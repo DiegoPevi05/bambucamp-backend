@@ -192,7 +192,9 @@ export const createReserveByUser = [
       if (!req.user) {
         return res.status(401).json({ error: req.t('error.unauthorized') });
       };
-      await reserveService.createReserveByUser(req.body, req.user.id);
+
+      const language = req.language || 'en';
+      await reserveService.createReserveByUser(req.body, req.user, language);
       res.status(201).json({ message: req.t('message.reserveCreated') });
     } catch (error) {
       console.log(error);
