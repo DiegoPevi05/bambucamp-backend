@@ -106,8 +106,6 @@ export const createReserve = async (data: ReserveDto) => {
 
 
   data.dateSale = new Date();
-  data.qtypeople = Number(data.qtypeople);
-  data.qtykids = Number(data.qtykids);
   data.discountCodeId = Number(data.discountCodeId);
   data.userId = Number(data.userId);
 
@@ -121,10 +119,14 @@ export const createReserve = async (data: ReserveDto) => {
       throw new BadRequestError("error.noTentsAvailable");
     }
 
-    const isRoomSizeCorrect = utils.checkRoomSize(tentsDb, data.qtypeople, data.qtykids, data.aditionalPeople);
-    if(!isRoomSizeCorrect){
+    const peopleInReserve = utils.getPeopleInReserve(tentsDb);
+
+    if(data.aditionalPeople && data.aditionalPeople > peopleInReserve.aditionalPeople){
       throw new BadRequestError("error.noRoomSizeCorrect");
     }
+
+    data.qtypeople = peopleInReserve.qtypeople;
+    data.qtykids   = peopleInReserve.qtykids;
 
     if(data.price_is_calculated){
 
@@ -177,9 +179,9 @@ export const createReserve = async (data: ReserveDto) => {
       if(promotion.stock <= 0) throw new BadRequestError("error.promotionIsOutOfStock");
     }
 
+
+    data.aditionalPeople = data.aditionalPeople ? data.aditionalPeople : 0;
     data.promotionId  = Number(promotion.id);
-    data.qtypeople    = promotion.qtypeople;
-    data.qtykids      = promotion.qtykids;
     data.netImport    = promotion.netImport;
     data.discount     = promotion.discount;
     data.grossImport  = promotion.grossImport;
@@ -206,6 +208,15 @@ export const createReserve = async (data: ReserveDto) => {
     if(!TentsAreAvialble){
       throw new BadRequestError("errror.noTentsAvailable");
     }
+
+    const peopleInReserve = utils.getPeopleInReserve(tentsDb);
+
+    if(data.aditionalPeople && data.aditionalPeople > peopleInReserve.aditionalPeople){
+      throw new BadRequestError("error.noRoomSizeCorrect");
+    }
+
+    data.qtypeople = peopleInReserve.qtypeople;
+    data.qtykids   = peopleInReserve.qtykids;
 
     // Convert idproducts to ReserveProduct structure
     const promotionProducts:ReserveProductDto[] = idproducts.map(product => ({
@@ -236,6 +247,7 @@ export const createReserve = async (data: ReserveDto) => {
     await promotionRepository.updatePromotionStock(promotion.id,promotion.stock - 1);
 
   }
+  data.canceled_reason = "";
 
   await reserveRepository.createReserve(data);
 };

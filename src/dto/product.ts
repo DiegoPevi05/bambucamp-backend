@@ -11,6 +11,7 @@ export interface ProductDto {
 }
 
 export interface ProductPublicDto extends ProductDto  {
+  id:number;
   category: { id: number; name:string, createdAt:Date, updatedAt:Date };
 }
 

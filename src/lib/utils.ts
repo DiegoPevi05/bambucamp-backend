@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { Tent , Product, Experience, Notification, NotificationType } from '@prisma/client';
+import { Tent , Product, Experience, Notification } from '@prisma/client';
 import { ReserveDto } from '../dto/reserve';
 import { PublicNotification } from '../dto/notification';
 import * as reserveRepository from '../repositories/ReserveRepository';
@@ -9,7 +9,6 @@ import * as tentRepository from '../repositories/TentRepository';
 import * as productRepository from '../repositories/ProductRepository';
 import * as experienceRepository from '../repositories/ExperienceRepository';
 import {BadRequestError, NotFoundError} from '../middleware/errors';
-import i18next from "i18next";
 
 // Define a custom type for the Multer file
 type MulterFile = Express.Multer.File;
@@ -112,6 +111,22 @@ export const checkAvailability = async (checkInTime: Date, checkOutTime:Date, te
   // If no overlapping reservations are found, return true
   return true;
 };
+
+export const getPeopleInReserve = (tents:Tent[] ):{ qtypeople:number, qtykids:number, aditionalPeople:number } => {
+
+  const qtypeople = tents.reduce((acc, tent) => acc + (tent.qtypeople ? tent.qtypeople : 0), 0);
+
+  const qtykids = tents.reduce((acc, tent) => acc + (tent.qtykids ? tent.qtykids : 0), 0);
+
+  const aditionalPeople = tents.length;
+
+  return {
+    qtypeople,
+    qtykids,
+    aditionalPeople
+  }
+
+}
 
 export const checkRoomSize = (tents: Tent[], qtypeople:number, qtyKids:number, aditionalPeople: number|undefined): boolean => {
 

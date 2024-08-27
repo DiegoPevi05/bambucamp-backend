@@ -8,6 +8,7 @@ export const getAllPublicProducts = async () => {
   const products = await productRepository.getAllPublicProducts();
 
   return products.map((product) => ({
+    id:product.id,
     categoryId: product.categoryId,
     category:product.category,
     name: product.name,

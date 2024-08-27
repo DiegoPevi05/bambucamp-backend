@@ -170,8 +170,6 @@ export const getAllReserves = async (req: Request, res: Response) => {
 };
 
 export const createReserveByUser = [
-  body('qtypeople').notEmpty().withMessage('validation.qtypeopleRequired'),
-  body('qtykids').notEmpty().withMessage('validation.qtykidsRequired'),
   body('tents').isArray().withMessage('validation.tentsMustBeArray'),
   body('products').isArray().withMessage('validation.productsMustBeArray'),
   body('experiences').isArray().withMessage('validation.experiencesMustBeArray'),
@@ -197,6 +195,7 @@ export const createReserveByUser = [
       await reserveService.createReserveByUser(req.body, req.user.id);
       res.status(201).json({ message: req.t('message.reserveCreated') });
     } catch (error) {
+      console.log(error);
       if (error instanceof CustomError) {
         res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {

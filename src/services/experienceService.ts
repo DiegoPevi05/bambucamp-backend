@@ -8,6 +8,7 @@ export const getAllPublicExperiences = async () => {
   const experiences = await experienceRepository.getAllPublicExperiences();
 
   return experiences.map((experience) => ({
+    id:experience.id,
     categoryId:experience.categoryId,
     category:experience.category,
     header: experience.header,
