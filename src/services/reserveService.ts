@@ -157,11 +157,14 @@ export const createReserve = async (data: ReserveDto):Promise<ReserveDto|null> =
         // Calculate total price
         data.netImport = utils.calculateReservePrice(tentsWithQuantities, productsWithQuantities, experiencesWithQuantities);
 
-        data.grossImport = await utils.applyDiscount(data.netImport, data.discountCodeId);
+        const { grossImport, discount } = await utils.applyDiscount(data.netImport, data.discountCodeId);
+        data.grossImport = grossImport;
+        data.discount = discount;
 
     }else{
-
-        data.grossImport = await utils.applyDiscount(data.netImport, data.discountCodeId, data.discount);
+        const { grossImport, discount } = await utils.applyDiscount(data.netImport, data.discountCodeId, data.discount);
+        data.grossImport = grossImport;
+        data.discount = discount;
 
     }
 
@@ -367,11 +370,15 @@ export const updateReserve = async (id:number, data: ReserveDto) => {
         // Calculate total price
         reserve.netImport = utils.calculateReservePrice(tentsWithQuantities, productsWithQuantities, experiencesWithQuantities);
 
-        reserve.grossImport = await utils.applyDiscount(data.netImport, data.discountCodeId);
+        const { grossImport, discount } = await utils.applyDiscount(data.netImport, data.discountCodeId);
+        reserve.grossImport = grossImport;
+        reserve.discount = discount;
 
     }else{
 
-        reserve.grossImport = await utils.applyDiscount(data.netImport, data.discountCodeId);
+        const { grossImport, discount } = await utils.applyDiscount(data.netImport, data.discountCodeId);
+        reserve.grossImport = grossImport;
+        reserve.discount = discount;
 
     }
 

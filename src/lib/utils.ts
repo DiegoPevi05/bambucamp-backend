@@ -147,10 +147,10 @@ export const checkRoomSize = (tents: Tent[], qtypeople:number, qtyKids:number, a
   return true;
 };
 
-export const applyDiscount = async (grossImport: number, discountCodeId: number | undefined, discountRaw?: number|undefined): Promise<number> => {
+export const applyDiscount = async (grossImport: number, discountCodeId: number | undefined, discountRaw?: number|undefined): Promise<{grossImport: number, discount:number }> => {
 
   if (!discountCodeId) {
-    return grossImport;
+    return {grossImport, discount:0};
   }
 
   const discount = await discountCodeRepository.getDiscountCodeById(discountCodeId);
@@ -161,17 +161,17 @@ export const applyDiscount = async (grossImport: number, discountCodeId: number 
 
     await discountCodeRepository.updateDiscountCodeStock(discountCodeId,newStock);
 
-    return grossImport - (grossImport * discount.discount) / 100;
+    return {grossImport: (grossImport - (grossImport * discount.discount) / 100 ) , discount: discount.discount} ;
 
   }else{
 
     if(discountRaw && discountRaw >= 0 && discountRaw <= 100){
 
-      return grossImport - (grossImport * discountRaw) / 100;
+      return {grossImport: (grossImport - (grossImport * discountRaw) / 100), discount:0};
 
     }else{
 
-      return grossImport;
+      return {grossImport, discount:0};
     }
   }
 };
@@ -329,3 +329,29 @@ export const createPublicNotification = (t:any,notification: Notification): Publ
     isRead: notification.isRead
   };
 };
+
+export const formatDateToYYYYMMDD = (date: Date): string => {
+  // Create a new Date object with the current time zone
+  const localDate = new Date(date);
+
+  // Get the year, month, and day from the localDate object
+  const year = localDate.getFullYear();
+  const month = String(localDate.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+  const day = String(localDate.getDate()).padStart(2, '0');
+
+  // Return the date in the desired format YYYYY-MM-DD
+  return `${year}-${month}-${day}`;
+}
+
+export const formatPrice = (price:number) => {
+  return price.toLocaleString("en-US", {style: "currency", currency: "USD"});
+};
+
+export const formatDate = (date:Date) => {
+  date.setHours(12);
+  date.setMinutes(0);
+  date.setSeconds(0);
+  date.setMilliseconds(0);
+  //format with time 
+  return new Intl.DateTimeFormat("en-US", {dateStyle: "medium", timeStyle: "short"}).format(date);
+}

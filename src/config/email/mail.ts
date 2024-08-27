@@ -2,6 +2,7 @@ import nodemailer, { TransportOptions } from 'nodemailer';
 import fs from 'fs';
 import path from 'path';
 import {ReserveDto} from '../../dto/reserve';
+import * as utils from '../../lib/utils';
 
 // Load SMTP configuration from environment variables
 const HOSTNAME = process.env.HOSTNAME || `http://localhost:${process.env.PORT}`;
@@ -126,17 +127,14 @@ const sendReservationEmail = async(user: { email:string, firstName:string }, res
                                   <tr>
                                     <td class="email-reserve-content-header">
                                       <h3>${tent.name}</h3>
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td class="email-reserve-content-header">
                                       <p class="email-reserve-content-paragraph">
-                                        <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Desde" : "From" }</span>:&nbsp;${reserve.dateFrom.toString()}&nbsp;~&nbsp;<span class="email-reserve-content-label">${chosenLanguage == "es" ? "Hasta" : "To" }</span>:&nbsp;${reserve.dateTo.toString()}&nbsp;
-                                        <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Personas" : "People" }</span>:&nbsp;${tent.quantity}}&nbsp;
-                                        <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Precio" : "Price" }</span>:&nbsp;${tent.price}/${chosenLanguage == "es" ? "por" : "per" }&nbsp;${chosenLanguage == "es" ? "noche" : "night" }<br>
+                                        <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Desde" : "From" }</span>:&nbsp;${utils.formatDate(reserve.dateFrom)}&nbsp;<br>
+                                        <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Hasta" : "To" }</span>:&nbsp;${utils.formatDate(reserve.dateTo)}&nbsp;<br>
+                                        <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Personas" : "People" }</span>:&nbsp;${tent.quantity}&nbsp;<br>
+                                        <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Precio" : "Price" }</span>:&nbsp;${utils.formatPrice(tent.price)}/${chosenLanguage == "es" ? "por" : "per" }&nbsp;${chosenLanguage == "es" ? "noche" : "night" }<br>
                                         <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Qty. noches" : "Qty. nights" }</span>:&nbsp;${tent.quantity}<br>
-                                        <span class="email-reserve-content-label">&nbsp;${tent.quantity}&nbsp;x&nbsp;${tent.quantity}&nbsp;${chosenLanguage == "es" ? "noches" : "nights" }</span><br>
-                                        <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Total" : "Total" }</span>:&nbsp;${tent.price*tent.quantity}<br>
+                                        <span class="email-reserve-content-label">&nbsp;${utils.formatPrice(tent.price)}&nbsp;x&nbsp;${tent.quantity}&nbsp;${chosenLanguage == "es" ? "noches" : "nights" }</span><br>
+                                        <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Total" : "Total" }</span>:&nbsp;${utils.formatPrice(tent.price*tent.quantity)}<br>
                                       </p>
                                     </td>
                                   </tr>
@@ -165,16 +163,16 @@ const sendReservationEmail = async(user: { email:string, firstName:string }, res
                 <span class="email-reserve-content-label">${experience.name}</span>&nbsp;
               </p>
               <p class="email-reserve-content-experience-paragraph">
-                  <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Dia" : "Day" }</span>:&nbsp;${experience.day.toString()}&nbsp;
+                  <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Dia" : "Day" }</span>:&nbsp;${utils.formatDateToYYYYMMDD(experience.day)}&nbsp;
               </p>
               <p class="email-reserve-content-experience-paragraph">
-                  <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Precio" : "price" }</span>:&nbsp;${experience.price}/${chosenLanguage == "es" ? "por" : "per" }&nbsp;${chosenLanguage == "es" ? "cantidad" : "quantity" }
+                  <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Precio" : "price" }</span>:&nbsp;${utils.formatPrice(experience.price)}/${chosenLanguage == "es" ? "por" : "per" }&nbsp;${chosenLanguage == "es" ? "cantidad" : "quantity" }
               </p>
               <p class="email-reserve-content-experience-paragraph">
                   <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Cantidad" : "Quantity" }</span>:&nbsp;${experience.quantity}&nbsp;
               </p>
               <p class="email-reserve-content-experience-paragraph">
-                  <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Total" : "Total" }</span>:&nbsp;${experience.price * experience.quantity}
+                  <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Total" : "Total" }</span>:&nbsp;${utils.formatPrice(experience.price * experience.quantity)}
               </p>
             </td>
           </tr>
@@ -195,13 +193,13 @@ const sendReservationEmail = async(user: { email:string, firstName:string }, res
               <span class="email-reserve-content-label">${product.name}</span>&nbsp;
             </p>
             <p class="email-reserve-content-product-paragraph">
-              <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Precio" : "price" }</span>:&nbsp;${product.price}/${chosenLanguage == "es" ? "por" : "per" }&nbsp;${chosenLanguage == "es" ? "cantidad" : "quantity" }
+              <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Precio" : "price" }</span>:&nbsp;${utils.formatPrice(product.price)}/${chosenLanguage == "es" ? "por" : "per" }&nbsp;${chosenLanguage == "es" ? "cantidad" : "quantity" }
             </p>
             <p class="email-reserve-content-product-paragraph">
                 <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Cantidad" : "Quantity" }</span>:&nbsp;${product.quantity}&nbsp;
             </p>
             <p class="email-reserve-content-product-paragraph">
-                <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Total" : "Total" }</span>:&nbsp;${product.quantity * product.price}
+                <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Total" : "Total" }</span>:&nbsp;${utils.formatPrice(product.quantity * product.price)}
             </p>
           </td>
         </tr>
@@ -209,11 +207,13 @@ const sendReservationEmail = async(user: { email:string, firstName:string }, res
     productsHtml += productHtml;
   });
 
+  emailTemplate = emailTemplate.replace('{{products}}', productsHtml);
+
   // Replace the placeholder in the template with the generated tents HTML
   emailTemplate = emailTemplate.replace('{{idReserve}}', "BAMBU-001");
-  emailTemplate = emailTemplate.replace('{{netImport}}', reserve.netImport.toString());
-  emailTemplate = emailTemplate.replace('{{discounted}}', reserve.discount.toString());
-  emailTemplate = emailTemplate.replace('{{grossImport}}', reserve.grossImport.toString());
+  emailTemplate = emailTemplate.replace('{{netImport}}', utils.formatPrice(reserve.netImport));
+  emailTemplate = emailTemplate.replace('{{discounted}}', reserve.discount.toString()+"%");
+  emailTemplate = emailTemplate.replace('{{grossImport}}', utils.formatPrice(reserve.grossImport));
   emailTemplate = emailTemplate.replace('{{currentYear}}', new Date().getFullYear().toString());
 
   await sendEmail(user.email, language === 'en' ? 'Reservation confirmed' : 'Reservacion confirmada', emailTemplate);
