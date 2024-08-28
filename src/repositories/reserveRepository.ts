@@ -1,5 +1,5 @@
-import { PrismaClient, Reserve, ReserveTent, ReserveProduct, ReserveExperience, Tent,   } from "@prisma/client";
-import { ReserveDto, ReserveFilters, PaginatedReserve, ReserveTentDto, ReserveExperienceDto, ReserveProductDto, ReserveOptions } from "../dto/reserve";
+import { PrismaClient, Reserve, ReserveTent, ReserveProduct, ReserveExperience, Tent, ReserveStatus,   } from "@prisma/client";
+import { ReserveDto, ReserveFilters, PaginatedReserve, ReserveTentDto, ReserveExperienceDto, ReserveProductDto, ReserveOptions, ReservePromotionDto } from "../dto/reserve";
 
 interface Pagination {
   page: number;
@@ -18,20 +18,25 @@ export const searchAvailableTents = async (dateFrom: Date, dateTo: Date): Promis
   // Find all reserved tent IDs within the date range
   const reservedTentIds = await prisma.reserveTent.findMany({
     where: {
-      reserve: {
-        AND: [
-          {
-            dateFrom: {
-              lte: dateTo,
+      AND: [
+        {
+          dateFrom: {
+            lte: dateTo,
+          },
+        },
+        {
+          dateTo: {
+            gte: dateFrom,
+          },
+        },
+        {
+          reserve: {
+            reserve_status: {
+              in: [ReserveStatus.CONFIRMED, ReserveStatus.NOT_CONFIRMED],
             },
           },
-          {
-            dateTo: {
-              gte: dateFrom,
-            },
-          },
-        ],
-      },
+        },
+      ],
     },
     select: {
       idTent: true,
@@ -63,17 +68,17 @@ export const getMyReservesByMonth = async (page: number, userId?: number): Promi
   const targetDate = new Date(currentDate.setMonth(currentDate.getMonth() + page));
   const startOfMonth = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1, 0, 0, 0);
   const endOfMonth = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0, 23, 59, 59);
-
- // Query reserves that either start or end in the month or overlap with the month
-  const reserves = await prisma.reserve.findMany({
+  const reserveTents = await prisma.reserveTent.findMany({
     where: {
-      ...(userId && { userId: userId }),
+      reserve: {
+        ...(userId && { userId: userId }), // Filter by userId if provided
+      },
       AND: [
         {
-          dateFrom: { lte: endOfMonth },
+          dateFrom: { lte: endOfMonth },  // Ensure the reserveTent's dateFrom is within the range
         },
         {
-          dateTo: { gte: startOfMonth },
+          dateTo: { gte: startOfMonth },  // Ensure the reserveTent's dateTo is within the range
         },
       ],
     },
@@ -84,12 +89,18 @@ export const getMyReservesByMonth = async (page: number, userId?: number): Promi
       id: true,
       dateFrom: true,
       dateTo: true,
+      reserveId:true
     },
   });
 
+  const formattedReserves = reserveTents.map(reserveTent => ({
+    id: reserveTent.reserveId,
+    dateFrom: reserveTent.dateFrom,
+    dateTo: reserveTent.dateTo,
+  }));
 
   return {
-    reserves,
+    reserves:formattedReserves,
   };
 };
 
@@ -121,6 +132,7 @@ export const getMyReserves = async (pagination: Pagination, userId?: number): Pr
       tents: true,
       products: true,
       experiences: true,
+      promotions:true,
     },
   });
 
@@ -129,6 +141,7 @@ export const getMyReserves = async (pagination: Pagination, userId?: number): Pr
       const tentIds = reserve.tents.map((t) => t.idTent);
       const productIds = reserve.products.map((p) => p.idProduct);
       const experienceIds = reserve.experiences.map((e) => e.idExperience);
+      const promotionIds = reserve.promotions.map((e) => e.idPromotion);
 
       const tentsDB = await prisma.tent.findMany({
         where: {
@@ -148,6 +161,13 @@ export const getMyReserves = async (pagination: Pagination, userId?: number): Pr
         },
       });
 
+      const promotionsDB = await prisma.promotion.findMany({
+        where: {
+
+          id: { in: promotionIds },
+        },
+      });
+
       return {
         ...reserve,
         tents: reserve.tents.map((tent) => ({
@@ -161,6 +181,10 @@ export const getMyReserves = async (pagination: Pagination, userId?: number): Pr
         experiences: reserve.experiences.map((experience) => ({
           ...experience,
           experienceDB: experiencesDB.find((dbExperience) => dbExperience.id === experience.idExperience),
+        })),
+        promotions: reserve.promotions.map((promotion) => ({
+          ...promotion,
+          promotionDB: promotionsDB.find((dbPromotion) => dbPromotion.id === promotion.idPromotion),
         })),
       };
     })
@@ -230,30 +254,40 @@ export const getAllReserves = async ( filters: ReserveFilters, pagination: Pagin
   const skip = (page - 1) * pageSize;
   const take = pageSize;
 
-  const totalCount = await prisma.reserve.count({
+ // Find ReserveTent records within the date range
+  const reservedTents = await prisma.reserveTent.findMany({
     where: {
-      ...(dateFrom && { dateFrom: { gte: dateFrom } }),
-      ...(dateTo && { dateTo: { lte: dateTo } }),
+      ...(dateFrom && { dateFrom: { lte: dateTo } }), // Ensure dateFrom is within the range
+      ...(dateTo && { dateTo: { gte: dateFrom } }),   // Ensure dateTo is within the range
+    },
+    skip,
+    take,
+    include: {
+      reserve: true,   // Include related Reserve data
     },
     orderBy: {
       createdAt: 'desc',
     },
   });
 
+  // Extract reserve IDs to filter the Reserve records
+  const reserveIds = [...new Set(reservedTents.map(tent => tent.reserveId))]; 
+
+  const totalCount = reserveIds.length;
+
+  // Retrieve all Reserve records matching the IDs
   const reserves = await prisma.reserve.findMany({
     where: {
-      ...(dateFrom && { dateFrom: { gte: dateFrom } }),
-      ...(dateTo && { dateTo: { lte: dateTo } }),
+      id: { in: reserveIds },
     },
-    orderBy: {
-      createdAt: 'desc',
-    },
-    skip,
-    take,
     include: {
       tents: true,        // Include ReserveTent data
       products: true,     // Include ReserveProduct data
       experiences: true,  // Include ReserveExperience data
+      promotions:true,
+    },
+    orderBy: {
+      createdAt: 'desc',
     },
   });
 
@@ -283,7 +317,9 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
           idTent: tent.idTent,
           name: tent.name,
           price: tent.price,
-          quantity: tent.quantity,
+          nights: tent.nights,
+          dateFrom:tent.dateFrom,
+          dateTo:tent.dateTo
         }))
       },
       products: {
@@ -300,6 +336,15 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
           name: experience.name,
           price: experience.price,
           quantity: experience.quantity,
+          day:experience.day
+        }))
+      },
+      promotions:{
+        create:data.promotions.map(promotion => ({
+          idPromotion:promotion.idPromotion,
+          name:promotion.name,
+          price:promotion.price,
+          quantity:promotion.quantity
         }))
       }
     }
@@ -312,64 +357,48 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
       tents: true,
       products: true,
       experiences: true,
+      promotions:true,
     },
   });
 };
 
 
-export const getAvailableReserves = async (checkInTime: Date, checkOutTime: Date, tents: Tent[]): Promise<{ reserveId:number, idTent:number }[]> => {
-  // Step 1: Find all ReserveTent entries that have a conflict in the given date range
+export const getAvailableReserves = async (tents: ReserveTentDto[]): Promise<{ reserveId: number; idTent: number }[]> => {
+  // Extract tent IDs and filter out any undefined values
+  const tentIds = tents.map(tent => tent.idTent).filter((id): id is number => id !== undefined);
+
+  // Prepare the query to find overlapping reservations
   return await prisma.reserveTent.findMany({
     where: {
       idTent: {
-        in: tents.map(tent => tent.id),
+        in: tentIds,
       },
-      reserve: {
-        AND: [
-          {
-            dateFrom: {
-              lt: checkOutTime, // Reserve ends after check-in
-            },
+      AND: tents.flatMap(tent => [
+        {
+          dateFrom: {
+            lt: tent.dateTo, // Check if the reservation ends after the tent's check-in
           },
-          {
-            dateTo: {
-              gt: checkInTime, // Reserve starts before check-out
-            },
+        },
+        {
+          dateTo: {
+            gt: tent.dateFrom, // Check if the reservation starts before the tent's check-out
           },
-        ],
-      },
+        },
+      ]),
     },
     select: {
-      reserveId: true, // Fetch reserveId instead of idTent
-      idTent:true
+      reserveId: true,
+      idTent: true,
     },
   });
-
-  /*// Step 2: Extract the reserveIds
-  const reserveIds = reservedTents.map(reservedTent => reservedTent.reserveId);
-
-  // Step 3: Fetch all Reserve records that match the reserveIds
-  const reserves = await prisma.reserve.findMany({
-    where: {
-      id: {
-        in: reserveIds, // Fetch reserves by reserveIds
-      },
-    },
-    include: {
-      tents: true, // Include related ReserveTent records
-      products: true, // Optionally include related products
-      experiences: true, // Optionally include related experiences
-    },
-  });
-
-  return reserves;*/
 };
 
 export const upsertReserveDetails = async (
   idReserve: number,
   tents: ReserveTentDto[],
   products: ReserveProductDto[],
-  experiences: ReserveExperienceDto[]
+  experiences: ReserveExperienceDto[],
+  promotions:ReservePromotionDto[]
 ) => {
   // Delete existing tents associated with the reserve
   await prisma.reserveTent.deleteMany({
@@ -386,13 +415,19 @@ export const upsertReserveDetails = async (
     where: { reserveId: idReserve },
   });
 
+  await prisma.reserveProduct.deleteMany({
+    where: { reserveId: idReserve },
+  });
+
   // Create new tents
   await prisma.reserveTent.createMany({
     data: tents.map((tent) => ({
       idTent: tent.idTent,
+      dateFrom: tent.dateFrom,
+      dateTo:tent.dateTo,
       name: tent.name,
       price: tent.price,
-      quantity: tent.quantity,
+      nights: tent.nights,
       reserveId: idReserve, // Establish the relationship
     })),
   });
@@ -415,6 +450,18 @@ export const upsertReserveDetails = async (
       name: experience.name,
       price: experience.price,
       quantity: experience.quantity,
+      day:experience.day,
+      reserveId: idReserve, // Establish the relationship
+    })),
+  });
+
+  // Create new experiences
+  await prisma.reservePromotion.createMany({
+    data: promotions.map((promotion) => ({
+      idPromotion: promotion.idPromotion,
+      name: promotion.name,
+      price: promotion.price,
+      quantity: promotion.quantity,
       reserveId: idReserve, // Establish the relationship
     })),
   });
@@ -426,6 +473,7 @@ export const upsertReserveDetails = async (
       tents: true,
       products: true,
       experiences: true,
+      promotions:true,
     },
   });
 };

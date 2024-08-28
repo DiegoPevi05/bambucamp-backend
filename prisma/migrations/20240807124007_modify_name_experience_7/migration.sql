@@ -1,4 +1,0 @@
--- AlterTable
-ALTER TABLE "Experience" ADD COLUMN     "limitAge" INTEGER NOT NULL DEFAULT 1,
-ADD COLUMN     "qtyPeople" INTEGER NOT NULL DEFAULT 1,
-ADD COLUMN     "suggestions" TEXT NOT NULL DEFAULT '[]';

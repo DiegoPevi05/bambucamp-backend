@@ -94,7 +94,8 @@
 		"failedToDisableAdmin": "You cannot disable an admin",
 		"failedToEnabledYourself": "You cannot enable yourself",
 		"failedToEnabledUser": "User already enabled",
-		"failedToEnableAdmin": "You cannot enable an admin"
+		"failedToEnableAdmin": "You cannot enable an admin",
+		"noAllPromotionsFound": "Not all promotions were found in the database"
 	},
 	"message": {
 		"reserveCreated": "Reserve created",

@@ -1,4 +1,4 @@
-import {  Experience, PaymentStatus, Tent, Product } from '@prisma/client';
+import {  Experience, PaymentStatus, Tent, Product, Promotion, ReserveStatus } from '@prisma/client';
 import { TentDto } from './tent';
 import { ProductPublicDto } from './product';
 import { ExperiencePublicDto } from './experience';
@@ -6,14 +6,19 @@ import { PromotionDto } from './promotion';
 import { DiscountCodeDto } from './discountcode'; 
 
 export interface ReserveTentDto {
+  id?:number;
   idTent:number;
   name:string;
   price:number;
-  quantity:number;
+  nights:number;
+  dateFrom:Date;
+  dateTo:Date;
+  aditionalPeople:number;
   tentDB?:Tent;
 }
 
 export interface ReserveProductDto {
+  id?:number;
   idProduct:number;
   name:string;
   price:number;
@@ -22,12 +27,22 @@ export interface ReserveProductDto {
 }
 
 export interface ReserveExperienceDto {
+  id?:number;
   idExperience:number;
   name:string;
   price:number;
   quantity:number;
   day:Date;
   experienceDB?:Experience;
+}
+
+export interface ReservePromotionDto {
+  id?:number;
+  idPromotion:number;
+  name:string;
+  price:number;
+  quantity:number;
+  promotionDB?:Promotion;
 }
 
 export interface ReserveOptions {
@@ -39,25 +54,22 @@ export interface ReserveOptions {
 }
 
 export interface ReserveDto {
-  qtypeople: number;
-  qtykids: number;
   userId: number;
   tents: ReserveTentDto[];
   products: ReserveProductDto[];
   experiences: ReserveExperienceDto[];
-  dateFrom: Date;
-  dateTo: Date;
+  promotions:ReservePromotionDto[];
   dateSale: Date;
-  promotionId: number;
   price_is_calculated: boolean;
-  discountCodeId: number;
-  netImport: number;
+  discount_code_id: number;
+  discount_code_name:string;
+  net_import: number;
   discount: number;
-  grossImport: number;
+  gross_import: number;
   canceled_reason: string;
   canceled_status: boolean;
-  paymentStatus: PaymentStatus;
-  aditionalPeople: number;
+  payment_status: PaymentStatus;
+  reserve_status:ReserveStatus;
 }
 
 export interface ReserveFilters {

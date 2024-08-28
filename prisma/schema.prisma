@@ -47,6 +47,7 @@ model Tent {
   price           Float           @default(0)
   status          String          @default("ACTIVE") @db.Text
   custom_price    String          @default("[]") @db.Text
+  aditional_people_price Float    @default(0)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt @default(now())
 }
@@ -133,36 +134,38 @@ model Promotion {
   updatedAt       DateTime        @updatedAt @default(now())
 }
 
+enum ReserveStatus {
+  NOT_CONFIRMED
+  CONFIRMED
+  COMPLETE
+}
+
 enum PaymentStatus {
+  UNPAID 
   PAID
-  PENDING
-  DEBT
 }
 
 model Reserve {
-  id                Int             @id @default(autoincrement())
-  qtypeople         Int             @default(1)
-  qtykids           Int             @default(0)
-  userId            Int
-  user              User            @relation(fields: [userId], references: [id])
-  tents             ReserveTent[]   
-  products          ReserveProduct[] 
-  experiences       ReserveExperience[]
-  dateFrom          DateTime        
-  dateTo            DateTime        
-  dateSale          DateTime        @default(now())
-  promotionId       Int             @default(0)            
-  price_is_calculated Boolean       @default(false)
-  discountCodeId    Int             @default(0)         
-  netImport         Float           @default(0)
-  discount          Int             @default(0)
-  grossImport       Float           @default(0)
-  canceled_reason   String          @db.Text
-  canceled_status   Boolean         @default(false)
-  paymentStatus     PaymentStatus   @default(PENDING) 
-  aditionalPeople   Int             @default(0)
-  createdAt                         DateTime @default(now())
-  updatedAt         DateTime        @updatedAt @default(now())
+  id                    Int               @id @default(autoincrement())
+  userId                Int
+  user                  User              @relation(fields: [userId], references: [id])
+  tents                 ReserveTent[]   
+  products              ReserveProduct[] 
+  experiences           ReserveExperience[]
+  promotions            ReservePromotion[]
+  dateSale              DateTime          @default(now())
+  price_is_calculated   Boolean           @default(false)
+  discount_code_id      Int               @default(0)         
+  discount_code_name    String            
+  net_import            Float             @default(0)
+  discount              Int               @default(0)
+  gross_import          Float             @default(0)
+  canceled_reason       String            @db.Text
+  canceled_status       Boolean           @default(false)
+  payment_status        PaymentStatus     @default(UNPAID) 
+  reserve_status        ReserveStatus     @default(NOT_CONFIRMED)
+  createdAt                               DateTime @default(now())
+  updatedAt             DateTime          @updatedAt @default(now())
 }
 
 model ReserveTent {
@@ -171,7 +174,10 @@ model ReserveTent {
   idTent          Int
   name            String    @db.Text
   price           Float     @default(0)
-  quantity        Int       @default(1)
+  nights          Int       @default(1)
+  dateFrom        DateTime        
+  dateTo          DateTime        
+  aditionalPeople Int       @default(0)
   reserve         Reserve   @relation(fields: [reserveId], references: [id], onDelete: Cascade)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt @default(now())
@@ -197,6 +203,18 @@ model ReserveExperience {
   price           Float     @default(0)
   quantity        Int       @default(1)
   day             DateTime  @default(now())
+  reserve         Reserve   @relation(fields: [reserveId], references: [id], onDelete: Cascade)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt @default(now())
+}
+
+model ReservePromotion {
+  id              Int       @id @default(autoincrement())
+  reserveId       Int
+  idPromotion     Int
+  name            String    @db.Text
+  price           Float     @default(0)
+  quantity        Int       @default(1)
   reserve         Reserve   @relation(fields: [reserveId], references: [id], onDelete: Cascade)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt @default(now())

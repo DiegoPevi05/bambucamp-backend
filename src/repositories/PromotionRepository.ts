@@ -1,6 +1,7 @@
 import { PrismaClient, Promotion   } from "@prisma/client";
 import { PromotionDto, PromotionFilters, PaginatedPromotions, PromotionPublicDto, PromotionOptions } from "../dto/promotion";
-import {BadRequestError} from "../middleware/errors";
+import {BadRequestError, NotFoundError} from "../middleware/errors";
+import {ReservePromotionDto} from "../dto/reserve";
 
 const prisma = new PrismaClient();
 
@@ -143,6 +144,16 @@ export const getPromotionById = async (id: number): Promise<Promotion | null> =>
   });
 };
 
+export const getPromotionsByIds = async (ids: number[]): Promise<Promotion[]> => {
+  return await prisma.promotion.findMany({
+    where: {
+      id: {
+        in: ids
+      }
+    }
+  });
+};
+
 export const createPromotion = async (data: PromotionDto): Promise<Promotion> => {
   return await prisma.promotion.create({
     data
@@ -156,14 +167,40 @@ export const updatePromotion = async (id:number, data: PromotionDto): Promise<Pr
   });
 };
 
-export const updatePromotionStock = async(id:number, newStock:number): Promise<Promotion> => {
+export const updatePromotionStock = async (id: number, newStock: number): Promise<Promotion> => {
   return await prisma.promotion.update({
     where: { id },
-    data:{
-      stock:newStock
-    }
+    data: {
+      stock: newStock,
+    },
   });
-}
+};
+
+// Function to reduce stock for all promotions in ReservePromotion
+export const reducePromotionStock = async (promotions: ReservePromotionDto[]): Promise<void> => {
+  // Iterate over all promotions in data.promotions
+  for (const promotion of promotions) {
+    // Fetch the current promotion stock
+    const currentPromotion = await prisma.promotion.findUnique({
+      where: { id: promotion.idPromotion },
+      select: { stock: true },
+    });
+
+    if (!currentPromotion) {
+      throw new NotFoundError("error.noPromotionFoundInDB");
+    }
+
+    // Calculate the new stock after deducting the promotion's quantity
+    const newStock = currentPromotion.stock - promotion.quantity;
+
+    if (newStock < 0) {
+      throw new BadRequestError("error.promotionIsOutOfStock");
+    }
+
+    // Update the promotion's stock
+    await updatePromotionStock(promotion.idPromotion, newStock);
+  }
+};
 
 export const deletePromotion = async (id: number): Promise<Promotion> => {
   return await prisma.promotion.delete({

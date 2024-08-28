@@ -1,14 +1,16 @@
 import fs from 'fs';
 import path from 'path';
-import { Tent , Product, Experience, Notification } from '@prisma/client';
-import { ReserveDto } from '../dto/reserve';
+import { Tent , Product, Experience, Notification, Promotion } from '@prisma/client';
+import { ReserveDto, ReserveExperienceDto, ReserveProductDto, ReservePromotionDto, ReserveTentDto } from '../dto/reserve';
 import { PublicNotification } from '../dto/notification';
 import * as reserveRepository from '../repositories/ReserveRepository';
 import * as discountCodeRepository from '../repositories/DiscountCodeRepository';
 import * as tentRepository from '../repositories/TentRepository';
 import * as productRepository from '../repositories/ProductRepository';
 import * as experienceRepository from '../repositories/ExperienceRepository';
+import * as promotionRepository from '../repositories/PromotionRepository';
 import {BadRequestError, NotFoundError} from '../middleware/errors';
+import {PromotionDto} from '../dto/promotion';
 
 // Define a custom type for the Multer file
 type MulterFile = Express.Multer.File;
@@ -99,31 +101,28 @@ export const getCurrentCustomPrice = (customPrices: string): number => {
   return matchingPrices[0].price;
 }
 
-export const checkAvailability = async (checkInTime: Date, checkOutTime:Date, tents:Tent[]): Promise<boolean> => {
-  // Find reservations that overlap with the given date range for the specified tents
-  const overlappingReserves = await reserveRepository.getAvailableReserves(checkInTime, checkOutTime, tents)
+export const checkAvailability = async (tents: ReserveTentDto[]): Promise<boolean> => {
+  // Find reservations that overlap with the provided tents' date ranges
+  const overlappingReserves = await reserveRepository.getAvailableReserves(tents);
 
-  // If there are any overlapping reservations that don't match the allowed edge case, return false
-  if (overlappingReserves.length > 0) {
-    return false;
-  }
+  // Create a Set of overlapping tent IDs for fast lookup
+  const overlappingTentIds = new Set(overlappingReserves.map((reservedTent:{reserveId:number,idTent:number}) => reservedTent.idTent));
 
-  // If no overlapping reservations are found, return true
-  return true;
+  // Check if any of the provided tents are in the set of overlapping tents
+  const isAvailable = tents.every(tent => !overlappingTentIds.has(tent.idTent));
+
+  return isAvailable;
 };
 
-export const getPeopleInReserve = (tents:Tent[] ):{ qtypeople:number, qtykids:number, aditionalPeople:number } => {
+export const getPeopleInReserve = (tents:Tent[] ):{ qtypeople:number, qtykids:number } => {
 
   const qtypeople = tents.reduce((acc, tent) => acc + (tent.qtypeople ? tent.qtypeople : 0), 0);
 
   const qtykids = tents.reduce((acc, tent) => acc + (tent.qtykids ? tent.qtykids : 0), 0);
 
-  const aditionalPeople = tents.length;
-
   return {
     qtypeople,
     qtykids,
-    aditionalPeople
   }
 
 }
@@ -147,10 +146,10 @@ export const checkRoomSize = (tents: Tent[], qtypeople:number, qtyKids:number, a
   return true;
 };
 
-export const applyDiscount = async (grossImport: number, discountCodeId: number | undefined, discountRaw?: number|undefined): Promise<{grossImport: number, discount:number }> => {
+export const applyDiscount = async (grossImport: number, discountCodeId: number | undefined, discountRaw?: number|undefined): Promise<{grossImport: number, discount:number, discount_name:string|null }> => {
 
   if (!discountCodeId) {
-    return {grossImport, discount:0};
+    return {grossImport, discount:0, discount_name:null};
   }
 
   const discount = await discountCodeRepository.getDiscountCodeById(discountCodeId);
@@ -161,23 +160,23 @@ export const applyDiscount = async (grossImport: number, discountCodeId: number 
 
     await discountCodeRepository.updateDiscountCodeStock(discountCodeId,newStock);
 
-    return {grossImport: (grossImport - (grossImport * discount.discount) / 100 ) , discount: discount.discount} ;
+    return {grossImport: (grossImport - (grossImport * discount.discount) / 100 ) , discount: discount.discount,discount_name:discount.code} ;
 
   }else{
 
     if(discountRaw && discountRaw >= 0 && discountRaw <= 100){
 
-      return {grossImport: (grossImport - (grossImport * discountRaw) / 100), discount:0};
+      return {grossImport: (grossImport - (grossImport * discountRaw) / 100), discount:0, discount_name:null};
 
     }else{
 
-      return {grossImport, discount:0};
+      return {grossImport, discount:0, discount_name:null};
     }
   }
 };
 
 
-export const getTents = async (tents: { idTent:number, name:string, price:number, quantity:number }[]): Promise<Tent[]> => {
+export const getTents = async (tents: ReserveTentDto[]): Promise<Tent[]> => {
 
   if(!tents) throw new BadRequestError("error.noTentsInArray");
 
@@ -196,6 +195,24 @@ export const getTents = async (tents: { idTent:number, name:string, price:number
   }
 
   return tentsDb;
+}
+
+export const normalizeTimesInTents = (tents:ReserveTentDto[]):ReserveTentDto[] => {
+
+  tents.forEach((tent)=> {
+
+    if(!tent.dateFrom) throw new BadRequestError("error.noDateFromInReserveRequest")
+    const checkInTime = new Date(tent.dateFrom);
+    checkInTime.setUTCHours(17, 0, 0, 0);
+    tent.dateFrom = checkInTime;
+
+    if(!tent.dateTo) throw new BadRequestError("error.noDateToInReserveRequest");
+    const checkOutTime = new Date(tent.dateTo);
+    checkOutTime.setUTCHours(17, 0, 0, 0);
+    tent.dateTo = checkOutTime;
+  })
+
+  return tents;
 }
 
 export const getProducts = async (products: { idProduct: number, name:string, price:number, quantity:number }[]): Promise<Product[]> => {
@@ -240,14 +257,36 @@ export const getExperiences = async (experiences: { idExperience: number, name:s
   return experiencesDb;
 }
 
-export const calculateReservePrice = (tents: { tent: Tent; quantity: number }[],
+export const getPromotions = async (promotions: { idPromotion: number, name:string, price:number, quantity:number }[]): Promise<Promotion[]> => {
+
+  if (!promotions || promotions.length === 0) {
+    return [];
+  }
+
+  const promotionIds = promotions.map((promotion) => promotion.idPromotion);
+  let   promotionsDb = await promotionRepository.getPromotionsByIds(promotionIds);
+  promotionsDb = promotionsDb.filter(promotion => promotion.status === 'ACTIVE');
+
+  const missingPromotionIds = promotionIds.filter(
+    (id) => !promotionsDb.some((promotion:Promotion) => promotion.id === id)
+  );
+
+  if (missingPromotionIds.length > 0) {
+    throw new NotFoundError("error.noAllPromotionsFound");
+  }
+  
+  return promotionsDb;
+}
+
+
+export const calculateReservePrice = (tents: { tent: Tent; nights: number, aditionalPeople:number }[],
   products: { product: Product; quantity: number }[],
   experiences: { experience: Experience; quantity: number }[]): number => {
 
   // Calculate the total price for tents
-  const calculateTentsPrice = tents.reduce((acc, { tent, quantity }) => {
+  const calculateTentsPrice = tents.reduce((acc, { tent, nights, aditionalPeople }) => {
     const pricePerTent = calculatePrice(tent.price, tent.custom_price);
-    return acc + (pricePerTent * quantity); // Multiply by quantity
+    return acc + (pricePerTent * nights + 50 * aditionalPeople); // is pending add to Tent addiontal people
   }, 0);
 
   // Calculate the total price for products
@@ -328,6 +367,97 @@ export const createPublicNotification = (t:any,notification: Notification): Publ
     date: notification.date,
     isRead: notification.isRead
   };
+};
+
+type PromotionItem = { id: number; label: string; qty: number; price: number };
+
+export const validatePromotionRequirements = (
+  promotionsDB: Promotion[], 
+  promotions: ReservePromotionDto[], 
+  tents: ReserveTentDto[], 
+  experiences: ReserveExperienceDto[], 
+  products: ReserveProductDto[]
+): boolean => {
+  // Step 1: Aggregate the quantities of promotions by idPromotion
+  const promotionQuantities: Record<number, number> = {}; // Maps idPromotion -> total quantity in the Reserve
+
+  for (const promotion of promotions) {
+    promotionQuantities[promotion.idPromotion] = (promotionQuantities[promotion.idPromotion] || 0) + promotion.quantity;
+  }
+
+  // Step 2: Aggregate required quantities from promotionsDB
+  const totalRequiredTents: Record<number, number> = {};
+  const totalRequiredProducts: Record<number, number> = {};
+  const totalRequiredExperiences: Record<number, number> = {};
+
+  for (const promotionDB of promotionsDB) {
+
+    if(promotionDB.expiredDate){
+      if(promotionDB.expiredDate < new Date()){
+        throw new BadRequestError("error.promotionIsExpired");
+      }
+    }
+
+    if(promotionDB.stock || promotionDB.stock !== null){
+      if(promotionDB.stock <= 0) throw new BadRequestError("error.promotionIsOutOfStock");
+    }
+
+    const idtents = JSON.parse(promotionDB.idtents) as PromotionItem[];
+    const idproducts = promotionDB.idproducts ? JSON.parse(promotionDB.idproducts) as PromotionItem[] : [];
+    const idexperiences = promotionDB.idexperiences ? JSON.parse(promotionDB.idexperiences) as PromotionItem[] : [];
+
+    const appliedQuantity = promotionQuantities[promotionDB.id] || 0;
+
+    for (const requiredTent of idtents) {
+      totalRequiredTents[requiredTent.id] = (totalRequiredTents[requiredTent.id] || 0) + (requiredTent.qty * appliedQuantity);
+    }
+
+    for (const requiredProduct of idproducts) {
+      totalRequiredProducts[requiredProduct.id] = (totalRequiredProducts[requiredProduct.id] || 0) + (requiredProduct.qty * appliedQuantity);
+    }
+
+    for (const requiredExperience of idexperiences) {
+      totalRequiredExperiences[requiredExperience.id] = (totalRequiredExperiences[requiredExperience.id] || 0) + (requiredExperience.qty * appliedQuantity);
+    }
+  }
+
+  // Step 3: Validate reservation data against required quantities
+
+  // Validate tents
+  for (const [tentId, requiredQty] of Object.entries(totalRequiredTents)) {
+    const totalTentNights = tents
+      .filter(t => t.idTent === Number(tentId))
+      .reduce((sum, tent) => sum + tent.nights, 0);
+
+    if (totalTentNights < requiredQty) {
+      return false; // Not enough tents
+    }
+  }
+
+  // Validate products
+  for (const [productId, requiredQty] of Object.entries(totalRequiredProducts)) {
+    const totalProductQty = products
+      .filter(p => p.idProduct === Number(productId))
+      .reduce((sum, product) => sum + product.quantity, 0);
+
+    if (totalProductQty < requiredQty) {
+      return false; // Not enough products
+    }
+  }
+
+  // Validate experiences
+  for (const [experienceId, requiredQty] of Object.entries(totalRequiredExperiences)) {
+    const totalExperienceQty = experiences
+      .filter(e => e.idExperience === Number(experienceId))
+      .reduce((sum, experience) => sum + experience.quantity, 0);
+
+    if (totalExperienceQty < requiredQty) {
+      return false; // Not enough experiences
+    }
+  }
+
+  // All validations passed
+  return true;
 };
 
 export const formatDateToYYYYMMDD = (date: Date): string => {
