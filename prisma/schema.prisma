@@ -148,6 +148,7 @@ enum PaymentStatus {
 
 model Reserve {
   id                    Int               @id @default(autoincrement())
+  external_id           String?
   userId                Int
   user                  User              @relation(fields: [userId], references: [id])
   tents                 ReserveTent[]   

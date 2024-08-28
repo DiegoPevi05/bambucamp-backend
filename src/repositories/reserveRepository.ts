@@ -1,5 +1,6 @@
 import { PrismaClient, Reserve, ReserveTent, ReserveProduct, ReserveExperience, Tent, ReserveStatus,   } from "@prisma/client";
 import { ReserveDto, ReserveFilters, PaginatedReserve, ReserveTentDto, ReserveExperienceDto, ReserveProductDto, ReserveOptions, ReservePromotionDto } from "../dto/reserve";
+import * as utils from "../lib/utils";
 
 interface Pagination {
   page: number;
@@ -348,6 +349,15 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
         }))
       }
     }
+  });
+
+  // Now, generate the external_id based on the reserve's internal ID
+  const externalId = utils.generateExternalId(createdReserve.id);
+
+  // Update the reserve with the generated external_id
+  await prisma.reserve.update({
+    where: { id: createdReserve.id },
+    data: { external_id: externalId },
   });
 
   // Query the newly created reserve to include related data

@@ -488,3 +488,13 @@ export const formatDate = (date:Date) => {
   //format with time 
   return new Intl.DateTimeFormat("en-US", {dateStyle: "medium", timeStyle: "short"}).format(date);
 }
+
+export const generateExternalId = (internalId: number): string => {
+  const prefix = 'BAMBU-';
+
+  // Zero-padded number (e.g., 0000001)
+  const paddedId = internalId.toString().padStart(7, '0');
+
+  // Combine them to create the external ID
+  return `${prefix}${paddedId}`;
+};
