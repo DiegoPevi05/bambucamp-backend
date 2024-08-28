@@ -10,7 +10,6 @@ import * as productRepository from '../repositories/ProductRepository';
 import * as experienceRepository from '../repositories/ExperienceRepository';
 import * as promotionRepository from '../repositories/PromotionRepository';
 import {BadRequestError, NotFoundError} from '../middleware/errors';
-import {PromotionDto} from '../dto/promotion';
 
 // Define a custom type for the Multer file
 type MulterFile = Express.Multer.File;
@@ -286,7 +285,11 @@ export const calculateReservePrice = (tents: { tent: Tent; nights: number, aditi
   // Calculate the total price for tents
   const calculateTentsPrice = tents.reduce((acc, { tent, nights, aditionalPeople }) => {
     const pricePerTent = calculatePrice(tent.price, tent.custom_price);
-    return acc + (pricePerTent * nights + 50 * aditionalPeople); // is pending add to Tent addiontal people
+
+    if(tent.max_aditional_people > aditionalPeople){
+      throw new BadRequestError("error.noRoomSizeCorrect");
+    }
+    return acc + (pricePerTent * nights + tent.aditional_people_price * aditionalPeople); // is pending add to Tent addiontal people
   }, 0);
 
   // Calculate the total price for products

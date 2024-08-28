@@ -8,6 +8,8 @@ export interface TentDto {
   images: string;
   price: number;
   status: string;
+  aditional_people_price:number;
+  max_aditional_people:number;
   custom_price?: string;
   existing_images?:string;
 }
