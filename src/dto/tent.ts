@@ -14,6 +14,11 @@ export interface TentDto {
   existing_images?:string;
 }
 
+export interface PublicTent extends Omit<TentDto,'custom_price'>  {
+  id:number;
+  custom_price?: number;
+}
+
 export interface TentFilters {
   title?: string;
   status?:string;

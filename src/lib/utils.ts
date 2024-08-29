@@ -90,7 +90,11 @@ export const getCurrentCustomPrice = (customPrices: string): number => {
 
   const currentDate = new Date();
   
-  const matchingPrices = prices.filter(price => currentDate >= price.dateFrom && currentDate <= price.dateTo);
+  const matchingPrices = prices.filter(price => {
+    const dateFrom = new Date(price.dateFrom);
+    const dateTo = new Date(price.dateTo);
+    return currentDate >= dateFrom && currentDate <= dateTo;
+  });
 
   if (matchingPrices.length === 0) {
     return 0;

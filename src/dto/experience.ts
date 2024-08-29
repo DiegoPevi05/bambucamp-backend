@@ -14,6 +14,12 @@ export interface ExperienceDto {
   existing_images?:string;
 }
 
+export interface PublicExperience extends Omit<ExperienceDto,'custom_price'|'stock'|'status'>  {
+  id:number;
+  custom_price?: number;
+  category: { id: number; name:string, createdAt:Date, updatedAt:Date };
+}
+
 export interface ExperiencePublicDto extends ExperienceDto  {
   id:number;
   category: { id: number; name:string, createdAt:Date, updatedAt:Date };

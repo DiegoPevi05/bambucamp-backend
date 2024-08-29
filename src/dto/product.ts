@@ -10,6 +10,12 @@ export interface ProductDto {
   existing_images?:string;
 }
 
+export interface PublicProduct extends Omit<ProductDto,'custom_price'|'stock'|'status'>  {
+  id:number;
+  custom_price?: number;
+  category: { id: number; name:string, createdAt:Date, updatedAt:Date };
+}
+
 export interface ProductPublicDto extends ProductDto  {
   id:number;
   category: { id: number; name:string, createdAt:Date, updatedAt:Date };

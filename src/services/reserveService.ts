@@ -6,6 +6,8 @@ import * as utils from '../lib/utils';
 import { BadRequestError, NotFoundError } from "../middleware/errors";
 import {sendReservationEmail} from '../config/email/mail';
 import { PaymentStatus, ReserveStatus, User} from '@prisma/client';
+import { calculatePrice } from '../lib/utils';
+import {PublicTent} from '../dto/tent';
 
 interface Pagination {
   page: number;
@@ -17,11 +19,19 @@ export const searchAvailableTents = async (dateFromInput:string,dateToInput:stri
   const dateTo = new Date(dateToInput);
   const tents = await reserveRepository.searchAvailableTents(dateFrom, dateTo);
 
+  const TentsPublic:PublicTent[]  = [] 
+
   tents.forEach((tent) => {
-    tent.images = JSON.parse(tent.images ? tent.images : '[]');
+
+    let tentPublic:PublicTent = { 
+      ...tent, 
+      images: JSON.parse(tent.images ? tent.images : '[]'),
+      custom_price: calculatePrice(tent.price,tent.custom_price) 
+    }
+    TentsPublic.push(tentPublic);
   });
 
-  return tents;
+  return TentsPublic;
 };
 
 export const getAllMyReservesCalendarUser = async(page:number,userId:number) => {

@@ -197,7 +197,6 @@ export const createReserveByUser = [
       await reserveService.createReserveByUser(req.body, req.user, language);
       res.status(201).json({ message: req.t('message.reserveCreated') });
     } catch (error) {
-      console.log(error);
       if (error instanceof CustomError) {
         res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
@@ -237,7 +236,6 @@ export const createReserve = [
       if (error instanceof CustomError) {
         res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
-        console.log(error)
         res.status(500).json({ error: req.t('error.failedToCreateReserve') });
       }
     }

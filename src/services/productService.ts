@@ -1,22 +1,29 @@
 import * as productRepository from '../repositories/ProductRepository';
 import * as utils from '../lib/utils';
-import { ProductDto, ProductFilters, PaginatedProducts } from "../dto/product";
+import { ProductDto, ProductFilters, PaginatedProducts, PublicProduct } from "../dto/product";
 import { deleteSubFolder, serializeImagesTodb, moveImagesToSubFolder, deleteImages } from '../lib/utils';
 import {NotFoundError} from '../middleware/errors';
 
 export const getAllPublicProducts = async () => {
   const products = await productRepository.getAllPublicProducts();
 
-  return products.map((product) => ({
-    id:product.id,
-    categoryId: product.categoryId,
-    category:product.category,
-    name: product.name,
-    description: product.description,
-    price: product.price,
-    images : JSON.parse(product.images ? product.images : '[]'),
-    custom_price: product.custom_price != undefined ? utils.calculatePrice(product.price,product.custom_price) :product.price 
-  }));
+  const ProductsPublic:PublicProduct[]  = [] 
+
+  products.forEach((product) => {
+    let productPublic:PublicProduct = {
+      id:product.id,
+      categoryId: product.categoryId,
+      category:product.category,
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      images : JSON.parse(product.images ? product.images : '[]'),
+      custom_price: product.custom_price != undefined ? utils.calculatePrice(product.price,product.custom_price) :product.price 
+    }
+    ProductsPublic.push(productPublic);
+  });
+
+  return ProductsPublic;
 
 };
 
