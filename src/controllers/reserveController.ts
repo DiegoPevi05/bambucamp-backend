@@ -173,8 +173,7 @@ export const createReserveByUser = [
   body('tents').isArray().withMessage('validation.tentsMustBeArray'),
   body('products').isArray().withMessage('validation.productsMustBeArray'),
   body('experiences').isArray().withMessage('validation.experiencesMustBeArray'),
-  body('dateFrom').notEmpty().withMessage('validation.dateFromRequired'),
-  body('dateTo').notEmpty().withMessage('validation.dateToRequired'),
+  body('promotions').isArray().withMessage('validation.promotionsMustBeArray'),
 
   async (req: Request, res: Response) => {
 
@@ -207,15 +206,11 @@ export const createReserveByUser = [
 ];
 
 export const createReserve = [
-
-  body('qtypeople').notEmpty().withMessage('validation.qtypeopleRequired'),
-  body('qtykids').notEmpty().withMessage('validation.qtykidsRequired'),
   body('userId').notEmpty().withMessage('validation.userIdRequired'),
   body('tents').isArray().withMessage('validation.tentsMustBeArray'),
   body('products').isArray().withMessage('validation.productsMustBeArray'),
   body('experiences').isArray().withMessage('validation.experiencesMustBeArray'),
-  body('dateFrom').notEmpty().withMessage('validation.dateFromRequired'),
-  body('dateTo').notEmpty().withMessage('validation.dateToRequired'),
+  body('promotions').isArray().withMessage('validation.promotionsMustBeArray'),
 
   async (req: Request, res: Response) => {
 

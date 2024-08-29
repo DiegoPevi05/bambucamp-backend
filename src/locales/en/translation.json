@@ -206,6 +206,7 @@
 		"qtykidsRequired": "Quantity of kids is required",
 		"userIdRequired": "User id is required",
 		"tentsMustBeArray": "Tents must be an array",
+		"promotionsMustBeArray": "Promotions must be an array",
 		"productsMustBeArray": "Products must be an array",
 		"experiencesMustBeArray": "Experiences must be an array",
 		"dateFromRequired": "Date from is required",

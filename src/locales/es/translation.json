@@ -206,6 +206,7 @@
 		"qtykidsRequired": "La cantidad de niños es obligatoria",
 		"userIdRequired": "El ID de usuario es obligatorio",
 		"tentsMustBeArray": "Las tiendas deben ser un arreglo",
+		"promotionsMustBeArray": "Las promociones deben ser un arreglo",
 		"productsMustBeArray": "Los productos deben ser un arreglo",
 		"experiencesMustBeArray": "Las experiencias deben ser un arreglo",
 		"dateFromRequired": "La fecha de inicio es obligatoria",

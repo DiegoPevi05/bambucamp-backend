@@ -101,7 +101,6 @@ export const createReserveByUser = async (data: ReserveDto, user: User, language
   data.price_is_calculated = true;
   data.payment_status = PaymentStatus.UNPAID;
   data.reserve_status = ReserveStatus.NOT_CONFIRMED; 
-  data.canceled_reason = "";
   const reserve = await createReserve(data);
   if(reserve == null) throw new BadRequestError("error.failedToCreateReserve")
   await sendReservationEmail({ email:user.email, firstName:user.firstName}, reserve, language );
@@ -114,11 +113,14 @@ export const createReserve = async (data: ReserveDto):Promise<ReserveDto|null> =
   data.dateSale = new Date();
   data.discount_code_id = Number(data.discount_code_id);
   data.userId = Number(data.userId);
+  data.canceled_reason = "";
 
   const promotionsDB = await utils.getPromotions(data.promotions);
 
-  if(!utils.validatePromotionRequirements(promotionsDB,data.promotions,data.tents,data.experiences,data.products)){
-    throw new BadRequestError("error.noAllPromotionsFound");
+  if(promotionsDB.length > 0 ){
+    if(!utils.validatePromotionRequirements(promotionsDB,data.promotions,data.tents,data.experiences,data.products)){
+      throw new BadRequestError("error.noAllPromotionsFound");
+    }
   }
 
   const tentsDb = await utils.getTents(data.tents);
