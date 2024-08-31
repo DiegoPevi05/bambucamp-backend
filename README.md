@@ -1,8 +1,11 @@
+<p align="center">
+  <a href="https://bambucamp.com" target="_blank">
+    <img src="https://github.com/DiegoPevi05/bambucamp-backend/blob/main/public/images/logo.png" width="200">
+  </a>
+</p>
+
 # BambuCamp Reservation System
 
-<div style="width: 150px; height: 150px; overflow: hidden; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-  <img src="/public/logo.png" alt="BambuCamp Logo" style="width: 100%; height: auto;">
-</div>
 
 This is a full-featured reservation system built with Express.js and TypeScript. It serves as a sales point for making reservations and managing various entities such as products, experiences, discount codes, promotions, and glamping tents (referred to as `tents`). The application also includes authentication and authorization services for secure access to its features.
 
