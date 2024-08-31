@@ -1,5 +1,5 @@
 {
-  "name": "server",
+  "name": "server_bambucamp",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -7,7 +7,7 @@
     "dev": "ts-node-dev src/server.ts"
   },
   "keywords": [],
-  "author": "",
+  "author": "digitalprocessit",
   "license": "ISC",
   "description": "",
   "dependencies": {
