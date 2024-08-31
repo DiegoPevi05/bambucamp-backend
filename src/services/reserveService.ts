@@ -1,11 +1,13 @@
 import * as reserveRepository from '../repositories/ReserveRepository';
-import { PaginatedReserve, ReserveDto, ReserveFilters, ReserveOptions } from "../dto/reserve";
+import { PaginatedReserve, ReserveDto, ReserveFilters, ReserveOptions, createReserveExperienceDto, createReserveProductDto } from "../dto/reserve";
 import * as promotionRepository from '../repositories/PromotionRepository';
 import *  as userRepository from '../repositories/userRepository';
+import * as productService from './productService';
+import * as experienceService from './experienceService';
 import * as utils from '../lib/utils';
-import { BadRequestError, NotFoundError } from "../middleware/errors";
+import { BadRequestError, NotFoundError, UnauthorizedError } from "../middleware/errors";
 import {sendReservationEmail} from '../config/email/mail';
-import { PaymentStatus, ReserveStatus, User} from '@prisma/client';
+import { PaymentStatus, Reserve, ReserveStatus, User} from '@prisma/client';
 import { calculatePrice } from '../lib/utils';
 import {PublicTent} from '../dto/tent';
 
@@ -266,3 +268,108 @@ export const deleteReserve = async (id: number) => {
   return await reserveRepository.deleteReserve(id);
 };
 
+export const AddProductReserveByUser = async(userId: number, data: createReserveProductDto) => {
+
+  const reserve = await reserveRepository.getReserveById(data.reserveId);
+
+  if (!reserve) {
+    throw new NotFoundError('error.noReservefoundInDB');
+  }
+
+  if (reserve.userId !== userId) {
+    throw new UnauthorizedError('error.unauthorized');
+  }
+
+  const product = await productService.getProductById(data.idProduct);
+
+  if(!product){
+    throw new NotFoundError("error.noProductFoundInDB");
+  }
+
+  data.name      = product.name;
+  data.price     = utils.calculatePrice(product.price,product.custom_price);
+  data.confirmed = false;
+  await AddProductReserve(reserve, data);  // Pass reserve object to avoid duplicate search
+};
+
+export const AddProductReserve = async(reserve: Reserve | null, data: createReserveProductDto) => {
+
+  // If reserve is not provided, fetch it from the repository
+  if (!reserve) {
+    reserve = await reserveRepository.getReserveById(data.reserveId);
+
+    if (!reserve) {
+      throw new NotFoundError('error.noReservefoundInDB');
+    }
+  }
+
+  const isStock = await productService.checkProductStock(data.idProduct, data.quantity);
+
+  if (!isStock) {
+    throw new NotFoundError('error.noProductsFoundInStock');
+  }
+
+  return await reserveRepository.AddProductReserve(data);
+};
+
+export const deleteProductReserve = async (id: number) => {
+  return await reserveRepository.deleteProductReserve(id);
+};
+
+export const updateConfirmStatusProductReserve = async (id: number, confirmed:boolean) => {
+  return await reserveRepository.updateProductReserve(id,confirmed);
+};
+
+export const AddExperienceReserveByUser = async(userId: number, data: createReserveExperienceDto) => {
+
+  const reserve = await reserveRepository.getReserveById(data.reserveId);
+
+  if (!reserve) {
+    throw new NotFoundError('error.noReservefoundInDB');
+  }
+
+  if (reserve.userId !== userId) {
+    throw new UnauthorizedError('error.unauthorized');
+  }
+
+
+  const experience = await experienceService.getExperienceById(data.idExperience);
+
+  if(!experience){
+    throw new NotFoundError("error.noProductFoundInDB");
+  }
+
+  data.name      = experience.name;
+  data.price     = utils.calculatePrice(experience.price,experience.custom_price);
+  data.confirmed = false;
+  await AddExperienceReserve(reserve, data);  // Pass reserve object to avoid duplicate search
+};
+
+
+export const AddExperienceReserve = async(reserve: Reserve | null, data: createReserveExperienceDto) => {
+
+  // If reserve is not provided, fetch it from the repository
+  if (!reserve) {
+    reserve = await reserveRepository.getReserveById(data.reserveId);
+
+    if (!reserve) {
+      throw new NotFoundError('error.noReservefoundInDB');
+    }
+  }
+
+  if (data.day) {
+    const date_parsed = new Date(data.day);
+    date_parsed.setUTCHours(17, 0, 0, 0);  // This modifies the date in place but returns a number
+    data.day = date_parsed;  // Assign the mutated date back to data.day
+  }
+
+  return await reserveRepository.AddExperienceReserve(data);
+};
+
+export const deleteExperienceReserve = async (id: number) => {
+  return await reserveRepository.deleteExperienceReserve(id);
+};
+
+export const updateConfirmStatusExperienceReserve = async (id: number, confirmed:boolean) => {
+  return await reserveRepository.updateExperienceReserve(id,confirmed);
+};

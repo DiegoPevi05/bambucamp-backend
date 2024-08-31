@@ -108,8 +108,3 @@ export const updateExperienceImages = async (experienceId: number, images: strin
   }
 };
 
-
-
-
-
-

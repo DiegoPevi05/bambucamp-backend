@@ -13,6 +13,7 @@ export interface ReserveTentDto {
   nights:number;
   dateFrom:Date;
   dateTo:Date;
+  confirmed:boolean;
   aditionalPeople:number;
   tentDB?:Tent;
 }
@@ -23,7 +24,12 @@ export interface ReserveProductDto {
   name:string;
   price:number;
   quantity:number;
+  confirmed:boolean;
   productDB?:Product;
+}
+
+export interface createReserveProductDto extends ReserveProductDto{
+  reserveId:number;
 }
 
 export interface ReserveExperienceDto {
@@ -33,7 +39,12 @@ export interface ReserveExperienceDto {
   price:number;
   quantity:number;
   day:Date;
+  confirmed:boolean;
   experienceDB?:Experience;
+}
+
+export interface createReserveExperienceDto extends ReserveExperienceDto{
+  reserveId:number;
 }
 
 export interface ReservePromotionDto {
@@ -42,6 +53,7 @@ export interface ReservePromotionDto {
   name:string;
   price:number;
   quantity:number;
+  confirmed:boolean;
   promotionDB?:Promotion;
 }
 

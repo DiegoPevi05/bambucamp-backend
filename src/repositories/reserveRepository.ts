@@ -1,5 +1,5 @@
 import { PrismaClient, Reserve, ReserveTent, ReserveProduct, ReserveExperience, Tent, ReserveStatus,   } from "@prisma/client";
-import { ReserveDto, ReserveFilters, PaginatedReserve, ReserveTentDto, ReserveExperienceDto, ReserveProductDto, ReserveOptions, ReservePromotionDto } from "../dto/reserve";
+import { ReserveDto, ReserveFilters, PaginatedReserve, ReserveTentDto, ReserveExperienceDto, ReserveProductDto, ReserveOptions, ReservePromotionDto, createReserveProductDto, createReserveExperienceDto } from "../dto/reserve";
 import * as utils from "../lib/utils";
 
 interface Pagination {
@@ -371,6 +371,61 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
     },
   });
 };
+
+export const AddProductReserve = async (data: createReserveProductDto): Promise<ReserveProduct | null> => {
+  // Create the reserve first
+  return await prisma.reserveProduct.create({
+    data: { 
+      reserveId: data.reserveId,
+      idProduct: data.idProduct,
+      name: data.name,
+      price: data.price,
+      quantity: data.quantity,
+      confirmed: data.confirmed
+    },
+  });
+};
+
+export const updateProductReserve = async(id:number, confirmed:boolean):Promise<ReserveProduct> => {
+  return await prisma.reserveProduct.update({
+    where: { id },
+    data:{ confirmed }
+  });
+}
+
+export const deleteProductReserve = async(id:number):Promise<ReserveProduct> => {
+  return await prisma.reserveProduct.delete({
+    where: { id }
+  });
+}
+
+export const AddExperienceReserve = async(data:createReserveExperienceDto):Promise<ReserveExperience | null> => {
+  return await prisma.reserveExperience.create({
+    data:{
+      reserveId:data.reserveId,
+      idExperience:data.idExperience,
+      name:data.name,
+      day:data.day,
+      price:data.price,
+      quantity:data.quantity,
+      confirmed:data.confirmed
+    }
+  })
+}
+
+export const updateExperienceReserve = async(id:number, confirmed:boolean):Promise<ReserveExperience> => {
+  return await prisma.reserveExperience.update({
+    where: { id },
+    data:{ confirmed }
+  });
+}
+
+export const deleteExperienceReserve = async(id:number):Promise<ReserveExperience> => {
+  return await prisma.reserveExperience.delete({
+    where: { id }
+  });
+}
+
 
 
 export const getAvailableReserves = async (tents: ReserveTentDto[]): Promise<{ reserveId: number; idTent: number }[]> => {

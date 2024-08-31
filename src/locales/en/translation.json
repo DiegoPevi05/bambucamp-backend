@@ -95,9 +95,12 @@
 		"failedToEnabledYourself": "You cannot enable yourself",
 		"failedToEnabledUser": "User already enabled",
 		"failedToEnableAdmin": "You cannot enable an admin",
-		"noAllPromotionsFound": "Not all promotions were found in the database"
+		"noAllPromotionsFound": "Not all promotions were found in the database",
+		"noProductsFoundInStock": "No Products found in Stock",
+		"failedToCreateProductReserve": "Failed to create add product to reserve"
 	},
 	"message": {
+		"productReserveCreated": "Product Added to the reserve",
 		"reserveCreated": "Reserve created",
 		"reserveUpdated": "Reserve updated",
 		"reserveDeleted": "Reserve deleted",
@@ -233,6 +236,7 @@
 		"passwordSpecial": "Password must contain at least one special character",
 		"passwordRequired": "Password is Required",
 		"roleInvalid": "Role must be either SUPERVISOR or CLIENT",
-		"notificationIsRead": "Notification was read"
+		"notificationIsRead": "Notification was read",
+		"quantityRequired": "Quantiy is required"
 	}
 }

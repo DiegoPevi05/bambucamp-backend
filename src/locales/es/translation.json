@@ -95,7 +95,8 @@
 		"failedToEnabledYourself": "No puedes habilitarte a ti mismo",
 		"failedToEnabledUser": "El usuario ya está habilitado",
 		"failedToEnableAdmin": "No puedes habilitar a un administrador",
-		"noAllPromotionsFound": "No todas las promociones se han encontrado en la base de datos "
+		"noAllPromotionsFound": "No todas las promociones se han encontrado en la base de datos ",
+		"noProductsFoundInStock": "No hay productos en stock"
 	},
 	"message": {
 		"reserveCreated": "Reserva creada",

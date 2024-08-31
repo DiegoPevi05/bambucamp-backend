@@ -181,6 +181,7 @@ model ReserveTent {
   dateTo          DateTime        
   aditionalPeople Int       @default(0)
   reserve         Reserve   @relation(fields: [reserveId], references: [id], onDelete: Cascade)
+  confirmed       Boolean   @default(false)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt @default(now())
 }
@@ -193,6 +194,7 @@ model ReserveProduct {
   price           Float     @default(0)
   quantity        Int       @default(1)
   reserve         Reserve   @relation(fields: [reserveId], references: [id], onDelete: Cascade)
+  confirmed       Boolean   @default(false)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt @default(now())
 }
@@ -206,6 +208,7 @@ model ReserveExperience {
   quantity        Int       @default(1)
   day             DateTime  @default(now())
   reserve         Reserve   @relation(fields: [reserveId], references: [id], onDelete: Cascade)
+  confirmed       Boolean   @default(false)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt @default(now())
 }
@@ -218,6 +221,7 @@ model ReservePromotion {
   price           Float     @default(0)
   quantity        Int       @default(1)
   reserve         Reserve   @relation(fields: [reserveId], references: [id], onDelete: Cascade)
+  confirmed       Boolean   @default(false)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt @default(now())
 }

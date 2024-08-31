@@ -6,7 +6,7 @@ import * as utils from '../../lib/utils';
 
 // Load SMTP configuration from environment variables
 const HOSTNAME = process.env.HOSTNAME || `http://localhost:${process.env.PORT}`;
-const CLIENT_HOSTNAME =  process.env.CLIENT_HOSTNAME || 'http://localhost:5173';
+const CLIENT_HOSTNAME =  process.env.CLIENT_HOSTNAME || 'http://localhost:5174';
 
 const smtpHost = process.env.SMTP_HOST;
 const smtpPort = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 465;

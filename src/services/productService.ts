@@ -4,6 +4,7 @@ import { ProductDto, ProductFilters, PaginatedProducts, PublicProduct } from "..
 import { deleteSubFolder, serializeImagesTodb, moveImagesToSubFolder, deleteImages } from '../lib/utils';
 import {NotFoundError} from '../middleware/errors';
 
+
 export const getAllPublicProducts = async () => {
   const products = await productRepository.getAllPublicProducts();
 
@@ -162,3 +163,21 @@ export const deleteProduct = async (id: number) => {
 export const updateProductImages = async (productId: number, images: string) => {
   await productRepository.updateProductImages(productId, images);
 };
+
+export const checkProductStock = async(idProduct:number, quantity:number ):Promise<boolean> => {
+
+  const product = await productRepository.getProductById(idProduct);
+
+  if(!product){
+    throw new NotFoundError("error.noProductFoundInDB");
+  }
+
+  if(product.stock >= quantity){
+    const newStock = product.stock - quantity;
+    await productRepository.updateStock(product.id,newStock);
+    return true;
+  }
+
+  return false;
+
+}

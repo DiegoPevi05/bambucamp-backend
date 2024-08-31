@@ -279,4 +279,250 @@ export const deleteReserve = async (req: Request, res: Response) => {
   }
 };
 
+export const createProductReserveByUser = [
+  body('idProduct').isArray().withMessage('validation.idRequired'),
+  body('name').isArray().withMessage('validation.nameRequired'),
+  body('price').isArray().withMessage('validation.priceRequired'),
+  body('quantity').isArray().withMessage('validation.quantityRequired'),
 
+  async (req: Request, res: Response) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
+    }
+
+    try {
+      if(req.user){
+        await reserveService.AddProductReserveByUser(req.user.id,req.body);
+        res.status(201).json({ message: req.t('message.productReserveCreated') });
+      } 
+    } catch (error) {
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: req.t(error.message) });
+      } else {
+        res.status(500).json({ error: req.t('error.failedToCreateProductReserve') });
+      }
+    }
+  }
+];
+
+
+
+export const createProductReserve = [
+  body('idProduct').notEmpty().withMessage('validation.idRequired'),
+  body('name').notEmpty().withMessage('validation.nameRequired'),
+  body('price').notEmpty().withMessage('validation.priceRequired'),
+  body('quantity').notEmpty().withMessage('validation.quantityRequired'),
+
+  async (req: Request, res: Response) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
+    }
+
+    try {
+      await reserveService.AddProductReserve(null,req.body);
+      res.status(201).json({ message: req.t('message.productReserveCreated') });
+    } catch (error) {
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: req.t(error.message) });
+      } else {
+        res.status(500).json({ error: req.t('error.failedToCreateProductReserve') });
+      }
+    }
+  }
+];
+
+
+export const deleteProductReserve = [
+  param('id').notEmpty().withMessage("validation.idRequired"),
+
+  async (req: Request, res: Response) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
+    }
+
+    try {
+      await reserveService.deleteProductReserve(Number(req.params.id));
+      res.status(201).json({ message: req.t('message.productReserveDeleted') });
+    } catch (error) {
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: req.t(error.message) });
+      } else {
+        res.status(500).json({ error: req.t('error.failedToDeleteProductReserve') });
+      }
+    }
+  }
+];
+
+export const updateProductReserve = [
+  param('id').notEmpty().withMessage("validation.idRequired"),
+  body('id').notEmpty().withMessage("validation.confirmedRequired"),
+
+  async (req: Request, res: Response) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
+    }
+
+    try {
+      await reserveService.updateConfirmStatusProductReserve(Number(req.params.id),req.body.confirmed);
+      res.status(201).json({ message: req.t('message.productReserveStatusUpdated') });
+    } catch (error) {
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: req.t(error.message) });
+      } else {
+        res.status(500).json({ error: req.t('error.failedToUpdateProductReserveStatus') });
+      }
+    }
+  }
+];
+
+export const createExperienceReserveByUser = [
+  body('idExperience').isArray().withMessage('validation.idRequired'),
+  body('name').isArray().withMessage('validation.nameRequired'),
+  body('price').isArray().withMessage('validation.priceRequired'),
+  body('quantity').isArray().withMessage('validation.quantityRequired'),
+
+  async (req: Request, res: Response) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
+    }
+
+    try {
+      if(req.user){
+        await reserveService.AddExperienceReserveByUser(req.user.id,req.body);
+        res.status(201).json({ message: req.t('message.experienceReserveCreated') });
+      } 
+    } catch (error) {
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: req.t(error.message) });
+      } else {
+        res.status(500).json({ error: req.t('error.failedToCreateExperienceReserve') });
+      }
+    }
+  }
+];
+
+
+
+export const createExperienceReserve = [
+  body('idExperience').notEmpty().withMessage('validation.idRequired'),
+  body('name').notEmpty().withMessage('validation.nameRequired'),
+  body('price').notEmpty().withMessage('validation.priceRequired'),
+  body('quantity').notEmpty().withMessage('validation.quantityRequired'),
+
+  async (req: Request, res: Response) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
+    }
+
+    try {
+      await reserveService.AddExperienceReserve(null,req.body);
+      res.status(201).json({ message: req.t('message.experienceReserveCreated') });
+    } catch (error) {
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: req.t(error.message) });
+      } else {
+        res.status(500).json({ error: req.t('error.failedToCreateExperienceReserve') });
+      }
+    }
+  }
+];
+
+
+export const deleteExperienceReserve = [
+  param('id').notEmpty().withMessage("validation.idRequired"),
+
+  async (req: Request, res: Response) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
+    }
+
+    try {
+      await reserveService.deleteExperienceReserve(Number(req.params.id));
+      res.status(201).json({ message: req.t('message.experienceReserveDeleted') });
+    } catch (error) {
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: req.t(error.message) });
+      } else {
+        res.status(500).json({ error: req.t('error.failedToDeleteExperienceReserve') });
+      }
+    }
+  }
+];
+
+export const updateExperienceReserve = [
+  param('id').notEmpty().withMessage("validation.idRequired"),
+  body('confirmed').notEmpty().withMessage("validation.confirmedRequired"),
+
+  async (req: Request, res: Response) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
+    }
+
+    try {
+      await reserveService.updateConfirmStatusExperienceReserve(Number(req.params.id),req.body.confirmed);
+      res.status(201).json({ message: req.t('message.experienceReserveStatusUpdated') });
+    } catch (error) {
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: req.t(error.message) });
+      } else {
+        res.status(500).json({ error: req.t('error.failedToUpdateExperienceReserveStatus') });
+      }
+    }
+  }
+];

@@ -110,6 +110,15 @@ export const updateProductImages = async (productId: number, images: string) => 
   }
 };
 
+export const updateStock = async(productId:number,newStock:number) => {
+  return await prisma.product.update({
+    where: { id: productId },
+    data:{
+      stock:newStock,
+    }
+  });
+}
+
 
 
 

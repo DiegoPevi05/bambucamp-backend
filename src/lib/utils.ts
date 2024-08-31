@@ -502,3 +502,5 @@ export const generateExternalId = (internalId: number): string => {
   // Combine them to create the external ID
   return `${prefix}${paddedId}`;
 };
+
+
