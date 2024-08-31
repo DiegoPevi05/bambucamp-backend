@@ -6,6 +6,19 @@
 
 # BambuCamp Reservation System
 
+<p align="center">
+  <!-- Example badges -->
+  <a href="https://github.com/DiegoPevi05/bambucamp-backend/releases">
+    <img src="https://img.shields.io/github/v/release/DiegoPevi05/bambucamp-backend" alt="Version">
+  </a>
+  <a href="https://github.com/DiegoPevi05/bambucamp-backend">
+    <img src="https://img.shields.io/github/languages/top/DiegoPevi05/bambucamp-backend" alt="Top Language">
+  </a>
+  <a href="https://opensource.org/licenses/MIT">
+    <img src="https://img.shields.io/badge/License-MIT-blue" alt="License">
+  </a>
+</p>
+
 
 This is a full-featured reservation system built with Express.js and TypeScript. It serves as a sales point for making reservations and managing various entities such as products, experiences, discount codes, promotions, and glamping tents (referred to as `tents`). The application also includes authentication and authorization services for secure access to its features.
 
@@ -83,7 +96,15 @@ Make sure you have the following installed on your system:
     ADMIN_HOSTNAME="http://your-admin-hostname"
     CLIENT_HOSTNAME="http://your-client-hostname"
     ```
-6. **Run the Application:**
+
+6. **Create Folder of Images:**
+
+    Create a folder at public folder named images, in order that the models have a place where the images are stored:
+
+   ```bash
+   cd public mkdir images
+    ```
+7. **Run the Application:**
 
     Start the development server using ts-node-dev:
 
