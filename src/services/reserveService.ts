@@ -320,9 +320,11 @@ export const updateConfirmStatusProductReserve = async (id: number, confirmed:bo
   return await reserveRepository.updateProductReserve(id,confirmed);
 };
 
-export const AddExperienceReserveByUser = async(userId: number, data: createReserveExperienceDto) => {
+export const AddExperienceReserveByUser = async(userId: number, data: createReserveExperienceDto[]) => {
 
-  const reserve = await reserveRepository.getReserveById(data.reserveId);
+  // Assume all data objects belong to the same reserve
+  const reserveId = data[0].reserveId;
+  const reserve = await reserveRepository.getReserveById(reserveId);
 
   if (!reserve) {
     throw new NotFoundError('error.noReservefoundInDB');
@@ -332,38 +334,46 @@ export const AddExperienceReserveByUser = async(userId: number, data: createRese
     throw new UnauthorizedError('error.unauthorized');
   }
 
+  const updatedExperiences = await Promise.all(data.map(async experienceData => {
+    const experience = await experienceService.getExperienceById(experienceData.idExperience);
 
-  const experience = await experienceService.getExperienceById(data.idExperience);
+    if (!experience) {
+      throw new NotFoundError("error.noExperienceFoundInDB");
+    }
 
-  if(!experience){
-    throw new NotFoundError("error.noProductFoundInDB");
-  }
+    experienceData.name = experience.name;
+    experienceData.price = utils.calculatePrice(experience.price, experience.custom_price);
+    experienceData.confirmed = false;
+    return experienceData;
+  }));
 
-  data.name      = experience.name;
-  data.price     = utils.calculatePrice(experience.price,experience.custom_price);
-  data.confirmed = false;
-  await AddExperienceReserve(reserve, data);  // Pass reserve object to avoid duplicate search
+  // Pass the entire array to the AddExperienceReserve function
+  await AddExperienceReserve(reserve, updatedExperiences);
 };
 
 
-export const AddExperienceReserve = async(reserve: Reserve | null, data: createReserveExperienceDto) => {
-
-  // If reserve is not provided, fetch it from the repository
+export const AddExperienceReserve = async(reserve: Reserve | null, data: createReserveExperienceDto[]) => {
+  // If reserve is not provided, fetch it from the repository (assuming all belong to the same reserve)
   if (!reserve) {
-    reserve = await reserveRepository.getReserveById(data.reserveId);
+    const reserveId = data[0].reserveId;
+    reserve = await reserveRepository.getReserveById(reserveId);
 
     if (!reserve) {
       throw new NotFoundError('error.noReservefoundInDB');
     }
   }
 
-  if (data.day) {
-    const date_parsed = new Date(data.day);
-    date_parsed.setUTCHours(17, 0, 0, 0);  // This modifies the date in place but returns a number
-    data.day = date_parsed;  // Assign the mutated date back to data.day
-  }
+  const processedExperiences = data.map(experienceData => {
+    if (experienceData.day) {
+      const date_parsed = new Date(experienceData.day);
+      date_parsed.setUTCHours(17, 0, 0, 0);  // This modifies the date in place
+      experienceData.day = date_parsed;
+    }
+    return experienceData;
+  });
 
-  return await reserveRepository.AddExperienceReserve(data);
+  // Pass the entire array to the repository method
+  return await reserveRepository.AddExperienceReserve(processedExperiences);
 };
 
 export const deleteExperienceReserve = async (id: number) => {

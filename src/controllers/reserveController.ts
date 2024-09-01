@@ -280,10 +280,7 @@ export const deleteReserve = async (req: Request, res: Response) => {
 };
 
 export const createProductReserveByUser = [
-  body('idProduct').isArray().withMessage('validation.idRequired'),
-  body('name').isArray().withMessage('validation.nameRequired'),
-  body('price').isArray().withMessage('validation.priceRequired'),
-  body('quantity').isArray().withMessage('validation.quantityRequired'),
+  body('products').isArray().withMessage('validation.productsMustBeArray'),
 
   async (req: Request, res: Response) => {
 
@@ -315,10 +312,7 @@ export const createProductReserveByUser = [
 
 
 export const createProductReserve = [
-  body('idProduct').notEmpty().withMessage('validation.idRequired'),
-  body('name').notEmpty().withMessage('validation.nameRequired'),
-  body('price').notEmpty().withMessage('validation.priceRequired'),
-  body('quantity').notEmpty().withMessage('validation.quantityRequired'),
+  body('products').isArray().withMessage('validation.productsMustBeArray'),
 
   async (req: Request, res: Response) => {
 
@@ -404,10 +398,7 @@ export const updateProductReserve = [
 ];
 
 export const createExperienceReserveByUser = [
-  body('idExperience').isArray().withMessage('validation.idRequired'),
-  body('name').isArray().withMessage('validation.nameRequired'),
-  body('price').isArray().withMessage('validation.priceRequired'),
-  body('quantity').isArray().withMessage('validation.quantityRequired'),
+  body('experiences').isArray().withMessage('validation.experiencesMustBeArray'),
 
   async (req: Request, res: Response) => {
 
@@ -423,10 +414,11 @@ export const createExperienceReserveByUser = [
 
     try {
       if(req.user){
-        await reserveService.AddExperienceReserveByUser(req.user.id,req.body);
+        await reserveService.AddExperienceReserveByUser(req.user.id,req.body.experiences);
         res.status(201).json({ message: req.t('message.experienceReserveCreated') });
       } 
     } catch (error) {
+      console.log(error);
       if (error instanceof CustomError) {
         res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
@@ -439,10 +431,7 @@ export const createExperienceReserveByUser = [
 
 
 export const createExperienceReserve = [
-  body('idExperience').notEmpty().withMessage('validation.idRequired'),
-  body('name').notEmpty().withMessage('validation.nameRequired'),
-  body('price').notEmpty().withMessage('validation.priceRequired'),
-  body('quantity').notEmpty().withMessage('validation.quantityRequired'),
+  body('experiences').isArray().withMessage('validation.experiencesMustBeArray'),
 
   async (req: Request, res: Response) => {
 
@@ -457,7 +446,7 @@ export const createExperienceReserve = [
     }
 
     try {
-      await reserveService.AddExperienceReserve(null,req.body);
+      await reserveService.AddExperienceReserve(null,req.body.experiences);
       res.status(201).json({ message: req.t('message.experienceReserveCreated') });
     } catch (error) {
       if (error instanceof CustomError) {

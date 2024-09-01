@@ -399,19 +399,26 @@ export const deleteProductReserve = async(id:number):Promise<ReserveProduct> => 
   });
 }
 
-export const AddExperienceReserve = async(data:createReserveExperienceDto):Promise<ReserveExperience | null> => {
-  return await prisma.reserveExperience.create({
-    data:{
-      reserveId:data.reserveId,
-      idExperience:data.idExperience,
-      name:data.name,
-      day:data.day,
-      price:data.price,
-      quantity:data.quantity,
-      confirmed:data.confirmed
-    }
-  })
-}
+export const AddExperienceReserve = async(data: createReserveExperienceDto[]): Promise<ReserveExperience[]> => {
+  const createdExperiences: ReserveExperience[] = [];
+
+  for (const experienceData of data) {
+    const createdExperience = await prisma.reserveExperience.create({
+      data: {
+        reserveId: experienceData.reserveId,
+        idExperience: experienceData.idExperience,
+        name: experienceData.name,
+        day: experienceData.day,
+        price: experienceData.price,
+        quantity: experienceData.quantity,
+        confirmed: experienceData.confirmed,
+      },
+    });
+    createdExperiences.push(createdExperience);
+  }
+
+  return createdExperiences;
+};
 
 export const updateExperienceReserve = async(id:number, confirmed:boolean):Promise<ReserveExperience> => {
   return await prisma.reserveExperience.update({
