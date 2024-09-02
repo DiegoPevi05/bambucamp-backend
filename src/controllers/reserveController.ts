@@ -370,7 +370,7 @@ export const deleteProductReserve = [
 
 export const updateProductReserve = [
   param('id').notEmpty().withMessage("validation.idRequired"),
-  body('id').notEmpty().withMessage("validation.confirmedRequired"),
+  body('confirmed').notEmpty().withMessage("validation.confirmedRequired"),
 
   async (req: Request, res: Response) => {
 

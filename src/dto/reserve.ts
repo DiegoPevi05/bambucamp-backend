@@ -67,6 +67,7 @@ export interface ReserveOptions {
 
 export interface ReserveDto {
   userId: number;
+  external_id:number;
   tents: ReserveTentDto[];
   products: ReserveProductDto[];
   experiences: ReserveExperienceDto[];
