@@ -290,7 +290,7 @@ export const calculateReservePrice = (tents: { tent: Tent; nights: number, aditi
   const calculateTentsPrice = tents.reduce((acc, { tent, nights, aditionalPeople }) => {
     const pricePerTent = calculatePrice(tent.price, tent.custom_price);
 
-    if(tent.max_aditional_people > aditionalPeople){
+    if(tent.max_aditional_people < aditionalPeople){
       throw new BadRequestError("error.noRoomSizeCorrect");
     }
     return acc + (pricePerTent * nights + tent.aditional_people_price * aditionalPeople); // is pending add to Tent addiontal people

@@ -91,11 +91,12 @@ export const getAllMyReservesUser = async (req: Request, res: Response) => {
         pageSize: parseInt(pageSize as string, 10),
       };
 
-      const PaginatedReserves = await reserveService.getAllMyReserves(pagination, req.user.id);
+      const PaginatedReserves = await reserveService.getAllMyReservesUser(pagination, req.user.id);
 
       res.json(PaginatedReserves);
 
     } catch (error) {
+      console.log(error)
       if (error instanceof CustomError) {
         res.status(error.statusCode).json({ error: error.message });
       } else {
@@ -196,6 +197,7 @@ export const createReserveByUser = [
       await reserveService.createReserveByUser(req.body, req.user, language);
       res.status(201).json({ message: req.t('message.reserveCreated') });
     } catch (error) {
+      console.log(error);
       if (error instanceof CustomError) {
         res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
@@ -296,7 +298,7 @@ export const createProductReserveByUser = [
 
     try {
       if(req.user){
-        await reserveService.AddProductReserveByUser(req.user.id,req.body);
+        await reserveService.AddProductReserveByUser(req.user.id,req.body.products);
         res.status(201).json({ message: req.t('message.productReserveCreated') });
       } 
     } catch (error) {
@@ -327,7 +329,7 @@ export const createProductReserve = [
     }
 
     try {
-      await reserveService.AddProductReserve(null,req.body);
+      await reserveService.AddProductReserve(null,req.body.products);
       res.status(201).json({ message: req.t('message.productReserveCreated') });
     } catch (error) {
       if (error instanceof CustomError) {

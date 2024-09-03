@@ -268,9 +268,10 @@ export const deleteReserve = async (id: number) => {
   return await reserveRepository.deleteReserve(id);
 };
 
-export const AddProductReserveByUser = async(userId: number, data: createReserveProductDto) => {
+export const AddProductReserveByUser = async(userId: number, data: createReserveProductDto[]) => {
 
-  const reserve = await reserveRepository.getReserveById(data.reserveId);
+  const reserveId = data[0].reserveId;
+  const reserve = await reserveRepository.getReserveById(reserveId);
 
   if (!reserve) {
     throw new NotFoundError('error.noReservefoundInDB');
@@ -280,36 +281,45 @@ export const AddProductReserveByUser = async(userId: number, data: createReserve
     throw new UnauthorizedError('error.unauthorized');
   }
 
-  const product = await productService.getProductById(data.idProduct);
+  const updatedProducts = await Promise.all(data.map(async productData => {
+    const product = await productService.getProductById(productData.idProduct);
 
-  if(!product){
-    throw new NotFoundError("error.noProductFoundInDB");
-  }
+    if(!product){
+      throw new NotFoundError("error.noProductFoundInDB");
+    }
 
-  data.name      = product.name;
-  data.price     = utils.calculatePrice(product.price,product.custom_price);
-  data.confirmed = false;
-  await AddProductReserve(reserve, data);  // Pass reserve object to avoid duplicate search
+    productData.name      = product.name;
+    productData.price     = utils.calculatePrice(product.price,product.custom_price);
+    productData.confirmed = false;
+    return productData;
+  }));
+
+
+  await AddProductReserve(reserve, updatedProducts);  // Pass reserve object to avoid duplicate search
 };
 
-export const AddProductReserve = async(reserve: Reserve | null, data: createReserveProductDto) => {
+export const AddProductReserve = async(reserve: Reserve | null, data: createReserveProductDto[]) => {
 
   // If reserve is not provided, fetch it from the repository
   if (!reserve) {
-    reserve = await reserveRepository.getReserveById(data.reserveId);
+    const reserveId = data[0].reserveId;
+    reserve = await reserveRepository.getReserveById(reserveId);
 
     if (!reserve) {
       throw new NotFoundError('error.noReservefoundInDB');
     }
   }
 
-  const isStock = await productService.checkProductStock(data.idProduct, data.quantity);
+  const processedProducts = await Promise.all(data.map(async productData => {
+    const isStock = await productService.checkProductStock(productData.idProduct, productData.quantity);
+      if (!isStock) {
+        throw new NotFoundError('error.noProductsFoundInStock');
+      }
+      return productData;
+    })
+  );
 
-  if (!isStock) {
-    throw new NotFoundError('error.noProductsFoundInStock');
-  }
-
-  return await reserveRepository.AddProductReserve(data);
+  return await reserveRepository.AddProductReserve(processedProducts);
 };
 
 export const deleteProductReserve = async (id: number) => {

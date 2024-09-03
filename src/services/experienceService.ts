@@ -145,7 +145,9 @@ export const updateExperience = async (id:number, data: ExperienceDto, files: Mu
 
     const allImages = [...imagesToConserve, ...NewMovedImages];
 
-    experience.images = JSON.stringify(allImages);
+    const formattedImages = allImages.map(image => image.replace(/\//g, '\\'));
+
+    experience.images = JSON.stringify(formattedImages);
   }
 
   if(data.limit_age &&  Number(data.limit_age) != experience.limit_age ){

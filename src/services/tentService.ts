@@ -138,7 +138,9 @@ export const updateTent = async (id:number, data: TentDto, files: MulterFile[] |
 
     const allImages = [...imagesToConserve, ...NewMovedImages];
 
-    tent.images = JSON.stringify(allImages);
+    const formattedImages = allImages.map(image => image.replace(/\//g, '\\'));
+
+    tent.images = JSON.stringify(formattedImages);
   }
 
   if(data.qtypeople &&  data.qtypeople != tent.qtypeople){

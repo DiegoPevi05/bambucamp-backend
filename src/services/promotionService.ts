@@ -279,7 +279,9 @@ export const updatePromotion = async (id:number, data: PromotionDto, files: Mult
 
     const allImages = [...imagesToConserve, ...NewMovedImages];
 
-    promotion.images = JSON.stringify(allImages);
+    const formattedImages = allImages.map(image => image.replace(/\//g, '\\'));
+
+    promotion.images = JSON.stringify(formattedImages);
   }
 
   promotion.updatedAt = new Date();

@@ -118,7 +118,7 @@ export const updateProduct = async (id:number, data: ProductDto, files: MulterFi
           deleteImages(imagesToRemove);
         }
 
-        imagesToConserve  = imagesToConserve.filter(dbImage => imageToReplace.includes(dbImage))
+        imagesToConserve  = imagesToConserve.filter(dbImage => imageToReplace.includes(dbImage));
       }
 
     }
@@ -135,7 +135,9 @@ export const updateProduct = async (id:number, data: ProductDto, files: MulterFi
 
     const allImages = [...imagesToConserve, ...NewMovedImages];
 
-    product.images = JSON.stringify(allImages);
+    const formattedImages = allImages.map(image => image.replace(/\//g, '\\'));
+    // Store the images in the desired format
+    product.images = JSON.stringify(formattedImages);
   }
 
   if(data.status && data.status != product.status){

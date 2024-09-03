@@ -313,6 +313,7 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
   const createdReserve = await prisma.reserve.create({
     data: {
       ...data,
+      external_id: "IN_PROCESS",
       tents: {
         create: data.tents.map(tent => ({
           idTent: tent.idTent,
@@ -372,18 +373,25 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
   });
 };
 
-export const AddProductReserve = async (data: createReserveProductDto): Promise<ReserveProduct | null> => {
-  // Create the reserve first
-  return await prisma.reserveProduct.create({
-    data: { 
-      reserveId: data.reserveId,
-      idProduct: data.idProduct,
-      name: data.name,
-      price: data.price,
-      quantity: data.quantity,
-      confirmed: data.confirmed
-    },
-  });
+export const AddProductReserve = async (data: createReserveProductDto[]): Promise<ReserveProduct[]> => {
+
+  const createdProducts: ReserveProduct[] = [];
+
+  for (const productData of data) {
+    const createdProduct = await prisma.reserveProduct.create({
+      data: {
+        reserveId: productData.reserveId,
+        idProduct: productData.idProduct,
+        name: productData.name,
+        price: productData.price,
+        quantity: productData.quantity,
+        confirmed: productData.confirmed,
+      },
+    });
+    createdProducts.push(createdProduct);
+  }
+
+  return createdProducts;
 };
 
 export const updateProductReserve = async(id:number, confirmed:boolean):Promise<ReserveProduct> => {
