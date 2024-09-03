@@ -6,7 +6,8 @@ import {CustomError} from '../middleware/errors';
 
 export const getAllPublicProducts = async (req: Request, res: Response) => {
   try {
-    const products = await productService.getAllPublicProducts();
+    const { categories } = req.query;
+    const products = await productService.getAllPublicProducts(categories as string[]);
     res.json(products);
   } catch (error) {
     if (error instanceof CustomError) {

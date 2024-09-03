@@ -9,10 +9,18 @@ interface Pagination {
   pageSize: number;
 }
 
-export const getAllPublicProducts = async (): Promise<ProductPublicDto[]> => {
+export const getAllPublicProducts = async (categories?:string[]): Promise<ProductPublicDto[]> => {
   return await prisma.product.findMany({
     where: {
-      status: 'ACTIVE'
+      status: 'ACTIVE',
+      ...(categories && { 
+        category: {
+          name: {
+            in: categories, // Filter experiences by the category names array
+            mode: 'insensitive', // Optional: make it case-insensitive
+          }
+        }
+      }),
     },
     orderBy: {
       createdAt: 'desc',

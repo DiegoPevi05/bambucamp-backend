@@ -9,10 +9,18 @@ interface Pagination {
   pageSize: number;
 }
 
-export const getAllPublicExperiences = async (): Promise<ExperiencePublicDto[]> => {
+export const getAllPublicExperiences = async (categories?: string[]): Promise<ExperiencePublicDto[]> => {
   return await prisma.experience.findMany({
     where: {
-      status: 'ACTIVE'
+      status: 'ACTIVE',
+      ...(categories && { 
+        category: {
+          name: {
+            in: categories, // Filter experiences by the category names array
+            mode: 'insensitive', // Optional: make it case-insensitive
+          }
+        }
+      }),
     },
     include: {
       category: true, // Include the category object

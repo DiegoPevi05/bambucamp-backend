@@ -4,8 +4,8 @@ import { ExperienceDto, ExperienceFilters, PaginatedExperiences, PublicExperienc
 import { deleteSubFolder, serializeImagesTodb, moveImagesToSubFolder, deleteImages } from '../lib/utils';
 import {BadRequestError} from '../middleware/errors';
 
-export const getAllPublicExperiences = async () => {
-  const experiences = await experienceRepository.getAllPublicExperiences();
+export const getAllPublicExperiences = async (categories?:string[]) => {
+  const experiences = await experienceRepository.getAllPublicExperiences(categories);
 
   const ExperiencesPublic:PublicExperience[] = [];
 

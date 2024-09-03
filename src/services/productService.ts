@@ -5,8 +5,8 @@ import { deleteSubFolder, serializeImagesTodb, moveImagesToSubFolder, deleteImag
 import {NotFoundError} from '../middleware/errors';
 
 
-export const getAllPublicProducts = async () => {
-  const products = await productRepository.getAllPublicProducts();
+export const getAllPublicProducts = async (categories?:string[]) => {
+  const products = await productRepository.getAllPublicProducts(categories);
 
   const ProductsPublic:PublicProduct[]  = [] 
 

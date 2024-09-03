@@ -5,7 +5,8 @@ import {CustomError} from '../middleware/errors';
 
 export const getAllPublicExperiences = async (req: Request, res: Response) => {
   try {
-    const experiences = await experienceService.getAllPublicExperiences();
+    const { categories } = req.query;
+    const experiences = await experienceService.getAllPublicExperiences(categories as string[]);
     res.json(experiences);
   } catch (error) {
 
