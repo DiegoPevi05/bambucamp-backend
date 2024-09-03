@@ -18,6 +18,7 @@ import i18nextMiddleware from 'i18next-http-middleware';
 import i18next from './config/i18n';
 import {chatHandler} from './services/chatService';
 import chatRoutes from './routes/chatRoutes';
+import webRoutes from './routes/webRoutes';
 
 const app = express();
 const server = http.createServer(app);
@@ -52,6 +53,7 @@ app.use('/promotions', promotionRoutes);
 app.use('/tents', tentRoutes);
 app.use('/reserves', reserveRoutes);
 app.use('/notifications', notificationRoutes);
+app.use('/web', webRoutes);
 app.use('/chats', chatRoutes);
 
 chatHandler(io);

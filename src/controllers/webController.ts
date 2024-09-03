@@ -1,0 +1,135 @@
+import { Request, Response } from 'express';
+import * as webService from '../services/webService';
+import { CustomError } from '../middleware/errors';
+import { body, validationResult } from 'express-validator';
+
+export const getWebContent = async (req: Request, res: Response) => {
+  try {
+    const webContent = await webService.getWebContent();
+    res.json(webContent);
+  } catch (error) {
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: req.t(error.message) });
+    } else {
+      res.status(500).json({ error: req.t("error.failedToFetchWebContent") });
+    }
+  }
+};
+
+export const getAllReviews = async (req: Request, res: Response) => {
+  try {
+    const reviews = await webService.getAllReviews();
+    res.json(reviews);
+  } catch (error) {
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: req.t(error.message) });
+    } else {
+      res.status(500).json({ error: req.t("error.failedToFetchReviews") });
+    }
+  }
+};
+
+export const createReview = [
+  body('name').notEmpty().withMessage("validation.nameRequired"),
+  body('title').notEmpty().withMessage("validation.titleRequired"),
+  body('review').notEmpty().withMessage("validation.reviewRequired"),
+  body('day').notEmpty().withMessage("validation.dayRequired"),
+  body('stars').notEmpty().withMessage("validation.starsRequired"),
+
+  async (req: Request, res: Response) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
+    }
+
+    try {
+      await webService.createReview(req.body);
+      res.status(201).json({ message: req.t("message.reviewCreated") });
+    } catch (error) {
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: req.t(error.message) });
+      } else {
+        res.status(500).json({ error: req.t("error.failedToCreateReview") });
+      }
+    }
+  }
+];
+
+export const deleteReview = async (req: Request, res: Response) => {
+  try {
+    await webService.deleteReview(Number(req.params.id));
+
+    res.json({ message: req.t("message.reviewDeleted") });
+  } catch (error) {
+
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: req.t(error.message) });
+    } else {
+      res.status(500).json({ error: req.t("failedToDeleteReview") });
+    }
+  }
+};
+
+
+export const getAllFaqs = async (req: Request, res: Response) => {
+  try {
+    const faqs = await webService.getAllFaqs();
+    res.json(faqs);
+  } catch (error) {
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: req.t(error.message) });
+    } else {
+      res.status(500).json({ error: req.t("error.failedToFetchFaqs") });
+    }
+  }
+};
+
+export const createFaq = [
+  body('question').notEmpty().withMessage("validation.questionRequired"),
+  body('answer').notEmpty().withMessage("validation.answerRequired"),
+
+  async (req: Request, res: Response) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
+    }
+
+    try {
+      await webService.createFaq(req.body);
+      res.status(201).json({ message: req.t("message.faqCreated") });
+    } catch (error) {
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: req.t(error.message) });
+      } else {
+        res.status(500).json({ error: req.t("error.failedToCreateFaq") });
+      }
+    }
+  }
+];
+
+export const deleteFaq = async (req: Request, res: Response) => {
+  try {
+    await webService.deleteFaq(Number(req.params.id));
+
+    res.json({ message: req.t("message.faqDeleted") });
+  } catch (error) {
+
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: req.t(error.message) });
+    } else {
+      res.status(500).json({ error: req.t("failedToDeleteFaq") });
+    }
+  }
+};

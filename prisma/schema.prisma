@@ -272,3 +272,25 @@ model ChatMessage {
   channelId String
   channel   ChatChannel @relation(fields: [channelId], references: [id])
 }
+
+
+model Review {
+  id                Int                @id @default(autoincrement())
+  name              String             @db.Text
+  title             String             @db.Text
+  review            String             @db.Text
+  stars             Int                @default(0)
+  day               DateTime           @default(now())
+  href              String             @db.Text
+  profile_image_url String             @db.Text
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt @default(now())
+}
+
+model Faq {
+  id                Int                @id @default(autoincrement())
+  question          String             @db.Text
+  answer            String             @db.Text
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt @default(now())
+}

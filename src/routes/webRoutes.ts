@@ -1,0 +1,19 @@
+import express from 'express';
+import * as webController from '../controllers/webController';
+import { authenticateToken, checkRole } from '../middleware/auth';
+
+const router = express.Router();
+
+router.get('/',webController.getWebContent);
+
+router.get('/faqs',webController.getAllFaqs);
+router.post('/faqs',authenticateToken,checkRole('ADMIN','SUPERVISOR'), webController.createReview);
+router.delete('/faqs/:id',authenticateToken,checkRole('ADMIN','SUPERVISOR'), webController.deleteReview);
+
+router.get('/reviews',webController.getAllReviews);
+router.post('/reviews',authenticateToken,checkRole('ADMIN','SUPERVISOR'), webController.createReview);
+router.delete('/reviews/:id',authenticateToken,checkRole('ADMIN','SUPERVISOR'), webController.deleteReview);
+
+
+export default router;
+

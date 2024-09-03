@@ -1,0 +1,26 @@
+-- CreateTable
+CREATE TABLE "Review" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "review" TEXT NOT NULL,
+    "stars" INTEGER NOT NULL DEFAULT 0,
+    "day" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "href" TEXT NOT NULL,
+    "profile_image_url" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Review_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Faq" (
+    "id" SERIAL NOT NULL,
+    "question" TEXT NOT NULL,
+    "answer" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Faq_pkey" PRIMARY KEY ("id")
+);
