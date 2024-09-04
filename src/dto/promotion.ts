@@ -27,6 +27,7 @@ export interface PromotionOptions {
 }
 
 export interface PromotionPublicDto extends PromotionDto  {
+  id:number;
   tents: TentDto[];
   products?: ProductPublicDto[];
   experiences?:ExperiencePublicDto[];

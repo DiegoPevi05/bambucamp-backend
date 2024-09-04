@@ -1,22 +1,25 @@
 import * as tentRepository from '../repositories/TentRepository';
-import { TentFilters, PaginatedTents, TentDto } from '../dto/tent';
-import { deleteSubFolder, serializeImagesTodb, moveImagesToSubFolder, deleteImages } from '../lib/utils';
+import { TentFilters, PaginatedTents, TentDto, PublicTent } from '../dto/tent';
+import { deleteSubFolder, serializeImagesTodb, moveImagesToSubFolder, deleteImages, calculatePrice } from '../lib/utils';
 import {NotFoundError} from '../middleware/errors';
 
 
 export const getAllPublicTents = async () => {
   const tents = await tentRepository.getAllPublicTents();
-  return tents.map((tent) => ({
-    header:tent.header,
-    title: tent.title,
-    description: tent.description,
-    services: tent.services,
-    images : JSON.parse(tent.images ? tent.images : '[]'),
-    qtypeople: tent.qtypeople,
-    qtykids: tent.qtykids,
-    price: tent.price,
-    status: tent.status,
-  }));
+
+  const TentsPublic:PublicTent[]  = [] 
+
+  tents.forEach((tent) => {
+
+    let tentPublic:PublicTent = { 
+      ...tent, 
+      images: JSON.parse(tent.images ? tent.images : '[]'),
+      custom_price: calculatePrice(tent.price,tent.custom_price) 
+    }
+    TentsPublic.push(tentPublic);
+  });
+
+  return TentsPublic;
 }
 
 interface Pagination {

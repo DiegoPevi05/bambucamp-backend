@@ -1,11 +1,14 @@
+import {PromotionPublicDto} from "./promotion";
+import {PublicTent} from "./tent";
+
 export interface ReviewDto {
   name:string;
   title:string;
   review:string;
   stars:number;
   day:Date;
-  href:string;
-  profile_image_url:string;
+  href:string|null;
+  profile_image_url:string|null;
 }
 
 export interface PublicReviewDto extends ReviewDto  {
@@ -36,8 +39,8 @@ export interface PaginatedFaqs {
 
 
 export interface webContent {
-  tents:any[];
-  promotions:any[];
+  tents:PublicTent[];
+  promotions:PromotionPublicDto[];
   reviews:PublicReviewDto[];
   faqs:PublicFaqDto[];
 }

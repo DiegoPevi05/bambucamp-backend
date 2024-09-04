@@ -3,28 +3,13 @@ import * as tentRepository from '../repositories/TentRepository';
 import * as experienceRepository from '../repositories/ExperienceRepository';
 import * as productRepository from '../repositories/ProductRepository';
 
-import { PromotionDto, PromotionFilters, PaginatedPromotions, PromotionOptions } from "../dto/promotion";
+import { PromotionDto, PromotionFilters, PaginatedPromotions, PromotionOptions, PromotionPublicDto } from "../dto/promotion";
 import { serializeImagesTodb, moveImagesToSubFolder, deleteSubFolder, deleteImages } from '../lib/utils';
 import {BadRequestError, NotFoundError} from '../middleware/errors';
 
 
-export const getAllPublicPromotions = async () => {
-  const promotions = await promotionRepository.getAllPublicPromotions();
-  return promotions.map((promotion) => ({
-    title: promotion.title,
-    description: promotion.description,
-    images : JSON.parse(promotion.images ? promotion.images : '[]'),
-    expiredDate : promotion.expiredDate,
-    qtypeople: promotion.qtypeople,
-    qtykids: promotion.qtykids,
-    idtents: promotion.idtents,
-    idproducts: promotion.idproducts,
-    idexperiences: promotion.idexperiences,
-    netImport:promotion.netImport,
-    discount:promotion.discount,
-    grossImport:promotion.grossImport,
-    stock: promotion.stock
-  }));
+export const getAllPublicPromotions = async ():Promise<PromotionPublicDto[]> => {
+  return await promotionRepository.getAllPublicPromotions();
 }
 
 export const getAllPromotionOptions = async():Promise<PromotionOptions> => {

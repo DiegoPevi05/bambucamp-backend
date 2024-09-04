@@ -10,8 +10,8 @@ interface Pagination {
   pageSize: number;
 }
 
-export const getAllPublicPromotions = async (): Promise<Promotion[]> => {
-  return await prisma.promotion.findMany({
+export const getAllPublicPromotions = async (): Promise<PromotionPublicDto[]> => {
+  const promotions = await prisma.promotion.findMany({
     where: {
       status: 'ACTIVE'
     },
@@ -19,6 +19,51 @@ export const getAllPublicPromotions = async (): Promise<Promotion[]> => {
       createdAt: 'desc',
     },
   });
+
+  const promotionPublicDtos = await Promise.all(promotions.map(async (promotion) => {
+    const idTents = JSON.parse(promotion.idtents || '[]');
+    const idProducts = JSON.parse(promotion.idproducts || '[]');
+    const idExperiences = JSON.parse(promotion.idexperiences || '[]');
+
+    const tents = await prisma.tent.findMany({
+      where: {
+        id: {
+          in: idTents.id,
+        },
+      },
+    });
+
+    const products = await prisma.product.findMany({
+      where: {
+        id: {
+          in: idProducts.id,
+        },
+      },
+      include: {
+        category: true, // Include the category object
+      },
+    });
+
+    const experiences = await prisma.experience.findMany({
+      where: {
+        id: {
+          in: idExperiences.id,
+        },
+      },
+      include: {
+        category: true, // Include the category object
+      },
+    });
+
+    return {
+      ...promotion,
+      tents,
+      products,
+      experiences,
+    } as PromotionPublicDto;
+  }));
+
+  return promotionPublicDtos;
 };
 
 export const getAllPromotionOptions = async():Promise<PromotionOptions> => {
@@ -46,6 +91,7 @@ export const getAllPromotionOptions = async():Promise<PromotionOptions> => {
       category: true, // Include the category object
     },
   });
+
 
   return {
     tents,
