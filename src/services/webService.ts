@@ -1,26 +1,27 @@
-import {FaqDto, PublicFaqDto, PublicReviewDto, ReviewDto} from '../dto/web';
+import {FaqDto, PaginatedFaqs, PaginatedReviews, PublicFaqDto, PublicReviewDto, ReviewDto} from '../dto/web';
 import * as webRepository from '../repositories/WebRepository';
 import * as tentService  from '../services/tentService';
 import * as promotionService from '../services/promotionService';
 import { webContent } from '../dto/web';
+import {Review} from '@prisma/client';
 
 export const getWebContent = async () => {
   const webContent:webContent = {
     tents: await tentService.getAllPublicTents(),
     promotions:await promotionService.getAllPublicPromotions(),
-    faqs:await getAllFaqs(),
-    reviews: await getAllReviews()
+    faqs:await getAllPublicFaqs(),
+    reviews: await getAllPublicReviews()
   }
   return webContent;
 };
 
 
-export const getAllReviews = async () => {
-  const reviews = await webRepository.getAllReviews();
+export const getAllPublicReviews = async () => {
+  const reviews = await webRepository.getAllPublicReviews();
 
   const ReviewsPublic:PublicReviewDto[]  = [] 
 
-  reviews.forEach((review) => {
+  reviews.forEach((review:Review) => {
     let reviewPublic:PublicReviewDto = {
       id:review.id,
       name: review.name,
@@ -38,6 +39,15 @@ export const getAllReviews = async () => {
 
 };
 
+interface Pagination {
+  page: number;
+  pageSize: number;
+}
+
+export const getAllReviews = async (pagination:Pagination):Promise<PaginatedReviews> => {
+  return await webRepository.getAllReviews(pagination);
+};
+
 export const createReview = async (data: ReviewDto) => {
 
   data.stars        = Number(data.stars);
@@ -50,8 +60,8 @@ export const deleteReview = async (id: number) => {
   return await webRepository.deleteReview(id);
 };
 
-export const getAllFaqs = async () => {
-  const faqs = await webRepository.getAllFaqs();
+export const getAllPublicFaqs = async () => {
+  const faqs = await webRepository.getAllPublicFaqs();
 
   const FaqsPublic:PublicFaqDto[]  = [] 
 
@@ -65,6 +75,10 @@ export const getAllFaqs = async () => {
   });
 
   return FaqsPublic;
+};
+
+export const getAllFaqs = async (pagination:Pagination):Promise<PaginatedFaqs> => {
+  return await webRepository.getAllFaqs(pagination);
 };
 
 export const createFaq = async (data: FaqDto) => {

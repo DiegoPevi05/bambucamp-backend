@@ -18,7 +18,15 @@ export const getWebContent = async (req: Request, res: Response) => {
 
 export const getAllReviews = async (req: Request, res: Response) => {
   try {
-    const reviews = await webService.getAllReviews();
+
+    const { page = '1', pageSize = '10' } = req.query;
+
+    const pagination = {
+      page: parseInt(page as string, 10),
+      pageSize: parseInt(pageSize as string, 10),
+    };
+
+    const reviews = await webService.getAllReviews(pagination);
     res.json(reviews);
   } catch (error) {
     if (error instanceof CustomError) {
@@ -76,10 +84,30 @@ export const deleteReview = async (req: Request, res: Response) => {
   }
 };
 
+export const getAllPublicFaqs = async (req: Request, res: Response) => {
+  try {
+    const faqs = await webService.getAllPublicFaqs();
+    res.json(faqs);
+  } catch (error) {
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: req.t(error.message) });
+    } else {
+      res.status(500).json({ error: req.t("error.failedToFetchFaqs") });
+    }
+  }
+};
 
 export const getAllFaqs = async (req: Request, res: Response) => {
   try {
-    const faqs = await webService.getAllFaqs();
+
+    const { page = '1', pageSize = '10' } = req.query;
+
+    const pagination = {
+      page: parseInt(page as string, 10),
+      pageSize: parseInt(pageSize as string, 10),
+    };
+
+    const faqs = await webService.getAllFaqs(pagination);
     res.json(faqs);
   } catch (error) {
     if (error instanceof CustomError) {

@@ -12,6 +12,12 @@ export interface PublicReviewDto extends ReviewDto  {
   id:number;
 }
 
+export interface PaginatedReviews {
+  reviews: PublicReviewDto[];
+  totalPages: number;
+  currentPage: number;
+};
+
 export interface FaqDto {
   question:string;
   answer:string;
@@ -21,6 +27,13 @@ export interface FaqDto {
 export interface PublicFaqDto extends FaqDto  {
   id:number;
 }
+
+export interface PaginatedFaqs {
+  faqs: PublicFaqDto[];
+  totalPages: number;
+  currentPage: number;
+};
+
 
 export interface webContent {
   tents:any[];

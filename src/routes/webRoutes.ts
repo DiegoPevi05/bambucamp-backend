@@ -6,11 +6,11 @@ const router = express.Router();
 
 router.get('/',webController.getWebContent);
 
-router.get('/faqs',webController.getAllFaqs);
+router.get('/faqs',authenticateToken,checkRole('ADMIN','SUPERVISOR'),webController.getAllFaqs);
 router.post('/faqs',authenticateToken,checkRole('ADMIN','SUPERVISOR'), webController.createReview);
 router.delete('/faqs/:id',authenticateToken,checkRole('ADMIN','SUPERVISOR'), webController.deleteReview);
 
-router.get('/reviews',webController.getAllReviews);
+router.get('/reviews',authenticateToken,checkRole('ADMIN','SUPERVISOR'),webController.getAllReviews);
 router.post('/reviews',authenticateToken,checkRole('ADMIN','SUPERVISOR'), webController.createReview);
 router.delete('/reviews/:id',authenticateToken,checkRole('ADMIN','SUPERVISOR'), webController.deleteReview);
 
