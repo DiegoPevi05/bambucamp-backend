@@ -8,6 +8,14 @@ interface Pagination {
   pageSize: number;
 }
 
+export const getAllNotificationsUser = async (t: any, filters: notifcationFilters, pagination: Pagination): Promise<PaginatedNotifications> => {
+  const filtersUser = {
+    ...filters,
+    target:[NotificationTarget.USER],
+  }
+  return await notificationRepository.getAllNotifications(t ,filtersUser, pagination);
+};
+
 
 export const getAllNotifications = async (t: any, filters: notifcationFilters, pagination: Pagination): Promise<PaginatedNotifications> => {
   return await notificationRepository.getAllNotifications(t ,filters, pagination);

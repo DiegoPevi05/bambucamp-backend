@@ -62,7 +62,7 @@ export const searchAvailableTents = async (dateFrom: Date, dateTo: Date): Promis
   return tents;
 };
 
-export const getMyReservesByMonth = async (page: number, userId?: number): Promise<{ reserves: { id:number, dateFrom:Date, dateTo:Date }[] }> => {
+export const getMyReservesByMonth = async (page: number, userId?: number): Promise<{ reserves: { id:number, external_id:string, dateFrom:Date, dateTo:Date }[] }> => {
   const currentDate = new Date();
 
   // Calculate the target month and year based on the page
@@ -88,6 +88,11 @@ export const getMyReservesByMonth = async (page: number, userId?: number): Promi
     },
     select: {
       id: true,
+      reserve: {
+        select: {
+          external_id: true, // Ensure external_id is selected
+        },
+      },
       dateFrom: true,
       dateTo: true,
       reserveId:true
@@ -96,6 +101,7 @@ export const getMyReservesByMonth = async (page: number, userId?: number): Promi
 
   const formattedReserves = reserveTents.map(reserveTent => ({
     id: reserveTent.reserveId,
+    external_id:reserveTent.reserve.external_id,
     dateFrom: reserveTent.dateFrom,
     dateTo: reserveTent.dateTo,
   }));
