@@ -7,6 +7,7 @@ import * as utils from '../../lib/utils';
 // Load SMTP configuration from environment variables
 const HOSTNAME = process.env.HOSTNAME || `http://localhost:${process.env.PORT}`;
 const CLIENT_HOSTNAME =  process.env.CLIENT_HOSTNAME || 'http://localhost:5174';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "diegopevi05@gmail.com";
 
 const smtpHost = process.env.SMTP_HOST;
 const smtpPort = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 465;
@@ -53,6 +54,35 @@ const sendEmail = async (to: string, subject: string, html: string) => {
     console.error('Error sending email: ', error);
   }
 };
+
+const sendContactFormConfirmation = async(props:{ email:string, name:string }, language:string) => {
+  const { email, name } = props;
+  const chosenLanguage = language === 'es' ? 'es' : 'en'; 
+  const templatePath = path.join(__dirname, `templates/contact-form-user-email-${chosenLanguage}.html`);
+  let emailTemplate = fs.readFileSync(templatePath, 'utf8');
+
+  emailTemplate = emailTemplate.replace('{{email}}', email);
+  emailTemplate = emailTemplate.replace('{{name}}', name);
+  emailTemplate = emailTemplate.replace('{{currentYear}}', new Date().getFullYear().toString());
+
+  await sendEmail(email, language === 'en' ? 'Thanks for contact us' : 'Gracias por contactarnos', emailTemplate);
+
+}
+
+const sendContactFormAdmin = async(props:{ email:string, name:string, message:string }, language:string) => {
+  const { email, name, message } = props;
+  const chosenLanguage = language === 'es' ? 'es' : 'en'; 
+  const templatePath = path.join(__dirname, `templates/contact-form-admin-email-${chosenLanguage}.html`);
+  let emailTemplate = fs.readFileSync(templatePath, 'utf8');
+
+  emailTemplate = emailTemplate.replace('{{email}}', email);
+  emailTemplate = emailTemplate.replace('{{name}}', name);
+  emailTemplate = emailTemplate.replace('{{message}}', message);
+  emailTemplate = emailTemplate.replace('{{currentYear}}', new Date().getFullYear().toString());
+
+  await sendEmail(ADMIN_EMAIL , language === 'en' ? 'Someone wants to contact' : 'Alguien quiere contactarte', emailTemplate);
+
+}
 
 // Function to send verification email
 const sendVerificationEmail = async (user: { email: string; firstName: string }, verificationCode: string, language:string) => {
@@ -220,6 +250,8 @@ const sendReservationEmail = async(user: { email:string, firstName:string }, res
 }
 
 export {
+  sendContactFormConfirmation,
+  sendContactFormAdmin,
   sendVerificationEmail,
   sendPasswordResetEmail,
   sendReservationEmail

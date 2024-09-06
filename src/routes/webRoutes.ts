@@ -5,6 +5,8 @@ import { authenticateToken, checkRole } from '../middleware/auth';
 const router = express.Router();
 
 router.get('/',webController.getWebContent);
+router.post('/contact',webController.contactForm);
+
 
 router.get('/faqs',authenticateToken,checkRole('ADMIN','SUPERVISOR'),webController.getAllFaqs);
 router.post('/faqs',authenticateToken,checkRole('ADMIN','SUPERVISOR'), webController.createFaq);

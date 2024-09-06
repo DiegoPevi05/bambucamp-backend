@@ -3,6 +3,38 @@ import * as webService from '../services/webService';
 import { CustomError } from '../middleware/errors';
 import { body, validationResult } from 'express-validator';
 
+export const contactForm = [
+  body('name').notEmpty().withMessage("validation.nameRequired"),
+  body('email').notEmpty().withMessage("validation.emailRequired"),
+  body('message').notEmpty().withMessage("validation.messageRequired"),
+
+  async (req: Request, res: Response) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
+    }
+
+    try {
+
+      const language = req.language || 'en';
+      await webService.contactForm(req.body, language);
+      res.status(201).json({ message: req.t("message.messageSended") });
+    } catch (error) {
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: req.t(error.message) });
+      } else {
+        res.status(500).json({ error: req.t("error.failedToSendContactForm") });
+      }
+    }
+  }
+]
+
 export const getWebContent = async (req: Request, res: Response) => {
   try {
     const webContent = await webService.getWebContent();

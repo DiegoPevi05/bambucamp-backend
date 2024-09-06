@@ -44,3 +44,10 @@ export interface webContent {
   reviews:PublicReviewDto[];
   faqs:PublicFaqDto[];
 }
+
+export interface ContactForm {
+  name:string;
+  email:string;
+  message:string;
+  saveinfo:boolean;
+}
