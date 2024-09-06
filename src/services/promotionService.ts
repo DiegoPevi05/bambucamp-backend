@@ -9,7 +9,26 @@ import {BadRequestError, NotFoundError} from '../middleware/errors';
 
 
 export const getAllPublicPromotions = async ():Promise<PromotionPublicDto[]> => {
-  return await promotionRepository.getAllPublicPromotions();
+  const promotions = await promotionRepository.getAllPublicPromotions();
+
+  promotions.forEach((promotion) => {
+    promotion.images = JSON.parse(promotion.images ? promotion.images : '[]');
+    promotion.tents.forEach((tent)=>{
+      tent.images = JSON.parse(tent.images ? tent.images : '[]');
+
+    })
+
+    promotion?.products?.forEach((product)=>{
+      product.images = JSON.parse(product.images ? product.images : '[]');
+    })
+
+    promotion?.experiences?.forEach((experience)=>{
+      experience.images = JSON.parse(experience.images ? experience.images : '[]');
+    })
+
+  });
+
+  return promotions;
 }
 
 export const getAllPromotionOptions = async():Promise<PromotionOptions> => {
