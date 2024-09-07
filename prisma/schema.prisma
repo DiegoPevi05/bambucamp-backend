@@ -124,13 +124,49 @@ model Promotion {
   status          String          @default("ACTIVE") @db.Text
   qtypeople       Int             @default(1)
   qtykids         Int             @default(0)
-  idtents         String          @db.Text
-  idproducts      String          @default("[]") @db.Text
-  idexperiences   String          @default("[]") @db.Text
+  tents           optTentPromotion[]  
+  products        optProductPromotion[] 
+  experiences     optExperiencePromotion[]  
   netImport       Float
   discount        Int
   grossImport     Float
   stock           Int             @default(1)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt @default(now())
+}
+
+model optTentPromotion {
+  id              Int             @id @default(autoincrement())
+  idTent          Int
+  name            String          
+  price           Float           @default(0)
+  quantity        Int             @default(1)
+  promotionId     Int
+  promotion       Promotion       @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt @default(now())
+}
+
+model optProductPromotion {
+  id              Int             @id @default(autoincrement())
+  idProduct       Int
+  name            String          
+  price           Float           @default(0)
+  quantity        Int             @default(1)
+  promotionId     Int
+  promotion       Promotion       @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt @default(now())
+}
+
+model optExperiencePromotion {
+  id              Int             @id @default(autoincrement())
+  idExperience    Int
+  name            String          
+  price           Float           @default(0)
+  quantity        Int             @default(1)
+  promotionId     Int
+  promotion       Promotion       @relation(fields: [promotionId], references: [id], onDelete: Cascade)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt @default(now())
 }
@@ -182,6 +218,7 @@ model ReserveTent {
   aditionalPeople Int       @default(0)
   reserve         Reserve   @relation(fields: [reserveId], references: [id], onDelete: Cascade)
   confirmed       Boolean   @default(false)
+  promotionId     Int?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt @default(now())
 }
@@ -195,6 +232,7 @@ model ReserveProduct {
   quantity        Int       @default(1)
   reserve         Reserve   @relation(fields: [reserveId], references: [id], onDelete: Cascade)
   confirmed       Boolean   @default(false)
+  promotionId     Int?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt @default(now())
 }
@@ -209,6 +247,7 @@ model ReserveExperience {
   day             DateTime  @default(now())
   reserve         Reserve   @relation(fields: [reserveId], references: [id], onDelete: Cascade)
   confirmed       Boolean   @default(false)
+  promotionId     Int?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt @default(now())
 }

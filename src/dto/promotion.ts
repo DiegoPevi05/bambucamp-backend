@@ -14,10 +14,31 @@ export interface PromotionDto {
   discount: number;
   grossImport: number;
   stock: number;
-  idtents: string;
-  idproducts?: string;
-  idexperiences?: string;
+  tents?: optTentPromotionDto[];
+  products?: optProductPromotionDto[];
+  experiences?: optExperiencePromotionDto[];
   existing_images?:string;
+}
+
+export interface optTentPromotionDto {
+  idTent:number;
+  name:string;
+  price:number;
+  quantity:number;
+}
+
+export interface optProductPromotionDto {
+  idProduct:number;
+  name:string;
+  price:number;
+  quantity:number;
+}
+
+export interface optExperiencePromotionDto {
+  idExperience:number;
+  name:string;
+  price:number;
+  quantity:number;
 }
 
 export interface PromotionOptions {
@@ -28,9 +49,9 @@ export interface PromotionOptions {
 
 export interface PromotionPublicDto extends PromotionDto  {
   id:number;
-  tents: TentDto[];
-  products?: ProductPublicDto[];
-  experiences?:ExperiencePublicDto[];
+  tentsDB: TentDto[];
+  productsDB?: ProductPublicDto[];
+  experiencesDB?:ExperiencePublicDto[];
 }
 
 export interface PromotionFilters {

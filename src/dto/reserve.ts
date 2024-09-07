@@ -15,6 +15,7 @@ export interface ReserveTentDto {
   dateTo:Date;
   confirmed:boolean;
   aditionalPeople:number;
+  promotionId?:number;
   tentDB?:Tent;
 }
 
@@ -25,6 +26,7 @@ export interface ReserveProductDto {
   price:number;
   quantity:number;
   confirmed:boolean;
+  promotionId?:number;
   productDB?:Product;
 }
 
@@ -40,6 +42,7 @@ export interface ReserveExperienceDto {
   quantity:number;
   day:Date;
   confirmed:boolean;
+  promotionId?:number;
   experienceDB?:Experience;
 }
 
