@@ -13,16 +13,16 @@ export const getAllPublicPromotions = async ():Promise<PromotionPublicDto[]> => 
 
   promotions.forEach((promotion) => {
     promotion.images = JSON.parse(promotion.images ? promotion.images : '[]');
-    promotion.tents.forEach((tent)=>{
+    promotion?.tentsDB?.forEach((tent)=>{
       tent.images = JSON.parse(tent.images ? tent.images : '[]');
 
     })
 
-    promotion?.products?.forEach((product)=>{
+    promotion?.productsDB?.forEach((product)=>{
       product.images = JSON.parse(product.images ? product.images : '[]');
     })
 
-    promotion?.experiences?.forEach((experience)=>{
+    promotion?.experiencesDB?.forEach((experience)=>{
       experience.images = JSON.parse(experience.images ? experience.images : '[]');
     })
 
@@ -62,16 +62,16 @@ export const getAllPromotions = async (filters:PromotionFilters, pagination:Pagi
 
   PaginatedPromotions.promotions.forEach((promotion) => {
     promotion.images = JSON.parse(promotion.images ? promotion.images : '[]');
-    promotion.tents.forEach((tent)=>{
+    promotion?.tentsDB?.forEach((tent)=>{
       tent.images = JSON.parse(tent.images ? tent.images : '[]');
 
     })
 
-    promotion?.products?.forEach((product)=>{
+    promotion?.productsDB?.forEach((product)=>{
       product.images = JSON.parse(product.images ? product.images : '[]');
     })
 
-    promotion?.experiences?.forEach((experience)=>{
+    promotion?.experiencesDB?.forEach((experience)=>{
       experience.images = JSON.parse(experience.images ? experience.images : '[]');
     })
 
@@ -89,11 +89,10 @@ type MulterFile = Express.Multer.File;
 
 export const createPromotion = async (data: PromotionDto, files: MulterFile[] | { [fieldname:string] :MulterFile[]; } | undefined) => {
 
-  if(data.idtents){
-    const idtents = JSON.parse(data.idtents)
-    idtents.map((tentId:{id:number,label:string,qty:number,price:number})=>{
-      const tent = tentRepository.getTentById(tentId.id);
-      if(!tent){
+  if(data.tents){
+    data.tents.map((tent:{idTent:number,name:string,price:number,quantity:number})=>{
+      const tentDB = tentRepository.getTentById(tent.idTent);
+      if(!tentDB){
         throw new NotFoundError("error.noAllTentsFound");
       }
     })
@@ -101,21 +100,19 @@ export const createPromotion = async (data: PromotionDto, files: MulterFile[] | 
     throw new BadRequestError("error.noTentsToValidate");
   }
 
-  if(data.idproducts){
-    const idproducts = JSON.parse(data.idproducts)
-    idproducts.map((productId:{id:number,label:string,qty:number,price:number})=>{
-      const product = productRepository.getProductById(productId.id);
-      if(!product){
+  if(data.products){
+    data.products.map((product:{idProduct:number,name:string,quantity:number,price:number})=>{
+      const productDB = productRepository.getProductById(product.idProduct);
+      if(!productDB){
         throw new NotFoundError("error.noAllProductsFound");
       }
     })
   };
 
-  if(data.idexperiences){
-    const idexperiences = JSON.parse(data.idexperiences)
-    idexperiences.map((experienceId:{id:number,label:string,qty:number,price:number})=>{
-      const experience = experienceRepository.getExperienceById(experienceId.id);
-      if(!experience){
+  if(data.experiences){
+    data.experiences.map((experience:{idExperience:number,name:string,quantity:number,price:number})=>{
+      const experienceDB = experienceRepository.getExperienceById(experience.idExperience);
+      if(!experienceDB){
         throw new NotFoundError("error.noAllExperiencesFound")
       }
     })
@@ -162,90 +159,45 @@ export const updatePromotion = async (id:number, data: PromotionDto, files: Mult
 
   const promotion = await promotionRepository.getPromotionById(id);
 
-  if(!promotion){
+  if (!promotion) {
     throw new NotFoundError("error.noPromotionFoundInDB");
   }
 
-  if(data.title &&  data.title != promotion.title){
-    promotion.title   = data.title;
-  }
-
-  if(data.description &&  data.description != promotion.description){
-    promotion.description   = data.description;
-  }
-
-  if(data.expiredDate){
+  // Update simple properties
+  if (data.title && data.title !== promotion.title) promotion.title = data.title;
+  if (data.description && data.description !== promotion.description) promotion.description = data.description;
+  if (data.expiredDate) {
     const expiredDate = new Date(data.expiredDate);
     expiredDate.setUTCHours(5, 0, 0, 0);
-
-    if(expiredDate < new Date()){
-      throw new BadRequestError("error.expiredDateGreaterThanToday");
-    }
-
+    if (expiredDate < new Date()) throw new BadRequestError("error.expiredDateGreaterThanToday");
     promotion.expiredDate = expiredDate;
   }
+  if (data.status && data.status !== promotion.status) promotion.status = data.status;
+  if (data.stock && Number(data.stock) !== promotion.stock) promotion.stock = Number(data.stock);
+  if (data.qtypeople && Number(data.qtypeople) !== promotion.qtypeople) promotion.qtypeople = Number(data.qtypeople);
+  if (data.qtykids && Number(data.qtykids) !== promotion.qtykids) promotion.qtykids = Number(data.qtykids);
+  if (data.netImport && Number(data.netImport) !== promotion.netImport) promotion.netImport = Number(data.netImport);
+  if (data.discount && Number(data.discount) !== promotion.discount) promotion.discount = Number(data.discount);
+  if (data.grossImport && Number(data.grossImport) !== promotion.grossImport) promotion.grossImport = Number(data.grossImport);
 
-  if(data.status && data.status != promotion.status){
-    promotion.status   = data.status;
+  // Check tents, products, experiences existence before updating
+  const tents = data.tents || [];
+  const products = data.products || [];
+  const experiences = data.experiences || [];
+
+  // Verify the existence of tents, products, and experiences
+  for (const tent of tents) {
+    const tentDB = await tentRepository.getTentById(tent.idTent);
+    if (!tentDB) throw new NotFoundError("error.noAllTentsFound");
   }
-
-  if(data.stock &&  Number(data.stock) != promotion.stock ){
-    promotion.stock = Number(data.stock);
+  for (const product of products) {
+    const productDB = await productRepository.getProductById(product.idProduct);
+    if (!productDB) throw new NotFoundError("error.noAllProductsFound");
   }
-
-  if(data.qtypeople &&  Number(data.qtypeople) != promotion.qtypeople ){
-    promotion.qtypeople = Number(data.qtypeople);
+  for (const experience of experiences) {
+    const experienceDB = await experienceRepository.getExperienceById(experience.idExperience);
+    if (!experienceDB) throw new NotFoundError("error.noAllExperiencesFound");
   }
-
-  if(data.qtykids &&  Number(data.qtykids) != promotion.qtykids ){
-    promotion.qtykids = Number(data.qtykids);
-  }
-
-  if(data.netImport && Number(data.netImport) != promotion.netImport){
-    promotion.netImport   = Number(data.netImport);
-  }
-
-  if(data.discount && Number(data.discount) != promotion.discount){
-    promotion.discount   = Number(data.discount);
-  }
-
-  if(data.grossImport && Number(data.grossImport) != promotion.grossImport){
-    promotion.grossImport   = Number(data.grossImport);
-  }
-
-  if(data.idtents){
-    const idtents = JSON.parse(data.idtents)
-    idtents.map((tentId:{id:number,label:string,qty:number,price:number})=>{
-      const tent = tentRepository.getTentById(tentId.id);
-      if(!tent){
-        throw new NotFoundError("error.noAllTentsFound")
-      }
-    })
-
-    promotion.idtents = data.idtents; 
-  }
-
-  if(data.idproducts){
-    const idproducts = JSON.parse(data.idproducts)
-    idproducts.map((productId:{id:number,label:string,qty:number,price:number})=>{
-      const product = productRepository.getProductById(productId.id);
-      if(!product){
-        throw new NotFoundError("error.noAllProductsFound")
-      }
-    })
-    promotion.idproducts = data.idproducts;
-  };
-
-  if(data.idexperiences){
-    const idexperiences = JSON.parse(data.idexperiences)
-    idexperiences.map((experienceId:{id:number,label:string,qty:number,price:number})=>{
-      const experience = experienceRepository.getExperienceById(experienceId.id);
-      if(!experience){
-        throw new NotFoundError("error.noAllExperiencesFound")
-      }
-    })
-    promotion.idexperiences = data.idexperiences;
-  };
 
   if(files || data.existing_images){
 
@@ -290,7 +242,14 @@ export const updatePromotion = async (id:number, data: PromotionDto, files: Mult
 
   promotion.updatedAt = new Date();
 
-  return await promotionRepository.updatePromotion(id,promotion);
+  const updatedPromotion = await promotionRepository.updatePromotion(id, {
+    ...promotion,
+    tents,
+    products,
+    experiences,
+  });
+
+  return updatedPromotion;
 };
 
 export const deletePromotion = async (id: number) => {

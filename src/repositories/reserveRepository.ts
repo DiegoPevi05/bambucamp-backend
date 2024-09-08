@@ -1,6 +1,7 @@
 import { PrismaClient, Reserve, ReserveTent, ReserveProduct, ReserveExperience, Tent, ReserveStatus,   } from "@prisma/client";
 import { ReserveDto, ReserveFilters, PaginatedReserve, ReserveTentDto, ReserveExperienceDto, ReserveProductDto, ReserveOptions, ReservePromotionDto, createReserveProductDto, createReserveExperienceDto } from "../dto/reserve";
 import * as utils from "../lib/utils";
+import {NotFoundError} from "../middleware/errors";
 
 interface Pagination {
   page: number;
@@ -180,14 +181,17 @@ export const getMyReserves = async (pagination: Pagination, userId?: number): Pr
         tents: reserve.tents.map((tent) => ({
           ...tent,
           tentDB: tentsDB.find((dbTent) => dbTent.id === tent.idTent),
+          promotionId: tent.promotionId ?? undefined,  // Handle null -> undefined conversion
         })),
         products: reserve.products.map((product) => ({
           ...product,
           productDB: productsDB.find((dbProduct) => dbProduct.id === product.idProduct),
+          promotionId: product.promotionId ?? undefined,  // Handle null -> undefined conversion
         })),
         experiences: reserve.experiences.map((experience) => ({
           ...experience,
           experienceDB: experiencesDB.find((dbExperience) => dbExperience.id === experience.idExperience),
+          promotionId: experience.promotionId ?? undefined,  // Handle null -> undefined conversion
         })),
         promotions: reserve.promotions.map((promotion) => ({
           ...promotion,
@@ -298,10 +302,30 @@ export const getAllReserves = async ( filters: ReserveFilters, pagination: Pagin
     },
   });
 
+  // Map over the reserves to ensure the data types match your DTO structure
+  const enrichedReserves = reserves.map((reserve) => ({
+    ...reserve,
+    tents: reserve.tents.map((tent) => ({
+      ...tent,
+      promotionId: tent.promotionId ?? undefined,  // Convert null to undefined for compatibility
+    })),
+    products: reserve.products.map((product) => ({
+      ...product,
+      promotionId: product.promotionId ?? undefined,  // Convert null to undefined
+    })),
+    experiences: reserve.experiences.map((experience) => ({
+      ...experience,
+      promotionId: experience.promotionId ?? undefined,  // Convert null to undefined
+    })),
+    promotions: reserve.promotions.map((promotion) => ({
+      ...promotion,
+    })),
+  }));
+
   const totalPages = Math.ceil(totalCount / pageSize);
 
   return {
-    reserves,
+    reserves: enrichedReserves,  // Return the enriched reserves
     totalPages,
     currentPage: page,
   };
@@ -315,50 +339,77 @@ export const getReserveById = async (id: number): Promise<Reserve | null> => {
 
 
 export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null> => {
-  // Create the reserve first
-  const createdReserve = await prisma.reserve.create({
-    data: {
-      ...data,
-      external_id: "IN_PROCESS",
-      tents: {
-        create: data.tents.map(tent => ({
-          idTent: tent.idTent,
-          name: tent.name,
-          price: tent.price,
-          nights: tent.nights,
-          dateFrom:tent.dateFrom,
-          dateTo:tent.dateTo
-        }))
-      },
-      products: {
-        create: data.products.map(product => ({
-          idProduct: product.idProduct,
-          name: product.name,
-          price: product.price,
-          quantity: product.quantity,
-        }))
-      },
-      experiences: {
-        create: data.experiences.map(experience => ({
-          idExperience: experience.idExperience,
-          name: experience.name,
-          price: experience.price,
-          quantity: experience.quantity,
-          day:experience.day
-        }))
-      },
-      promotions:{
-        create:data.promotions.map(promotion => ({
-          idPromotion:promotion.idPromotion,
-          name:promotion.name,
-          price:promotion.price,
-          quantity:promotion.quantity
-        }))
-      }
+  // Ensure userId is defined, otherwise throw an error or handle appropriately
+  if (!data.userId) {
+    throw new NotFoundError('error.noUserFoundInDB');
+  }
+
+  // Prepare the data for Prisma
+  const reserveData = {
+    userId: data.userId,  // Ensure this is a valid number
+    external_id: "IN_PROCESS",  // Placeholder for external_id
+    dateSale: data.dateSale,
+    price_is_calculated: data.price_is_calculated,
+    discount_code_id: data.discount_code_id,
+    discount_code_name: data.discount_code_name,
+    net_import: data.net_import,
+    discount: data.discount,
+    gross_import: data.gross_import,
+    canceled_reason: data.canceled_reason,
+    canceled_status: data.canceled_status,
+    payment_status: data.payment_status,
+    reserve_status: data.reserve_status,
+    tents: {
+      create: data.tents.map(tent => ({
+        idTent: tent.idTent,
+        name: tent.name,
+        price: tent.price,
+        nights: tent.nights,
+        dateFrom: tent.dateFrom,
+        dateTo: tent.dateTo,
+        aditionalPeople: tent.aditionalPeople,
+        confirmed: tent.confirmed,
+        promotionId: tent.promotionId ?? undefined,  // Handle optional promotionId
+      }))
+    },
+    products: {
+      create: data.products.map(product => ({
+        idProduct: product.idProduct,
+        name: product.name,
+        price: product.price,
+        quantity: product.quantity,
+        confirmed: product.confirmed,
+        promotionId: product.promotionId ?? undefined,  // Handle optional promotionId
+      }))
+    },
+    experiences: {
+      create: data.experiences.map(experience => ({
+        idExperience: experience.idExperience,
+        name: experience.name,
+        price: experience.price,
+        quantity: experience.quantity,
+        day: experience.day,
+        confirmed: experience.confirmed,
+        promotionId: experience.promotionId ?? undefined,  // Handle optional promotionId
+      }))
+    },
+    promotions: {
+      create: data.promotions.map(promotion => ({
+        idPromotion: promotion.idPromotion,
+        name: promotion.name,
+        price: promotion.price,
+        quantity: promotion.quantity,
+        confirmed: promotion.confirmed,
+      }))
     }
+  };
+
+  // Create the reserve in the database
+  const createdReserve = await prisma.reserve.create({
+    data: reserveData,
   });
 
-  // Now, generate the external_id based on the reserve's internal ID
+  // Generate the external_id based on the reserve's internal ID
   const externalId = utils.generateExternalId(createdReserve.id);
 
   // Update the reserve with the generated external_id
@@ -367,16 +418,42 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
     data: { external_id: externalId },
   });
 
-  // Query the newly created reserve to include related data
-  return await prisma.reserve.findUnique({
+  // Fetch the newly created reserve with related data
+  const reserve = await prisma.reserve.findUnique({
     where: { id: createdReserve.id },
     include: {
       tents: true,
       products: true,
       experiences: true,
-      promotions:true,
+      promotions: true,
     },
   });
+
+  // If reserve exists, map over related data to ensure compatibility with your DTO
+  if (reserve) {
+    const enrichedReserve: ReserveDto = {
+      ...reserve,
+      tents: reserve.tents.map(tent => ({
+        ...tent,
+        promotionId: tent.promotionId ?? undefined,  // Handle null values
+      })),
+      products: reserve.products.map(product => ({
+        ...product,
+        promotionId: product.promotionId ?? undefined,  // Handle null values
+      })),
+      experiences: reserve.experiences.map(experience => ({
+        ...experience,
+        promotionId: experience.promotionId ?? undefined,  // Handle null values
+      })),
+      promotions: reserve.promotions.map(promotion => ({
+        ...promotion,
+      }))
+    };
+
+    return enrichedReserve;
+  }
+
+  return null;
 };
 
 export const AddProductReserve = async (data: createReserveProductDto[]): Promise<ReserveProduct[]> => {

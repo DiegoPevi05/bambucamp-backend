@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { Tent , Product, Experience, Notification, Promotion } from '@prisma/client';
+import { Tent , Product, Experience, Notification } from '@prisma/client';
 import { ReserveDto, ReserveExperienceDto, ReserveProductDto, ReservePromotionDto, ReserveTentDto } from '../dto/reserve';
 import { PublicNotification } from '../dto/notification';
 import * as reserveRepository from '../repositories/ReserveRepository';
@@ -10,6 +10,7 @@ import * as productRepository from '../repositories/ProductRepository';
 import * as experienceRepository from '../repositories/ExperienceRepository';
 import * as promotionRepository from '../repositories/PromotionRepository';
 import {BadRequestError, NotFoundError} from '../middleware/errors';
+import {PromotionPublicDto} from '../dto/promotion';
 
 // Define a custom type for the Multer file
 type MulterFile = Express.Multer.File;
@@ -260,7 +261,7 @@ export const getExperiences = async (experiences: { idExperience: number, name:s
   return experiencesDb;
 }
 
-export const getPromotions = async (promotions: { idPromotion: number, name:string, price:number, quantity:number }[]): Promise<Promotion[]> => {
+export const getPromotions = async (promotions: { idPromotion: number, name:string, price:number, quantity:number }[]): Promise<PromotionPublicDto[]> => {
 
   if (!promotions || promotions.length === 0) {
     return [];
@@ -271,7 +272,7 @@ export const getPromotions = async (promotions: { idPromotion: number, name:stri
   promotionsDb = promotionsDb.filter(promotion => promotion.status === 'ACTIVE');
 
   const missingPromotionIds = promotionIds.filter(
-    (id) => !promotionsDb.some((promotion:Promotion) => promotion.id === id)
+    (id) => !promotionsDb.some((promotion:PromotionPublicDto) => promotion.id === id)
   );
 
   if (missingPromotionIds.length > 0) {
@@ -376,10 +377,9 @@ export const createPublicNotification = (t:any,notification: Notification): Publ
   };
 };
 
-type PromotionItem = { id: number; label: string; qty: number; price: number };
 
 export const validatePromotionRequirements = (
-  promotionsDB: Promotion[], 
+  promotionsDB: PromotionPublicDto[], 
   promotions: ReservePromotionDto[], 
   tents: ReserveTentDto[], 
   experiences: ReserveExperienceDto[], 
@@ -409,22 +409,22 @@ export const validatePromotionRequirements = (
       if(promotionDB.stock <= 0) throw new BadRequestError("error.promotionIsOutOfStock");
     }
 
-    const idtents = JSON.parse(promotionDB.idtents) as PromotionItem[];
-    const idproducts = promotionDB.idproducts ? JSON.parse(promotionDB.idproducts) as PromotionItem[] : [];
-    const idexperiences = promotionDB.idexperiences ? JSON.parse(promotionDB.idexperiences) as PromotionItem[] : [];
+    const idtents = promotionDB.tents || [];
+    const idproducts = promotionDB.products || [];
+    const idexperiences = promotionDB.experiences || [];
 
     const appliedQuantity = promotionQuantities[promotionDB.id] || 0;
 
     for (const requiredTent of idtents) {
-      totalRequiredTents[requiredTent.id] = (totalRequiredTents[requiredTent.id] || 0) + (requiredTent.qty * appliedQuantity);
+      totalRequiredTents[requiredTent.id] = (totalRequiredTents[requiredTent.id] || 0) + (requiredTent.quantity * appliedQuantity);
     }
 
     for (const requiredProduct of idproducts) {
-      totalRequiredProducts[requiredProduct.id] = (totalRequiredProducts[requiredProduct.id] || 0) + (requiredProduct.qty * appliedQuantity);
+      totalRequiredProducts[requiredProduct.id] = (totalRequiredProducts[requiredProduct.id] || 0) + (requiredProduct.quantity * appliedQuantity);
     }
 
     for (const requiredExperience of idexperiences) {
-      totalRequiredExperiences[requiredExperience.id] = (totalRequiredExperiences[requiredExperience.id] || 0) + (requiredExperience.qty * appliedQuantity);
+      totalRequiredExperiences[requiredExperience.id] = (totalRequiredExperiences[requiredExperience.id] || 0) + (requiredExperience.quantity * appliedQuantity);
     }
   }
 
