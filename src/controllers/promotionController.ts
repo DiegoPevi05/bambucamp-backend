@@ -97,7 +97,6 @@ export const createPromotion = [
   body('discount').notEmpty().withMessage("discountRequired"),
   body('grossImport').notEmpty().withMessage("grossImportRequired"),
   body('stock').notEmpty().withMessage("stockRequired"),
-  body('idtents').notEmpty().withMessage("idtentsRequired"),
 
   async (req: Request, res: Response) => {
 
@@ -115,6 +114,7 @@ export const createPromotion = [
       await promotionService.createPromotion(req.body, req.files);
       res.status(201).json({ message: req.t("message.promotionCreated") });
     } catch (error) {
+      console.log(error)
       if (error instanceof CustomError) {
         res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {

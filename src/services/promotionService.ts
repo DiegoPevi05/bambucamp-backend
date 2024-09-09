@@ -4,7 +4,7 @@ import * as experienceRepository from '../repositories/ExperienceRepository';
 import * as productRepository from '../repositories/ProductRepository';
 import * as reserveRepository from '../repositories/ReserveRepository';
 
-import { PromotionDto, PromotionFilters, PaginatedPromotions, PromotionOptions, PromotionPublicDto } from "../dto/promotion";
+import {  PromotionFilters, PaginatedPromotions, PromotionOptions, PromotionPublicDto } from "../dto/promotion";
 import { serializeImagesTodb, moveImagesToSubFolder, deleteSubFolder, deleteImages } from '../lib/utils';
 import {BadRequestError, NotFoundError} from '../middleware/errors';
 
@@ -114,34 +114,38 @@ export const getPromotionById = async (id: number) => {
 // Define a custom type for the Multer file
 type MulterFile = Express.Multer.File;
 
-export const createPromotion = async (data: PromotionDto, files: MulterFile[] | { [fieldname:string] :MulterFile[]; } | undefined) => {
+export const createPromotion = async (data:any, files: MulterFile[] | { [fieldname:string] :MulterFile[]; } | undefined) => {
 
   if(data.tents){
-    data.tents.map((tent:{idTent:number,name:string,price:number,quantity:number})=>{
-      const tentDB = tentRepository.getTentById(tent.idTent);
+    data.tents = JSON.parse(data.tents);
+    data.tents.map(async(tent:{idTent:number,name:string,price:number,quantity:number})=>{
+      const tentDB = await tentRepository.getTentById(tent.idTent);
       if(!tentDB){
         throw new NotFoundError("error.noAllTentsFound");
       }
+      if(tentDB.status == "INACTIVE")  throw new BadRequestError("error.noAllTentsFound");
     })
-  }else{
-    throw new BadRequestError("error.noTentsToValidate");
   }
 
   if(data.products){
-    data.products.map((product:{idProduct:number,name:string,quantity:number,price:number})=>{
-      const productDB = productRepository.getProductById(product.idProduct);
+    data.products = JSON.parse(data.products);
+    data.products.map(async(product:{idProduct:number,name:string,quantity:number,price:number})=>{
+      const productDB = await productRepository.getProductById(product.idProduct);
       if(!productDB){
         throw new NotFoundError("error.noAllProductsFound");
       }
+      if(productDB.status == "INACTIVE")  throw new BadRequestError("error.noAllProductsFound");
     })
   };
 
   if(data.experiences){
-    data.experiences.map((experience:{idExperience:number,name:string,quantity:number,price:number})=>{
-      const experienceDB = experienceRepository.getExperienceById(experience.idExperience);
+    data.experiences = JSON.parse(data.experiences);
+    data.experiences.map(async(experience:{idExperience:number,name:string,quantity:number,price:number})=>{
+      const experienceDB = await experienceRepository.getExperienceById(experience.idExperience);
       if(!experienceDB){
         throw new NotFoundError("error.noAllExperiencesFound")
       }
+      if(experienceDB.status == "INACTIVE")  throw new BadRequestError("error.noAllExperiencesFound");
     })
   };
 
@@ -182,7 +186,7 @@ export const createPromotion = async (data: PromotionDto, files: MulterFile[] | 
 
 };
 
-export const updatePromotion = async (id:number, data: PromotionDto, files: MulterFile[] | { [fieldname:string] :MulterFile[]; } | undefined) => {
+export const updatePromotion = async (id:number, data: any, files: MulterFile[] | { [fieldname:string] :MulterFile[]; } | undefined) => {
 
   const promotion = await promotionRepository.getPromotionById(id);
 
@@ -208,22 +212,25 @@ export const updatePromotion = async (id:number, data: PromotionDto, files: Mult
   if (data.grossImport && Number(data.grossImport) !== promotion.grossImport) promotion.grossImport = Number(data.grossImport);
 
   // Check tents, products, experiences existence before updating
-  const tents = data.tents || [];
-  const products = data.products || [];
-  const experiences = data.experiences || [];
+  const tents = data.tents ?  JSON.parse(data.tents) : [];
+  const products = data.products ?  JSON.parse(data.products) : [];
+  const experiences = data.experiences ?  JSON.parse(data.experiences) : [];
 
   // Verify the existence of tents, products, and experiences
   for (const tent of tents) {
     const tentDB = await tentRepository.getTentById(tent.idTent);
     if (!tentDB) throw new NotFoundError("error.noAllTentsFound");
+    if(tentDB.status == "INACTIVE")  throw new BadRequestError("error.noAllTentsFound");
   }
   for (const product of products) {
     const productDB = await productRepository.getProductById(product.idProduct);
     if (!productDB) throw new NotFoundError("error.noAllProductsFound");
+    if(productDB.status == "INACTIVE")  throw new BadRequestError("error.noAllProductsFound");
   }
   for (const experience of experiences) {
     const experienceDB = await experienceRepository.getExperienceById(experience.idExperience);
     if (!experienceDB) throw new NotFoundError("error.noAllExperiencesFound");
+    if(experienceDB.status == "INACTIVE")  throw new BadRequestError("error.noAllExperiencesFound");
   }
 
   if(files || data.existing_images){

@@ -1,5 +1,15 @@
 {
 	"error": {
+		"failedToCreateFaq": "Failed to create Faq",
+		"failedToDeleteFaq": "Failed to delete Faq",
+		"failedToDeleteReview": "Failed to delete review",
+		"failedToFetchFaqs": "Failed to fetch Faqs",
+		"failedToCreateReview": "Failed to create review",
+		"failedToSendContactForm": "Failed to send contact form",
+		"failedToFetchWebContent": "Failed to fetch web content",
+		"failedToFetchReviews": "Failed to fetch reviews",
+		"failedToValidatePromotion": "Promotion is not valid",
+		"failedToFetchNotifications": "Failed to fetch Notifications",
 		"badRequest": "Bad Request",
 		"unauthorized": "Unauthorized",
 		"forbidden": "Forbidden",
@@ -97,10 +107,21 @@
 		"failedToEnableAdmin": "You cannot enable an admin",
 		"noAllPromotionsFound": "Not all promotions were found in the database",
 		"noProductsFoundInStock": "No Products found in Stock",
-		"failedToCreateProductReserve": "Failed to create add product to reserve"
+		"failedToCreateProductReserve": "Failed to add product to reserve",
+		"failedToCreateExperienceReserve": "Failed to add experience to reserve",
+		"failedToDeleteProductReserve": "Failed to delete the product from the reserve",
+		"failedToDeleteExperienceReserve": "Failed to delete the experience from the reserve",
+		"failedToUpdateProductReserveStatus": "Failed to confirm the product in the reserve",
+		"failedToUpdateExperienceReserveStatus": "Failed to confirm the experience in the reserve"
 	},
 	"message": {
+		"reviewDeleted": "Review deleted",
 		"productReserveCreated": "Product Added to the reserve",
+		"productReserveDeleted": "Product Remove from the reserve",
+		"experienceReserveCreated": "Experience Added to the reserve",
+		"experienceReserveDeleted": "Experience Remove from the reserve",
+		"productReserveStatusUpdated": "Product confirmed in the reserve",
+		"experienceReserveStatusUpdated": "Experience confirmed in the reserve",
 		"reserveCreated": "Reserve created",
 		"reserveUpdated": "Reserve updated",
 		"reserveDeleted": "Reserve deleted",
@@ -197,9 +218,18 @@
 		"NotificationReserveUserCreatedDescription": "Your reservation for the date {{date}} has been successfully confirmed. Thank you for choosing us!",
 		"NotificationReserveUserUpdated": "Reservation Updated",
 		"NotificationReserveUserUpdatedPreview": "Your reservation has been updated for {{date}}.",
-		"NotificationReserveUserUpdatedDescription": "Your reservation for the date {{date}} has been successfully updated."
+		"NotificationReserveUserUpdatedDescription": "Your reservation for the date {{date}} has been successfully updated.",
+		"notificationIsRead": "Notification was read",
+		"promotionValidated": "Promotion is valid",
+		"messageSended": "Message sent",
+		"reviewCreated": "Review created",
+		"faqCreated": "Faq created",
+		"faqDeleted": "Faq deleted"
 	},
 	"validation": {
+		"reviewRequired": "Review is required",
+		"dayRequired": "Day is required",
+		"starsRequired": "Stars are required",
 		"headerRequired": "Header of Tent is required",
 		"titleRequired": "Title is required",
 		"descriptionRequired": "Description is required",
@@ -215,8 +245,11 @@
 		"dateFromRequired": "Date from is required",
 		"dateToRequired": "Date to is required",
 		"idRequired": "Id is required",
+		"confirmedRequired": "Confirmation param is required",
 		"categoryIdRequired": "Category is required",
 		"nameRequired": "Name is required",
+		"emailRequired": "Email is required",
+		"messageRequired": "Message is required",
 		"stockRequired": "Stock is required",
 		"durationRequired": "Duration is required",
 		"limit_ageRequired": "Age limit is required",
@@ -236,7 +269,9 @@
 		"passwordSpecial": "Password must contain at least one special character",
 		"passwordRequired": "Password is Required",
 		"roleInvalid": "Role must be either SUPERVISOR or CLIENT",
-		"notificationIsRead": "Notification was read",
-		"quantityRequired": "Quantiy is required"
+		"quantityRequired": "Quantiy is required",
+		"promotionRequired": "Promotion Id is required",
+		"questionRequired": "Question is required",
+		"answerRequired": "Answer is required"
 	}
 }

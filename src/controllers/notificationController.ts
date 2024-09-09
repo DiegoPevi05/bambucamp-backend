@@ -27,7 +27,7 @@ export const getAllNotificationsUser = async (req: Request, res: Response) => {
     if (error instanceof CustomError) {
       res.status(error.statusCode).json({ error: req.t(error.message) });
     } else {
-      res.status(500).json({ error: req.t("error.failedToFetchNotificationsUser") });
+      res.status(500).json({ error: req.t("error.failedToFetchNotifications") });
     }
   }
 };

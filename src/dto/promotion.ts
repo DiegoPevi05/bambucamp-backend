@@ -2,7 +2,6 @@ import { TentDto  } from "./tent";
 import { ProductPublicDto } from "./product";
 import { ExperiencePublicDto } from "./experience";
 
-
 export interface PromotionDto {
   title: string;
   description: string;

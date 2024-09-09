@@ -1,5 +1,6 @@
 {
 	"error": {
+		"failedToFetchNotifications": "Error al obtener las notificaciones",
 		"badRequest": "Solicitud incorrecta",
 		"unauthorized": "No autorizado",
 		"forbidden": "Prohibido",
@@ -96,7 +97,22 @@
 		"failedToEnabledUser": "El usuario ya está habilitado",
 		"failedToEnableAdmin": "No puedes habilitar a un administrador",
 		"noAllPromotionsFound": "No todas las promociones se han encontrado en la base de datos ",
-		"noProductsFoundInStock": "No hay productos en stock"
+		"noProductsFoundInStock": "No hay productos en stock",
+		"failedToCreateFaq": "Error al crear la pregunta",
+		"failedToDeleteFaq": "Error al borrar la pregunta",
+		"failedToDeleteReview": "Error al borrar la review",
+		"failedToFetchFaqs": "Error al obtener las preguntas ",
+		"failedToCreateReview": "Error al crear la review",
+		"failedToSendContactForm": "Error al enviar formulario de contacto",
+		"failedToFetchWebContent": "Error al traer contenido web",
+		"failedToFetchReviews": "Error al obtener las reviews",
+		"failedToValidatePromotion": "La promocion es valida",
+		"failedToCreateProductReserve": "Fallo al agregar el producto a la reserva",
+		"failedToCreateExperienceReserve": "Fallo al agregar la experiencia en la reserva",
+		"failedToDeleteProductReserve": "Fallo al borrar el producto de la reserva",
+		"failedToDeleteExperienceReserve": "Fallo al borrar la experiencia de la reserva",
+		"failedToUpdateProductReserveStatus": "Fallo al confirmar el producto en la reserva",
+		"failedToUpdateExperienceReserveStatus": "Fallo al confirmar la experiencia en la reserva"
 	},
 	"message": {
 		"reserveCreated": "Reserva creada",
@@ -195,7 +211,20 @@
 		"NotificationReserveUserCreatedDescription": "Su reserva para la fecha {{date}} ha sido confirmada con éxito. ¡Gracias por elegirnos!",
 		"NotificationReserveUserUpdated": "Reserva Actualizada",
 		"NotificationReserveUserUpdatedPreview": "Su reserva ha sido actualizada para {{date}}.",
-		"NotificationReserveUserUpdatedDescription": "Su reserva para la fecha {{date}} ha sido actualizada con éxito."
+		"NotificationReserveUserUpdatedDescription": "Su reserva para la fecha {{date}} ha sido actualizada con éxito.",
+		"notificationIsRead": "La notificacion esta marcada como leida",
+		"reviewDeleted": "Review borrada",
+		"productReserveCreated": "Producto agregado a la reserve",
+		"productReserveDeleted": "Producto eliminado de la reserva",
+		"experienceReserveCreated": "Experiencia agregada a la reserva",
+		"experienceReserveDeleted": "Experiencia eliminada de la reserva",
+		"productReserveStatusUpdated": "Producto confirmado en la reserva",
+		"experienceReserveStatusUpdated": "Experiencia confirmada en la reserva",
+		"promotionValidated": "Promoción es valida",
+		"messageSended": "Mensaje enviado",
+		"reviewCreated": "Reivew creada",
+		"faqCreated": "Faq creada",
+		"faqDeleted": "Faq borrada"
 	},
 	"validation": {
 		"headerRequired": "El encabezado del glamping es obligatorio",
@@ -234,6 +263,15 @@
 		"passwordSpecial": "La contraseña debe contener al menos un carácter especial",
 		"passwordRequired": "La contraseña es requerida",
 		"roleInvalid": "El Rol debe ser SUPERVISOR or CLIENTE",
-		"notificationIsRead": "La notificacion esta marcada como leida"
+		"dayRequired": "El dia es requerido",
+		"starsRequired": "Las estrellas son requeridas",
+		"confirmedRequired": "Confirmacion es requerida",
+		"emailRequired": "Email es requerido",
+		"messageRequired": "Mensaje es requerido",
+		"quantityRequired": "Cantidad es requerida",
+		"promotionRequired": "La promocion es requerida",
+		"questionRequired": "La pregunta es requerida",
+		"answerRequired": "La respuesta es requerida",
+		"reviewRequired": "La review es requerida"
 	}
 }
