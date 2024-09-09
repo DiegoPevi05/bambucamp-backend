@@ -10,6 +10,7 @@ const uploadFields = [
 ];
 
 router.get('/public',promotionController.getAllPublicPromotions);
+router.post('/validate', promotionController.validatePromotionAvailability);
 router.get('/',authenticateToken,checkRole('ADMIN','SUPERVISOR'),promotionController.getAllPromotions);
 router.get('/options',authenticateToken,checkRole('ADMIN','SUPERVISOR'),promotionController.getAllPromotionOptions);
 router.post('/',authenticateToken,checkRole('ADMIN','SUPERVISOR'),upload.fields(uploadFields), promotionController.createPromotion);

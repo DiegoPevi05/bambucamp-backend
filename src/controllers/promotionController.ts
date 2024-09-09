@@ -1,7 +1,37 @@
 import { Request, Response } from 'express';
 import * as promotionService from '../services/promotionService';
-import { body, param, validationResult } from 'express-validator';
+import { body,query, param, validationResult } from 'express-validator';
 import {CustomError} from '../middleware/errors';
+
+export const validatePromotionAvailability = [
+    query('promotion').notEmpty().withMessage('validation.promotionRequired'),
+    query('dateFrom').notEmpty().withMessage('validation.dateFromRequired'),
+    query('dateTo').notEmpty().withMessage('validation.dateToRequired'),
+    async (req: Request, res: Response) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+          const localizedErrors = errors.array().map((error) => ({
+            ...error,
+            msg: req.t(error.msg)
+          }));
+
+          return res.status(400).json({ error: localizedErrors });
+        }
+      try {
+
+        const { promotion, dateFrom, dateTo } = req.query;
+
+        await promotionService.validatePromotion(Number(promotion),dateFrom as string, dateTo as string);
+        res.status(200).json({ message: req.t("message.promotionValidated") });
+      } catch (error) {
+        if (error instanceof CustomError) {
+          res.status(error.statusCode).json({ error: req.t(error.message) });
+        } else {
+          res.status(500).json({ error: req.t("error.failedToValidatePromotion") });
+        }
+      }
+    }
+] 
 
 export const getAllPublicPromotions = async (req: Request, res: Response) => {
   try {

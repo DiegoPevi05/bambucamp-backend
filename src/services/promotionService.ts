@@ -2,10 +2,37 @@ import * as promotionRepository from '../repositories/PromotionRepository';
 import * as tentRepository from '../repositories/TentRepository';
 import * as experienceRepository from '../repositories/ExperienceRepository';
 import * as productRepository from '../repositories/ProductRepository';
+import * as reserveRepository from '../repositories/ReserveRepository';
 
 import { PromotionDto, PromotionFilters, PaginatedPromotions, PromotionOptions, PromotionPublicDto } from "../dto/promotion";
 import { serializeImagesTodb, moveImagesToSubFolder, deleteSubFolder, deleteImages } from '../lib/utils';
 import {BadRequestError, NotFoundError} from '../middleware/errors';
+
+export const validatePromotion = async(idPromotion:number, dateFromInput:string, dateToInput:string):Promise<void> => {
+  const dateFrom = new Date(dateFromInput);
+  const dateTo = new Date(dateToInput);
+  const tentsAvailable = await reserveRepository.searchAvailableTents(dateFrom, dateTo);
+
+  const promotion = await promotionRepository.getPromotionById(idPromotion);
+
+  if (!promotion) {
+    throw new NotFoundError("error.noPromotionFoundInDB");
+  }
+
+  // Extract available tent IDs
+  const availableTentIds = tentsAvailable.map(tent => tent.id);
+  
+  // Extract promotion tent IDs
+  const promotionTentIds = promotion.tents.map(tent => tent.idTent);
+  
+  // Check if any of the promotion tents are not available
+  const unavailableTents = promotionTentIds.filter(idTent => !availableTentIds.includes(idTent));
+  
+  if (unavailableTents.length > 0) {
+    throw new BadRequestError("error.noTentsAvailable");
+  }
+
+}
 
 
 export const getAllPublicPromotions = async ():Promise<PromotionPublicDto[]> => {
