@@ -1,0 +1,98 @@
+name: Deploy to SSH server
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    environment: digital_ocean
+    runs-on: ubuntu-latest
+    steps:
+    - name: Initialize Deploy
+      env:
+        SLACK_MESSAGE: " * Initialize deploy of Bambucamp Server to Digital Ocean Server :git:"
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      run: |
+        echo "${SLACK_MESSAGE}"
+        curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${SLACK_MESSAGE}"'"}' ${{ secrets.SLACK_WEBHOOK_URL }}
+      
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up SSH key
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Create .env file
+      run: |
+        echo ADMIN_HOSTNAME=${{ secrets.ADMIN_HOSTNAME }} >> .env
+        echo CLIENT_HOSTNAME=${{ secrets.CLIENT_HOSTNAME }} >> .env
+        echo DATABASE_URL=${{ secrets.DATABASE_URL }} >> .env
+        echo JWT_SECRET=${{ secrets.JWT_SECRET }} >> .env
+        echo PORT=${{ secrets.PORT }} >> .env
+        echo ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }} >> .env
+        echo SMTP_HOST=${{ secrets.SMTP_HOST }} >> .env
+        echo SMTP_PORT=${{ secrets.SMTP_PORT }} >> .env
+        echo SMTP_USER=${{ secrets.SMTP_USER }} >> .env
+        echo SMTP_PASS=${{ secrets.SMTP_PASS }} >> .env
+
+    - name: Add host key to known host
+      env:
+        SLACK_MESSAGE: " * Set Connection and Enable it to SSH Digital Ocean server :digital_ocean:"
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      run: |
+        echo "${SLACK_MESSAGE}"
+        ssh-keyscan 104.236.199.84 >> ~/.ssh/known_hosts
+        curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${SLACK_MESSAGE}"'"}' ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    - name: Ensure deployment directory exists and deploy code
+      env:
+        SLACK_MESSAGE: " * Ensuring Deployment Directory Exists and Cloning/Pulling Repository :file_folder:"
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      run: |
+        echo "${SLACK_MESSAGE}"
+        ssh root@104.236.199.84 '
+          if [ ! -d "/root/bambucamp-backend/.git" ]; then
+            echo "Directory does not exist, cloning repository...";
+            git clone git@github.com:DiegoPevi05/bambucamp-backend.git /root/bambucamp-backend;
+          else
+            echo "Directory exists, pulling latest changes...";
+            cd /root/bambucamp-backend && git pull;
+          fi
+        '
+        curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${SLACK_MESSAGE}"'"}' ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    
+    - name: Ensure public/images directory exists
+      env:
+        SLACK_MESSAGE: " * Ensuring /public/images directory exists :file_folder:"
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      run: |
+        echo "${SLACK_MESSAGE}"
+        ssh root@104.236.199.84 '
+          if [ ! -d "/root/bambucamp-backend/public/images" ]; then
+            echo "Creating /root/bambucamp-backend/public/images directory...";
+            mkdir -p /root/bambucamp-backend/public/images;
+          else
+            echo "/root/bambucamp-backend/public/images directory already exists.";
+          fi
+        '
+        curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${SLACK_MESSAGE}"'"}' ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    - name: Copy .env to server
+      env:
+        SLACK_MESSAGE: " * Copying .env file to server :file_folder:"
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      run: |
+        echo "${SLACK_MESSAGE}"
+        scp .env root@104.236.199.84:/root/bambucamp-backend/.env
+        curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${SLACK_MESSAGE}"'"}' ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    - name: Deploy
+      env:
+        SLACK_MESSAGE: " * App Deployed Successfully :react: :typescript: :nodejs: "
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      run: |
+        echo "${SLACK_MESSAGE}"
+        curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${SLACK_MESSAGE}"'"}' ${{ secrets.SLACK_WEBHOOK_URL }}

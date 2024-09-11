@@ -5,7 +5,6 @@ import {ReserveDto} from '../../dto/reserve';
 import * as utils from '../../lib/utils';
 
 // Load SMTP configuration from environment variables
-const HOSTNAME = process.env.HOSTNAME || `http://localhost:${process.env.PORT}`;
 const CLIENT_HOSTNAME =  process.env.CLIENT_HOSTNAME || 'http://localhost:5174';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "diegopevi05@gmail.com";
 
