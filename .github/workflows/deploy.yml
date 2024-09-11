@@ -89,6 +89,15 @@ jobs:
         scp .env root@104.236.199.84:/root/bambucamp-backend/.env
         curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${SLACK_MESSAGE}"'"}' ${{ secrets.SLACK_WEBHOOK_URL }}
 
+    - name: Install Dependencies
+      env:
+        SLACK_MESSAGE: " * Installing dependencies :package:"
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      run: |
+        echo "${SLACK_MESSAGE}"
+        ssh root@104.236.199.84 'cd /root/bambucamp-backend && npm install'
+        curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${SLACK_MESSAGE}"'"}' ${{ secrets.SLACK_WEBHOOK_URL }}
+
     - name: Deploy
       env:
         SLACK_MESSAGE: " * App Deployed Successfully :react: :typescript: :nodejs: "
