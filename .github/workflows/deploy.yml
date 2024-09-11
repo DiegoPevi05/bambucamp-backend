@@ -28,7 +28,7 @@ jobs:
       run: |
         echo ADMIN_HOSTNAME=${{ secrets.ADMIN_HOSTNAME }} >> .env
         echo CLIENT_HOSTNAME=${{ secrets.CLIENT_HOSTNAME }} >> .env
-        echo DATABASE_URL=${{ secrets.DATABASE_URL }} >> .env
+        echo DATABASE_URL="${{ secrets.DATABASE_URL }}" >> .env
         echo JWT_SECRET=${{ secrets.JWT_SECRET }} >> .env
         echo PORT=${{ secrets.PORT }} >> .env
         echo ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }} >> .env
