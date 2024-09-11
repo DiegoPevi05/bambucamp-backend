@@ -416,7 +416,7 @@ export const validatePromotionRequirements = (
     const appliedQuantity = promotionQuantities[promotionDB.id] || 0;
 
     for (const requiredTent of idtents) {
-      totalRequiredTents[requiredTent.id] = (totalRequiredTents[requiredTent.id] || 0) + (requiredTent.quantity * appliedQuantity);
+      totalRequiredTents[requiredTent.id] = (totalRequiredTents[requiredTent.id] || 0) + (requiredTent.nights * appliedQuantity);
     }
 
     for (const requiredProduct of idproducts) {

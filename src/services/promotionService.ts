@@ -118,7 +118,7 @@ export const createPromotion = async (data:any, files: MulterFile[] | { [fieldna
 
   if(data.tents){
     data.tents = JSON.parse(data.tents);
-    data.tents.map(async(tent:{idTent:number,name:string,price:number,quantity:number})=>{
+    data.tents.map(async(tent:{idTent:number,name:string,price:number,nights:number})=>{
       const tentDB = await tentRepository.getTentById(tent.idTent);
       if(!tentDB){
         throw new NotFoundError("error.noAllTentsFound");

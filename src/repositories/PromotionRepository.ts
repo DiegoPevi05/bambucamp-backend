@@ -33,7 +33,7 @@ export const getAllPublicPromotions = async (): Promise<PromotionPublicDto[]> =>
         idTent: tent.idTent,
         name: tent.name,
         price: tent.price,
-        quantity: tent.quantity,
+        nights: tent.nights,
       })),
       products: promotion.products.map(product => ({
         id:product.id,
@@ -172,7 +172,7 @@ export const getAllPromotions = async (filters: PromotionFilters, pagination: Pa
         idTent: tent.idTent,
         name: tent.name,
         price: tent.price,
-        quantity: tent.quantity,
+        nights: tent.nights,
       })),
       products: promotion.products.map(product => ({
         id:product.id,
@@ -280,7 +280,7 @@ export const createPromotion = async (data: PromotionDto): Promise<Promotion> =>
           idTent: tent.idTent,
           name: tent.name,
           price: tent.price,
-          quantity: tent.quantity,
+          nights: tent.nights,
         })),
       },
       products: {
@@ -318,7 +318,7 @@ export const updatePromotion = async (id: number, data: PromotionDto): Promise<P
           idTent: tent.idTent,
           name: tent.name,
           price: tent.price,
-          quantity: tent.quantity,
+          nights: tent.nights,
         })),
       },
       products: {
