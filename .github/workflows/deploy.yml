@@ -55,7 +55,7 @@ jobs:
         ssh root@104.236.199.84 '
           if [ ! -d "/root/bambucamp-backend/.git" ]; then
             echo "Directory does not exist, cloning repository...";
-            git clone git@github.com:DiegoPevi05/bambucamp-backend.git /root/bambucamp-backend;
+            git clone https://github.com/DiegoPevi05/bambucamp-backend.git /root/bambucamp-backend;
           else
             echo "Directory exists, pulling latest changes...";
             cd /root/bambucamp-backend && git pull;
