@@ -53,8 +53,8 @@ Make sure you have the following installed on your system:
 1. **Clone the Repository**:
 
    ```bash
-    git clone https://github.com/your-username/server_bambucamp.git
-    cd server_bambucamp
+    git clone https://github.com/DiegoPevi05/bambucamp-backend.git
+    cd bambucamp-backend
    ```
 
 2. **Install Node.js & npm (if not already installed):**
