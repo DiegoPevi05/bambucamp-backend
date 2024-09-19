@@ -344,6 +344,7 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
     throw new NotFoundError('error.noUserFoundInDB');
   }
 
+  const confirmed =  data.reserve_status != ReserveStatus.NOT_CONFIRMED
   // Prepare the data for Prisma
   const reserveData = {
     userId: data.userId,  // Ensure this is a valid number
@@ -368,7 +369,7 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
         dateFrom: tent.dateFrom,
         dateTo: tent.dateTo,
         aditionalPeople: tent.aditionalPeople,
-        confirmed: tent.confirmed,
+        confirmed: confirmed,
         promotionId: tent.promotionId ?? undefined,  // Handle optional promotionId
       }))
     },
@@ -378,7 +379,7 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
         name: product.name,
         price: product.price,
         quantity: product.quantity,
-        confirmed: product.confirmed,
+        confirmed: confirmed,
         promotionId: product.promotionId ?? undefined,  // Handle optional promotionId
       }))
     },
@@ -389,7 +390,7 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
         price: experience.price,
         quantity: experience.quantity,
         day: experience.day,
-        confirmed: experience.confirmed,
+        confirmed: confirmed,
         promotionId: experience.promotionId ?? undefined,  // Handle optional promotionId
       }))
     },
@@ -399,7 +400,7 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
         name: promotion.name,
         price: promotion.price,
         quantity: promotion.quantity,
-        confirmed: promotion.confirmed,
+        confirmed: confirmed,
       }))
     }
   };
@@ -578,7 +579,7 @@ export const upsertReserveDetails = async (
     where: { reserveId: idReserve },
   });
 
-  await prisma.reserveProduct.deleteMany({
+  await prisma.reservePromotion.deleteMany({
     where: { reserveId: idReserve },
   });
 

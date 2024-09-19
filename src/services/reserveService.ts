@@ -1,5 +1,5 @@
 import * as reserveRepository from '../repositories/ReserveRepository';
-import { PaginatedReserve, ReserveDto, ReserveFilters, ReserveOptions, createReserveExperienceDto, createReserveProductDto } from "../dto/reserve";
+import { PaginatedReserve, ReserveDto, ReserveExperienceDto, ReserveFilters, ReserveFormDto, ReserveOptions, ReserveProductDto, ReservePromotionDto, ReserveTentDto, createReserveExperienceDto, createReserveProductDto } from "../dto/reserve";
 import * as promotionRepository from '../repositories/PromotionRepository';
 import *  as userRepository from '../repositories/userRepository';
 import * as productService from './productService';
@@ -98,7 +98,7 @@ export const getReserveById = async (id: number) => {
   return await reserveRepository.getReserveById(id);
 };
 
-export const createReserveByUser = async (data: ReserveDto, user: User, language:string) => {
+export const createReserveByUser = async (data: ReserveFormDto, user: User, language:string) => {
   data.userId = user.id;
   data.price_is_calculated = true;
   data.payment_status = PaymentStatus.UNPAID;
@@ -109,20 +109,47 @@ export const createReserveByUser = async (data: ReserveDto, user: User, language
 };
 
 
-export const createReserve = async (data: ReserveDto):Promise<ReserveDto|null> => {
+export const createReserve = async (data: ReserveFormDto):Promise<ReserveDto|null> => {
 
-  data.tents = utils.normalizeTimesInTents(data.tents);
-  data.dateSale = new Date();
-  data.discount_code_id = Number(data.discount_code_id);
-  data.userId = Number(data.userId);
-  data.canceled_reason = "";
+  let reserveDto:ReserveDto = {
+    userId:0,
+    external_id:"",
+    dateSale: new Date(),
+    tents:[],
+    experiences:[],
+    products:[],
+    promotions:[],
+    price_is_calculated:true,
+    discount_code_id:0,
+    discount_code_name:"",
+    net_import:0,
+    discount:0,
+    gross_import:0,
+    canceled_reason:"",
+    canceled_status:false,
+    payment_status:PaymentStatus.PAID,
+    reserve_status:ReserveStatus.CONFIRMED,
+  };
 
-  const promotionsDB = await utils.getPromotions(data.promotions);
+  reserveDto.userId           = Number(data.userId);
+  reserveDto.tents            = utils.normalizeTimesInTents(data.tents);
+  reserveDto.experiences      = utils.normalizeTimesInExperience(data.experiences);
+  reserveDto.products         = data.products;
 
-  if(promotionsDB.length > 0 ){
-    if(!utils.validatePromotionRequirements(promotionsDB,data.promotions,data.tents,data.experiences,data.products)){
-      throw new BadRequestError("error.noAllPromotionsFound");
-    }
+  if(data.reserve_status) reserveDto.reserve_status = data.reserve_status;
+  if(data.payment_status) reserveDto.payment_status = data.payment_status;
+
+  reserveDto.discount_code_id = Number(data.discount_code_id);
+
+  if(data.promotions.length > 0){
+    const { tents, products, experiences, promotions  } = await utils.getPromotionItems(data.promotions); 
+
+    if(tents.length > 0) reserveDto.tents = [...reserveDto.tents, ...tents]; 
+    if(products.length > 0) reserveDto.products = [...reserveDto.products, ...products];
+    if(experiences.length > 0) reserveDto.experiences = [...reserveDto.experiences, ...experiences];
+    if(promotions.length > 0) reserveDto.promotions = promotions;
+
+    await promotionRepository.reducePromotionStock(data.promotions);
   }
 
   const tentsDb = await utils.getTents(data.tents);
@@ -139,45 +166,73 @@ export const createReserve = async (data: ReserveDto):Promise<ReserveDto|null> =
   }
 
   if(data.price_is_calculated){
-      // Map quantities to the respective tents, products, and experiences
-      const tentsWithQuantities = tentsDb.map(tent => ({
-        tent,
-        nights: data.tents.find(t => t.idTent === tent.id)?.nights || 1,
-        aditionalPeople: data.tents.find(t => t.idTent === tent.id)?.aditionalPeople || 1
-      }));
 
-      const productsWithQuantities = productsDb.map(product => ({
-        product,
-        quantity: data.products.find(p => p.idProduct === product.id)?.quantity || 1
-      }));
+      const tentsWithQuantities = data.tents.map(tent => {
+        const foundTent = tentsDb.find(t => t.id === tent.idTent);
+        if (!foundTent) {
+          throw new NotFoundError("error.noAllTentsFound");
+        }
+        return {
+          tent: foundTent,
+          nights: tent.nights,
+          aditionalPeople: tent.aditionalPeople,
+        };
+      });
 
-      const experiencesWithQuantities = experiencesDb.map(experience => ({
-        experience,
-        quantity: data.experiences.find(e => e.idExperience === experience.id)?.quantity || 1
-      }));
+      const productsWithQuantities = data.products.map(product => {
+        const foundProduct = productsDb.find(p => p.id === product.idProduct);
+        if (!foundProduct) {
+          throw new NotFoundError("error.noAllProductsFound");
+        }
+        return {
+          product: foundProduct,
+          quantity: product.quantity
+        };
+      });
+
+      const experiencesWithQuantities = data.experiences.map(experience => {
+        const foundExperience = experiencesDb.find(e => e.id === experience.idExperience);
+        if (!foundExperience) {
+          throw new NotFoundError("error.noAllExperiencesFound");
+        }
+        return {
+          experience: foundExperience,
+          quantity: experience.quantity
+        };
+      });
+
+      const promotionWithQuantities = data.promotions.map(promotion => {
+        return {
+          promotionId:promotion.idPromotion,
+          price:promotion.price
+        }
+      })
 
       // Calculate total price
-      data.net_import = utils.calculateReservePrice(tentsWithQuantities, productsWithQuantities, experiencesWithQuantities);
+      data.gross_import = utils.calculateReservePrice(
+        tentsWithQuantities, 
+        productsWithQuantities, 
+        experiencesWithQuantities,
+        promotionWithQuantities
+      );
 
-      const { grossImport, discount, discount_name } = await utils.applyDiscount(data.net_import, data.discount_code_id);
+      const { netImport, discount, discount_name } = await utils.applyDiscount(data.gross_import, data.discount_code_id);
       data.discount_code_name = discount_name != null ? discount_name : "";
-      data.gross_import = grossImport;
+      data.net_import = netImport;
       data.discount = discount;
 
   }else{
-      const { grossImport, discount, discount_name } = await utils.applyDiscount(data.net_import, data.discount_code_id, data.discount);
+      const { netImport, discount, discount_name } = await utils.applyDiscount(data.net_import, data.discount_code_id, data.discount);
       data.discount_code_name = discount_name != null ? discount_name : "";
-      data.gross_import = grossImport;
+      data.net_import = netImport;
       data.discount = discount;
 
   }
 
-  await promotionRepository.reducePromotionStock(data.promotions);
-
-  return await reserveRepository.createReserve(data);
+  return await reserveRepository.createReserve(reserveDto);
 };
 
-export const updateReserve = async (id:number, data: ReserveDto) => {
+export const updateReserve = async (id:number, data: ReserveFormDto) => {
 
   const reserve = await reserveRepository.getReserveById(id);
 
@@ -195,17 +250,38 @@ export const updateReserve = async (id:number, data: ReserveDto) => {
     reserve.userId = user.id;
   }
 
-  data.tents = utils.normalizeTimesInTents(data.tents);
-  data.discount_code_id = Number(data.discount_code_id);
-  data.userId = Number(data.userId);
+  if(data.reserve_status && reserve.reserve_status != data.reserve_status){
+    reserve.reserve_status = data.reserve_status;
+  } 
 
-  reserve.dateSale = new Date(data.dateSale);
-
-  const promotionsDB = await utils.getPromotions(data.promotions);
-
-  if(!utils.validatePromotionRequirements(promotionsDB,data.promotions,data.tents,data.experiences,data.products)){
-    throw new BadRequestError("error.noAllPromotionsFound");
+  if(data.payment_status && reserve.payment_status != data.payment_status){
+    reserve.payment_status = data.payment_status;
   }
+
+  if(data.discount_code_id && reserve.discount_code_id != data.discount_code_id){
+    reserve.discount_code_id = Number(data.discount_code_id);
+  }
+
+  let reserve_tents:ReserveTentDto[] = [];
+  let reserve_products:ReserveProductDto[] = [];
+  let reserve_experiences:ReserveExperienceDto[] = [];
+  let reserve_promotions:ReservePromotionDto[] = [];
+
+  reserve_tents            = utils.normalizeTimesInTents(data.tents);
+  reserve_experiences      = utils.normalizeTimesInExperience(data.experiences);
+  reserve_products         = data.products;
+
+  if(data.promotions.length > 0){
+    const { tents, products, experiences, promotions  } = await utils.getPromotionItems(data.promotions); 
+
+    if(tents.length > 0) reserve_tents = [...reserve_tents, ...tents]; 
+    if(products.length > 0) reserve_products = [...reserve_products, ...products];
+    if(experiences.length > 0) reserve_experiences = [...reserve_experiences, ...experiences];
+    if(promotions.length > 0) reserve_promotions = promotions;
+
+    await promotionRepository.reducePromotionStock(data.promotions);
+  }
+
 
   const tentsDb = await utils.getTents(data.tents);
 
@@ -222,44 +298,80 @@ export const updateReserve = async (id:number, data: ReserveDto) => {
 
   if(data.price_is_calculated){
       // Map quantities to the respective tents, products, and experiences
-      const tentsWithQuantities = tentsDb.map(tent => ({
-        tent,
-        nights: data.tents.find(t => t.idTent === tent.id)?.nights || 1,
-        aditionalPeople: data.tents.find(t => t.idTent === tent.id)?.aditionalPeople || 1
-      }));
+      const tentsWithQuantities = data.tents.map(tent => {
+        const foundTent = tentsDb.find(t => t.id === tent.idTent);
+        if (!foundTent) {
+          throw new NotFoundError("error.noAllTentsFound");
+        }
+        return {
+          tent: foundTent,
+          nights: tent.nights,
+          aditionalPeople: tent.aditionalPeople,
+        };
+      });
 
-      const productsWithQuantities = productsDb.map(product => ({
-        product,
-        quantity: data.products.find(p => p.idProduct === product.id)?.quantity || 1
-      }));
+      const productsWithQuantities = data.products.map(product => {
+        const foundProduct = productsDb.find(p => p.id === product.idProduct);
+        if (!foundProduct) {
+          throw new NotFoundError("error.noAllProductsFound");
+        }
+        return {
+          product: foundProduct,
+          quantity: product.quantity
+        };
+      });
 
-      const experiencesWithQuantities = experiencesDb.map(experience => ({
-        experience,
-        quantity: data.experiences.find(e => e.idExperience === experience.id)?.quantity || 1
-      }));
+      const experiencesWithQuantities = data.experiences.map(experience => {
+        const foundExperience = experiencesDb.find(e => e.id === experience.idExperience);
+        if (!foundExperience) {
+          throw new NotFoundError("error.noAllExperiencesFound");
+        }
+        return {
+          experience: foundExperience,
+          quantity: experience.quantity
+        };
+      });
+
+      const promotionWithQuantities = data.promotions.map(promotion => {
+        return {
+          promotionId:promotion.idPromotion,
+          price:promotion.price
+        }
+      })
 
       // Calculate total price
-      reserve.net_import = utils.calculateReservePrice(tentsWithQuantities, productsWithQuantities, experiencesWithQuantities);
+      reserve.gross_import = utils.calculateReservePrice(
+        tentsWithQuantities, 
+        productsWithQuantities, 
+        experiencesWithQuantities,
+        promotionWithQuantities
+      );
 
-      const { grossImport, discount, discount_name } = await utils.applyDiscount(data.net_import, data.discount_code_id);
+      const { netImport, discount, discount_name } = await utils.applyDiscount(data.gross_import, data.discount_code_id);
       reserve.discount_code_id = data.discount_code_id;
       reserve.discount_code_name = discount_name != null ? discount_name : "";
-      reserve.gross_import = grossImport;
+      reserve.net_import = netImport;
       reserve.discount = discount;
 
   }else{
-      const { grossImport, discount, discount_name } = await utils.applyDiscount(data.net_import, data.discount_code_id, data.discount);
+      const { netImport, discount, discount_name } = await utils.applyDiscount(data.gross_import, data.discount_code_id, data.discount);
       reserve.discount_code_id = data.discount_code_id;
-      reserve.net_import = data.net_import;
+      reserve.gross_import = data.gross_import;
       reserve.discount_code_name = discount_name != null ? discount_name : "";
-      reserve.gross_import = grossImport;
+      reserve.net_import = netImport;
       reserve.discount = discount;
 
   }
 
   await promotionRepository.reducePromotionStock(data.promotions);
 
-  await reserveRepository.upsertReserveDetails(reserve.id, data.tents, data.products, data.experiences, data.promotions);
+  await reserveRepository.upsertReserveDetails(
+    reserve.id, 
+    reserve_tents, 
+    reserve_products, 
+    reserve_experiences, 
+    reserve_promotions
+  );
 
   return await reserveRepository.updateReserve(id,reserve);
 };

@@ -59,6 +59,15 @@ export interface ReservePromotionDto {
   confirmed:boolean;
   promotionDB?:Promotion;
 }
+export interface ReservePromotionFormDto {
+  idPromotion:number;
+  name:string;
+  price:number;
+  nights:number;
+  dateFrom:Date;
+  dateTo:Date;
+  confirmed:boolean;
+}
 
 export interface ReserveOptions {
   tents?: TentDto[];
@@ -76,6 +85,25 @@ export interface ReserveDto {
   experiences: ReserveExperienceDto[];
   promotions:ReservePromotionDto[];
   dateSale: Date;
+  price_is_calculated: boolean;
+  discount_code_id: number;
+  discount_code_name:string;
+  net_import: number;
+  discount: number;
+  gross_import: number;
+  canceled_reason: string;
+  canceled_status: boolean;
+  payment_status: PaymentStatus;
+  reserve_status:ReserveStatus;
+}
+
+export interface ReserveFormDto {
+  userId: number;
+  external_id:string;
+  tents: ReserveTentDto[];
+  products: ReserveProductDto[];
+  experiences: ReserveExperienceDto[];
+  promotions:ReservePromotionFormDto[];
   price_is_calculated: boolean;
   discount_code_id: number;
   discount_code_name:string;

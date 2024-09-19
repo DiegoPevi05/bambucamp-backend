@@ -1,7 +1,7 @@
 import { PrismaClient, Promotion } from "@prisma/client";
 import { PromotionDto, PromotionFilters, PaginatedPromotions, PromotionPublicDto, PromotionOptions } from "../dto/promotion";
 import {BadRequestError, NotFoundError} from "../middleware/errors";
-import {ReservePromotionDto} from "../dto/reserve";
+import {ReservePromotionDto, ReservePromotionFormDto} from "../dto/reserve";
 
 const prisma = new PrismaClient();
 
@@ -355,7 +355,7 @@ export const updatePromotionStock = async (id: number, newStock: number): Promis
 };
 
 // Function to reduce stock for all promotions in ReservePromotion
-export const reducePromotionStock = async (promotions: ReservePromotionDto[]): Promise<void> => {
+export const reducePromotionStock = async (promotions: ReservePromotionFormDto[]): Promise<void> => {
   // Iterate over all promotions in data.promotions
   for (const promotion of promotions) {
     // Fetch the current promotion stock
@@ -369,7 +369,7 @@ export const reducePromotionStock = async (promotions: ReservePromotionDto[]): P
     }
 
     // Calculate the new stock after deducting the promotion's quantity
-    const newStock = currentPromotion.stock - promotion.quantity;
+    const newStock = currentPromotion.stock - 1;
 
     if (newStock < 0) {
       throw new BadRequestError("error.promotionIsOutOfStock");

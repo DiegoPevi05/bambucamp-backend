@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { Tent , Product, Experience, Notification } from '@prisma/client';
-import { ReserveDto, ReserveExperienceDto, ReserveProductDto, ReservePromotionDto, ReserveTentDto } from '../dto/reserve';
+import { Tent , Product, Experience, Notification, ReserveStatus } from '@prisma/client';
+import { ReserveDto, ReserveExperienceDto, ReserveProductDto, ReservePromotionDto, ReservePromotionFormDto, ReserveTentDto } from '../dto/reserve';
 import { PublicNotification } from '../dto/notification';
 import * as reserveRepository from '../repositories/ReserveRepository';
 import * as discountCodeRepository from '../repositories/DiscountCodeRepository';
@@ -150,10 +150,10 @@ export const checkRoomSize = (tents: Tent[], qtypeople:number, qtyKids:number, a
   return true;
 };
 
-export const applyDiscount = async (grossImport: number, discountCodeId: number | undefined, discountRaw?: number|undefined): Promise<{grossImport: number, discount:number, discount_name:string|null }> => {
+export const applyDiscount = async (netImport: number, discountCodeId: number | undefined, discountRaw?: number|undefined): Promise<{netImport: number, discount:number, discount_name:string|null }> => {
 
   if (!discountCodeId) {
-    return {grossImport, discount:0, discount_name:null};
+    return {netImport, discount:0, discount_name:null};
   }
 
   const discount = await discountCodeRepository.getDiscountCodeById(discountCodeId);
@@ -164,17 +164,17 @@ export const applyDiscount = async (grossImport: number, discountCodeId: number 
 
     await discountCodeRepository.updateDiscountCodeStock(discountCodeId,newStock);
 
-    return {grossImport: (grossImport - (grossImport * discount.discount) / 100 ) , discount: discount.discount,discount_name:discount.code} ;
+    return {netImport: (netImport - (netImport * discount.discount) / 100 ) , discount: discount.discount,discount_name:discount.code} ;
 
   }else{
 
     if(discountRaw && discountRaw >= 0 && discountRaw <= 100){
 
-      return {grossImport: (grossImport - (grossImport * discountRaw) / 100), discount:0, discount_name:null};
+      return {netImport: (netImport - (netImport * discountRaw) / 100), discount:0, discount_name:null};
 
     }else{
 
-      return {grossImport, discount:0, discount_name:null};
+      return {netImport, discount:0, discount_name:null};
     }
   }
 };
@@ -219,6 +219,21 @@ export const normalizeTimesInTents = (tents:ReserveTentDto[]):ReserveTentDto[] =
   return tents;
 }
 
+export const normalizeTimesInExperience = (experiences:ReserveExperienceDto[]):ReserveExperienceDto[] => {
+
+  experiences.forEach((experience)=>{
+    if(!experience.day) throw new BadRequestError("error.noDateFromInReserveRequest")
+    const experienceDay = new Date(experience.day);
+    experienceDay.setUTCHours(17, 0, 0, 0);
+    experience.day = experienceDay;
+
+  })
+
+  return experiences;
+
+}
+
+
 export const getProducts = async (products: { idProduct: number, name:string, price:number, quantity:number }[]): Promise<Product[]> => {
 
   if (!products || products.length === 0) {
@@ -261,7 +276,7 @@ export const getExperiences = async (experiences: { idExperience: number, name:s
   return experiencesDb;
 }
 
-export const getPromotions = async (promotions: { idPromotion: number, name:string, price:number, quantity:number }[]): Promise<PromotionPublicDto[]> => {
+export const getPromotions = async (promotions: ReservePromotionFormDto[]): Promise<PromotionPublicDto[]> => {
 
   if (!promotions || promotions.length === 0) {
     return [];
@@ -285,7 +300,8 @@ export const getPromotions = async (promotions: { idPromotion: number, name:stri
 
 export const calculateReservePrice = (tents: { tent: Tent; nights: number, aditionalPeople:number }[],
   products: { product: Product; quantity: number }[],
-  experiences: { experience: Experience; quantity: number }[]): number => {
+  experiences: { experience: Experience; quantity: number }[],
+  promotions:{promotionId:number, price:number}[] ): number => {
 
   // Calculate the total price for tents
   const calculateTentsPrice = tents.reduce((acc, { tent, nights, aditionalPeople }) => {
@@ -309,7 +325,11 @@ export const calculateReservePrice = (tents: { tent: Tent; nights: number, aditi
     return acc + (pricePerExperience * quantity); // Multiply by quantity
   }, 0);
 
-  return calculateTentsPrice + calculateProductsPrice + calculateExperiencesPrice;
+  const calculatePromotionsPrice = promotions.reduce((acc, { price }) => {
+    return acc + (1 * price); // Multiply by quantity
+  }, 0);
+
+  return calculateTentsPrice + calculateProductsPrice + calculateExperiencesPrice + calculatePromotionsPrice;
 }
 
 
@@ -502,6 +522,91 @@ export const generateExternalId = (internalId: number): string => {
   // Combine them to create the external ID
   return `${prefix}${paddedId}`;
 };
+
+export const getPromotionItems = async(promotions:ReservePromotionFormDto[]):Promise<{
+  tents: ReserveTentDto[],
+  products: ReserveProductDto[],
+  experiences: ReserveExperienceDto[]
+  promotions:ReservePromotionDto[]
+}> => {
+
+  let tents:ReserveTentDto[] = [];
+  let products:ReserveProductDto[] = [];
+  let experiences:ReserveExperienceDto[] = [];
+  let promotionsReserve:ReservePromotionDto[] = [];
+
+  const promotionsDB = await getPromotions(promotions);
+
+  for (const promotion of promotions) {
+    const promoDB = promotionsDB.find((pr_it) => pr_it.id == promotion.idPromotion);
+    if(promoDB){
+
+      const tentsDB = promoDB.tents;
+
+      for(const tentDB of tentsDB){
+        let tent:ReserveTentDto = {
+          idTent:tentDB.id,
+          name:tentDB.name,
+          price:tentDB.price,
+          nights:promotion.nights,
+          dateFrom:promotion.dateFrom,
+          dateTo:promotion.dateTo,
+          confirmed:false,
+          aditionalPeople:0,
+          promotionId:promoDB.id
+        }
+        tents.push(tent);
+      }
+
+      const experiencesDB = promoDB.experiences;
+
+      for(const experienceDB of experiencesDB){
+        let experience:ReserveExperienceDto = {
+          idExperience:experienceDB.id,
+          name:experienceDB.name,
+          price:experienceDB.price,
+          quantity:experienceDB.quantity,
+          day:new Date(),
+          confirmed:false,
+          promotionId:promoDB.id
+        }
+        experiences.push(experience);
+      }
+
+      const productsDB = promoDB.products;
+
+      for(const productDB of productsDB){
+        let product:ReserveProductDto = {
+          idProduct:productDB.id,
+          name:productDB.name,
+          price:productDB.price,
+          quantity:productDB.quantity,
+          confirmed:false,
+          promotionId:promoDB.id
+        }
+        products.push(product);
+      }
+
+      let promotionReserve:ReservePromotionDto = {
+        idPromotion:promotion.idPromotion,
+        name:promotion.name,
+        price:promotion.price,
+        quantity:promotion.nights,
+        confirmed:false
+      }
+
+      promotionsReserve.push(promotionReserve);
+    }
+  }
+
+
+  return {
+    tents,
+    products,
+    experiences,
+    promotions:promotionsReserve
+  }
+}
 
 
 
