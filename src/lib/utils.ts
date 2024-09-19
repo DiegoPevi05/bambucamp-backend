@@ -310,7 +310,7 @@ export const calculateReservePrice = (tents: { tent: Tent; nights: number, aditi
     if(tent.max_aditional_people < aditionalPeople){
       throw new BadRequestError("error.noRoomSizeCorrect");
     }
-    return acc + (pricePerTent * nights + tent.aditional_people_price * aditionalPeople); // is pending add to Tent addiontal people
+    return acc + ( nights * (pricePerTent + (tent.aditional_people_price * aditionalPeople))); // is pending add to Tent addiontal people
   }, 0);
 
   // Calculate the total price for products
@@ -486,6 +486,17 @@ export const validatePromotionRequirements = (
   // All validations passed
   return true;
 };
+
+export const formatStrToDate = (dateYYYYMMDD:string):Date|undefined => {
+  if(!dateYYYYMMDD) return undefined
+
+  const dates = dateYYYYMMDD.split("-");
+
+  const convertedDate =  new Date (Number(dates[0]),Number(dates[1]) - 1,Number(dates[2]),0,0,0,0);
+  convertedDate.setUTCHours(17,0,0,0);
+  return convertedDate;
+
+}
 
 export const formatDateToYYYYMMDD = (date: Date): string => {
   // Create a new Date object with the current time zone

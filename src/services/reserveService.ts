@@ -127,7 +127,7 @@ export const createReserve = async (data: ReserveFormDto):Promise<ReserveDto|nul
     gross_import:0,
     canceled_reason:"",
     canceled_status:false,
-    payment_status:PaymentStatus.PAID,
+    payment_status:PaymentStatus.UNPAID,
     reserve_status:ReserveStatus.CONFIRMED,
   };
 
@@ -138,8 +138,16 @@ export const createReserve = async (data: ReserveFormDto):Promise<ReserveDto|nul
 
   if(data.reserve_status) reserveDto.reserve_status = data.reserve_status;
   if(data.payment_status) reserveDto.payment_status = data.payment_status;
+  if(data.canceled_reason) reserveDto.canceled_reason = data.canceled_reason;
+  if(data.canceled_status) reserveDto.canceled_status = data.canceled_status;
+  if(data.price_is_calculated) reserveDto.price_is_calculated = data.price_is_calculated;
+  if(data.discount_code_id) reserveDto.discount_code_id = Number(data.discount_code_id);
+  if(data.discount_code_name) reserveDto.discount_code_name = data.discount_code_name; 
+  if(data.gross_import) reserveDto.gross_import = Number(data.gross_import);
+  if(data.discount) reserveDto.discount = Number(data.discount);
+  if(data.net_import) reserveDto.net_import = Number(data.net_import);
 
-  reserveDto.discount_code_id = Number(data.discount_code_id);
+
 
   if(data.promotions.length > 0){
     const { tents, products, experiences, promotions  } = await utils.getPromotionItems(data.promotions); 
@@ -250,6 +258,8 @@ export const updateReserve = async (id:number, data: ReserveFormDto) => {
     reserve.userId = user.id;
   }
 
+
+
   if(data.reserve_status && reserve.reserve_status != data.reserve_status){
     reserve.reserve_status = data.reserve_status;
   } 
@@ -258,9 +268,29 @@ export const updateReserve = async (id:number, data: ReserveFormDto) => {
     reserve.payment_status = data.payment_status;
   }
 
-  if(data.discount_code_id && reserve.discount_code_id != data.discount_code_id){
+  if(data.discount_code_id && reserve.discount_code_id != Number(data.discount_code_id)){
     reserve.discount_code_id = Number(data.discount_code_id);
   }
+
+  if(data.discount_code_name && reserve.discount_code_name != data.discount_code_name){
+    reserve.discount_code_name = data.discount_code_name;
+  }
+
+  if(data.price_is_calculated && reserve.price_is_calculated != data.price_is_calculated){
+    reserve.price_is_calculated = data.price_is_calculated;
+  }
+
+  if(data.gross_import && reserve.gross_import != Number(data.gross_import)){
+    reserve.gross_import = Number(data.gross_import);
+  } 
+
+  if(data.discount && reserve.discount != Number(data.discount)){
+    reserve.discount = Number(data.discount);
+  } 
+
+  if(data.net_import && reserve.net_import != Number(data.net_import)){
+    reserve.net_import = Number(data.net_import);
+  } 
 
   let reserve_tents:ReserveTentDto[] = [];
   let reserve_products:ReserveProductDto[] = [];
@@ -347,19 +377,19 @@ export const updateReserve = async (id:number, data: ReserveFormDto) => {
         promotionWithQuantities
       );
 
-      const { netImport, discount, discount_name } = await utils.applyDiscount(data.gross_import, data.discount_code_id);
-      reserve.discount_code_id = data.discount_code_id;
+      const { netImport, discount, discount_name } = await utils.applyDiscount(reserve.gross_import, reserve.discount_code_id);
+      reserve.discount_code_id = reserve.discount_code_id;
       reserve.discount_code_name = discount_name != null ? discount_name : "";
-      reserve.net_import = netImport;
       reserve.discount = discount;
+      reserve.net_import = netImport;
 
   }else{
-      const { netImport, discount, discount_name } = await utils.applyDiscount(data.gross_import, data.discount_code_id, data.discount);
-      reserve.discount_code_id = data.discount_code_id;
-      reserve.gross_import = data.gross_import;
+      const { netImport, discount, discount_name } = await utils.applyDiscount(reserve.gross_import, reserve.discount_code_id, reserve.discount);
+      reserve.discount_code_id = reserve.discount_code_id;
+      reserve.gross_import = reserve.gross_import;
       reserve.discount_code_name = discount_name != null ? discount_name : "";
-      reserve.net_import = netImport;
       reserve.discount = discount;
+      reserve.net_import = netImport;
 
   }
 

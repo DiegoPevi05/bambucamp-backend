@@ -119,6 +119,7 @@ export interface ReserveFormDto {
 export interface ReserveFilters {
   dateFrom?:Date;
   dateTo?:Date;
+  payment_status?:PaymentStatus;
 }
 
 export interface PaginatedReserve {

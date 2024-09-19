@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import * as reserveService from '../services/reserveService';
 import { body, query, param, validationResult } from 'express-validator';
 import {CustomError} from '../middleware/errors';
+import {PaymentStatus} from '@prisma/client';
+import {formatStrToDate} from '../lib/utils';
 
 export const getAllPublicTentsForReservation = [
     query('dateFrom').notEmpty().withMessage('validation.dateFromRequired'),
@@ -144,11 +146,12 @@ export const getAllReserveOptions = async( req:Request, res:Response ) => {
 
 export const getAllReserves = async (req: Request, res: Response) => {
   try {
-    const { dateFrom, dateTo, page = '1', pageSize = '10' } = req.query;
+    const { dateFrom, dateTo, payment_status, page = '1', pageSize = '10' } = req.query;
 
     const filters = {
-      dateFrom: dateFrom as Date | undefined,
-      dateTo: dateTo as Date | undefined
+      dateFrom: formatStrToDate(dateFrom as string) as Date | undefined,
+      dateTo: formatStrToDate(dateTo as string) as Date | undefined,
+      payment_status:payment_status as PaymentStatus | undefined
     };
 
     const pagination = {
@@ -241,6 +244,10 @@ export const createReserve = [
 
 export const updateReserve = [
   param('id').notEmpty().withMessage('validation.idRequired'),
+  body('tents').isArray().withMessage('validation.tentsMustBeArray'),
+  body('products').isArray().withMessage('validation.productsMustBeArray'),
+  body('experiences').isArray().withMessage('validation.experiencesMustBeArray'),
+  body('promotions').isArray().withMessage('validation.promotionsMustBeArray'),
 
   async (req: Request, res: Response) => {
 

@@ -259,7 +259,7 @@ export const getAllReserveOptions = async():Promise<ReserveOptions> => {
 }
 
 export const getAllReserves = async ( filters: ReserveFilters, pagination: Pagination): Promise<PaginatedReserve> => {
-  const { dateFrom, dateTo } = filters;
+  const { dateFrom, dateTo, payment_status } = filters;
   const { page, pageSize } = pagination;
 
   const skip = (page - 1) * pageSize;
@@ -270,6 +270,11 @@ export const getAllReserves = async ( filters: ReserveFilters, pagination: Pagin
     where: {
       ...(dateFrom && { dateFrom: { lte: dateTo } }), // Ensure dateFrom is within the range
       ...(dateTo && { dateTo: { gte: dateFrom } }),   // Ensure dateTo is within the range
+      ...(payment_status && {
+        reserve: {
+          payment_status: payment_status,
+        },
+      }),
     },
     skip,
     take,
@@ -292,10 +297,31 @@ export const getAllReserves = async ( filters: ReserveFilters, pagination: Pagin
       id: { in: reserveIds },
     },
     include: {
-      tents: true,        // Include ReserveTent data
-      products: true,     // Include ReserveProduct data
-      experiences: true,  // Include ReserveExperience data
-      promotions:true,
+      tents: {
+        where: {
+          OR: [
+            { promotionId: null },     // Fetch tents with null promotionId
+            { promotionId: undefined }, // Fetch tents with undefined promotionId (though undefined is often unnecessary in Prisma)
+          ],
+        },
+      },
+      products: {
+        where: {
+          OR: [
+            { promotionId: null },     // Fetch products with null promotionId
+            { promotionId: undefined }, // Fetch products with undefined promotionId
+          ],
+        },
+      },
+      experiences: {
+        where: {
+          OR: [
+            { promotionId: null },     // Fetch experiences with null promotionId
+            { promotionId: undefined }, // Fetch experiences with undefined promotionId
+          ],
+        },
+      },
+      promotions: true,
     },
     orderBy: {
       createdAt: 'desc',
@@ -593,6 +619,7 @@ export const upsertReserveDetails = async (
       price: tent.price,
       nights: tent.nights,
       reserveId: idReserve, // Establish the relationship
+      promotionId: tent.promotionId ?? undefined,  // Handle optional promotionId
     })),
   });
 
@@ -604,6 +631,7 @@ export const upsertReserveDetails = async (
       price: product.price,
       quantity: product.quantity,
       reserveId: idReserve, // Establish the relationship
+      promotionId: product.promotionId ?? undefined,  // Handle optional promotionId
     })),
   });
 
@@ -616,6 +644,7 @@ export const upsertReserveDetails = async (
       quantity: experience.quantity,
       day:experience.day,
       reserveId: idReserve, // Establish the relationship
+      promotionId: experience.promotionId ?? undefined,  // Handle optional promotionId
     })),
   });
 
