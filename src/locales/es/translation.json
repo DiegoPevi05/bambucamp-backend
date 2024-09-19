@@ -1,5 +1,15 @@
 {
+	"reserve": {
+		"day_of_experience": "Dia de la experiencia",
+		"unit": "Und.",
+		"from": "Desde",
+		"to": "Hasta",
+		"nights": "Noches"
+	},
 	"error": {
+		"reserveNotPayOrComplete": "La reserva no esta pagada o completa",
+		"failedToDownloadBill": "Error al generar el comprobante de pago",
+		"failedToGeneratePDF": "Error al generar el pdf",
 		"failedToFetchNotifications": "Error al obtener las notificaciones",
 		"badRequest": "Solicitud incorrecta",
 		"unauthorized": "No autorizado",

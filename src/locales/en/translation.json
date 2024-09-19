@@ -1,5 +1,15 @@
 {
+	"reserve": {
+		"day_of_experience": "Day of Experience",
+		"unit": "Unit.",
+		"from": "From",
+		"to": "To",
+		"nights": "Nights"
+	},
 	"error": {
+		"reserveNotPayOrComplete": "Reserve is not paid or complete",
+		"failedToDownloadBill": "Failed to generate Bill",
+		"failedToGeneratePDF": "Failed to generate PDF",
 		"failedToCreateFaq": "Failed to create Faq",
 		"failedToDeleteFaq": "Failed to delete Faq",
 		"failedToDeleteReview": "Failed to delete review",

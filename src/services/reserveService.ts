@@ -10,6 +10,7 @@ import {sendReservationEmail} from '../config/email/mail';
 import { PaymentStatus, Reserve, ReserveStatus, User} from '@prisma/client';
 import { calculatePrice } from '../lib/utils';
 import {PublicTent} from '../dto/tent';
+import {generateSalesNote} from '../config/receipt/pdf';
 
 interface Pagination {
   page: number;
@@ -535,3 +536,25 @@ export const deleteExperienceReserve = async (id: number) => {
 export const updateConfirmStatusExperienceReserve = async (id: number, confirmed:boolean) => {
   return await reserveRepository.updateExperienceReserve(id,confirmed);
 };
+
+export const downloadReserveBill = async(reserveId:number, t: (key: string) => string):Promise<Buffer> => {
+  const reserve = await reserveRepository.getReserveDtoById(reserveId);
+
+  if (!reserve) {
+    throw new NotFoundError('error.noReservefoundInDB');
+  }
+
+  if(reserve.reserve_status != ReserveStatus.COMPLETE || reserve.payment_status != PaymentStatus.PAID){
+    throw new BadRequestError('error.reserveNotPayOrComplete')
+  }
+
+  const buffer = await generateSalesNote(reserve,t);
+
+  if(!buffer) throw new BadRequestError("error.failedToGeneratePDF");
+
+  return buffer;
+
+}
+
+
+

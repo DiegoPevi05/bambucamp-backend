@@ -29,5 +29,7 @@ router.post('/reserve/experience/admin',authenticateToken,checkRole('ADMIN','SUP
 router.put('/reserve/experience/admin/:id',authenticateToken,checkRole('ADMIN','SUPERVISOR'), reserveController.updateExperienceReserve);
 router.delete('/reserve/experience/:id',authenticateToken,checkRole('ADMIN','SUPERVISOR'), reserveController.deleteExperienceReserve);
 
+router.get('/bill/:id',authenticateToken,checkRole('CLIENT','ADMIN','SUPERVISOR'),reserveController.downloadReserveBill);
+
 export default router;
 

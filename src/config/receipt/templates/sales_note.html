@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Boleta de Venta Electrónica</title>
+	<style>
+		@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+		:root {
+			font-family: "Roboto", sans-serif;
+			font-weight: 400;
+			font-style: normal;
+			--primary-color: #00AAA9;
+			--primary-color-light: #eab485;
+			--primary-color-dark: #146c73;
+			--danger-color: #f87171;
+			--white-color: #fff;
+			color: var(--primary-color-dark);
+		}
+
+		body {
+			font-family: "Roboto", sans-serif;
+			margin: 0;
+			padding: 20px;
+		}
+
+		.container {
+			max-width: 800px;
+			margin: 0 auto;
+			padding: 40px 40px;
+			border: 1px solid #000;
+		}
+
+		.header {
+			text-align: center;
+			width: 100%;
+			height: auto;
+			display: flex;
+			flex-direction: row;
+		}
+
+		.header .column1 {
+			width: 50%;
+			height: auto;
+			display: flex;
+			flex-direction: column;
+			align-items: flex-start;
+			justify-content: center;
+		}
+
+		.header .column1 .logo {
+			width: 100px;
+			height: auto;
+		}
+
+		.header .column2 {
+			width: 50%;
+			height: auto;
+			display: flex;
+			flex-direction: column;
+			align-items: flex-end;
+			justify-content: center;
+		}
+
+		.header .column2 .header_description {
+			width: auto;
+			height: auto;
+			flex-direction: center;
+			justify-content: center;
+			align-items: center;
+			border: 2px solid var(--primary-color);
+			border-radius: 12px;
+			padding: 1rem;
+		}
+
+		.header h1 {
+			margin: 5px 0;
+			font-size: 1rem;
+		}
+
+		.header h2 {
+			margin: 0;
+			font-size: 1.2em;
+		}
+
+		.info {
+			margin-top: 80px;
+			width: 100%;
+			height: auto;
+			display: flex;
+			flex-direction: column;
+			align-items: flex-start;
+			justify-content: flex-start;
+		}
+
+		.info .info_wrapper_columns {
+			margin-top: 20px;
+			height: auto;
+			width: 100%;
+			display: flex;
+			flex-direction: row;
+			gap: 0px 2%;
+		}
+
+		.info_column1,
+		.info_column2 {
+			width: 49%;
+			border: 2px solid var(--primary-color);
+			border-radius: 6px;
+			padding: 6px;
+			display: grid;
+			grid-template-columns: 30% 70%;
+			gap: 5px;
+		}
+
+		.info p {
+			margin: 0px 0;
+			font-size: 12px;
+		}
+
+		.info_column1_labels,
+		.info_column1_values,
+		.info_column2_labels,
+		.info_column2_values {
+			display: grid;
+			align-items: start;
+			gap: 0px;
+		}
+
+		.info_column1_labels p,
+		.info_column1_values p,
+		.info_column2_labels p,
+		.info_column2_values p {
+			margin: 0;
+		}
+
+		.info_column1_labels p,
+		.info_column2_labels p {
+			font-size: 10px;
+		}
+
+		.table-container {
+			margin-top: 20px;
+		}
+
+		table {
+			width: 100%;
+			border-collapse: separate;
+			border-spacing: 0;
+			margin-top: 10px;
+			border: 1px solid var(--primary-color);
+			border-radius: 12px;
+		}
+
+		th,
+		td {
+			padding: 8px;
+			text-align: left;
+			border-bottom: 1px solid var(--primary-color);
+		}
+
+		table tr:first-child th:first-child {
+			border-top-left-radius: 12px;
+		}
+
+		table tr:first-child th:last-child {
+			border-top-right-radius: 12px;
+		}
+
+		table tr:last-child td:first-child {
+			border-bottom-left-radius: 12px;
+		}
+
+		table tr:last-child td:last-child {
+			border-bottom-right-radius: 12px;
+		}
+
+		.right-align {
+			text-align: right;
+		}
+
+		.totals {
+			margin-top: 20px;
+			width: 100%;
+			display: flex;
+			flex-direction: row;
+			justify-content: flex-end;
+			align-items: flex-start;
+		}
+
+		.totals .summary {
+			height: auto;
+			width: 30%;
+			display: flex;
+			flex-direction: column;
+			justify-content: flex-end;
+			align-items: flex-end;
+			gap: 12px 0;
+			border-radius: 12px;
+		}
+
+		.totals .summary .details {
+			width: auto;
+			height: auto;
+			display: flex;
+			flex-direction: column;
+			justify-content: flex-end;
+			align-items: flex-end;
+			border-radius: 12px;
+			padding: 12px 12px;
+			border: 2px solid var(--primary-color);
+			font-size: 12px;
+		}
+
+		.totals .summary .total {
+			width: 100%;
+			height: auto;
+			display: flex;
+			flex-direction: row;
+			justify-content: center;
+			align-items: center;
+			padding: 6px 0px;
+			border-radius: 12px;
+			border: 2px solid var(--primary-color);
+		}
+
+		.totals p {
+			text-align: right;
+			margin: 0px 0;
+		}
+
+		.footer {
+			margin-top: 20px;
+			text-align: center;
+			font-size: 0.9em;
+		}
+
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<div class="header">
+			<div class="column1">
+				<img src="http://104.236.199.84/backend-public/logo.png" class="logo">
+			</div>
+			<div class="column2">
+				<div class="header_description">
+					<h1>COMPROBANTE DE PAGO</h1>
+					<h2>{{external_id}}</h2>
+				</div>
+			</div>
+		</div>
+
+		<div class="info">
+			<p>BAMBUCAMP</p>
+			<p>Jita pasaje cuatro esquina, Lunahuaná 15727</p>
+			<div class="info_wrapper_columns">
+				<div class="info_column1">
+					<div class="info_column1_labels">
+						<p><strong>CLIENTE:</strong></p>
+						<p><strong>DNI:</strong></p>
+						<p><strong>DIRECCION:</strong></p>
+					</div>
+					<div class="info_column1_values">
+						<p>{{ username }}</p>
+						<p>000000</p>
+						<p></p>
+					</div>
+				</div>
+				<div class="info_column2">
+					<div class="info_column2_labels">
+						<p><strong>INICIO DE ESTADIA:</strong> </p>
+						<p><strong>FIN DE ESTADIA:</strong> </p>
+						<p><strong>MONEDA:</strong></p>
+					</div>
+					<div class="info_column2_values">
+						<p>{{CheckIn}}</p>
+						<p>{{CheckOut}}</p>
+						<p>SOLES</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="table-container">
+			<table>
+				<thead>
+					<tr>
+						<th>N°</th>
+						<th>DESCRIPCIÓN</th>
+						<th>UNIDAD</th>
+						<th>P.UNIT.</th>
+						<th>CANT.</th>
+						<th>TOTAL</th>
+					</tr>
+				</thead>
+				<tbody>
+					{{promotions_items}}
+					{{tents_items}}
+					{{experiences_items}}
+					{{products_items}}
+				</tbody>
+			</table>
+		</div>
+
+		<div class="totals">
+			<div class="summary">
+				<div class="details">
+					<p>SUB TOTAL: {{gross_import}}</p>
+					<p>DESCUENTOS: {{discounted_import}}</p>
+				</div>
+				<div class="total">
+					<p><strong>TOTAL: S/ {{net_import}}</strong></p>
+				</div>
+			</div>
+		</div>
+
+		<div class="footer">
+			<p>Comprobante emitido a través de <a href="{{link_web_page}}">{{web_page}}</a></p>
+		</div>
+	</div>
+</body>
+
+</html>

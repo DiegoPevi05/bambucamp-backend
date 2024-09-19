@@ -216,6 +216,7 @@ model ReserveTent {
   dateFrom        DateTime        
   dateTo          DateTime        
   aditionalPeople Int       @default(0)
+  aditionalPeoplePrice Float @default(0)
   reserve         Reserve   @relation(fields: [reserveId], references: [id], onDelete: Cascade)
   confirmed       Boolean   @default(false)
   promotionId     Int?

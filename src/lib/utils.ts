@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { Tent , Product, Experience, Notification, ReserveStatus } from '@prisma/client';
+import { Tent , Product, Experience, Notification } from '@prisma/client';
 import { ReserveDto, ReserveExperienceDto, ReserveProductDto, ReservePromotionDto, ReservePromotionFormDto, ReserveTentDto } from '../dto/reserve';
 import { PublicNotification } from '../dto/notification';
 import * as reserveRepository from '../repositories/ReserveRepository';
@@ -564,6 +564,7 @@ export const getPromotionItems = async(promotions:ReservePromotionFormDto[]):Pro
           dateTo:promotion.dateTo,
           confirmed:false,
           aditionalPeople:0,
+          aditionalPeoplePrice:0,
           promotionId:promoDB.id
         }
         tents.push(tent);
@@ -618,6 +619,40 @@ export const getPromotionItems = async(promotions:ReservePromotionFormDto[]):Pro
     promotions:promotionsReserve
   }
 }
+
+export const getRangeDatesForReserve = (reserve:ReserveDto) => {
+    // Initialize an array to store the ranges of dates
+    let dateRanges: { date: Date; label: string }[] = [];
+
+    // Loop through each tent in the cart
+    reserve.tents.forEach((dateItem) => {
+      // Initialize the current date to tent's dateFrom
+      let currentDate = new Date(dateItem.dateFrom);
+
+      // Loop through the dates from dateFrom to dateTo for each tent
+      while (currentDate <= dateItem.dateTo) {
+        const formattedDate = currentDate.toISOString().split('T')[0]; // Format date as YYYY-MM-DD
+
+        // Check if the date is already in the dateRanges array to avoid overlap
+        const dateExists = dateRanges.some((range) => range.label === formattedDate);
+
+        if (!dateExists) {
+          dateRanges.push({
+            date: new Date(currentDate),
+            label: formattedDate,
+          });
+        }
+
+        // Move to the next day
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+    });
+
+    // Sort the dateRanges array by date to ensure the dates are in chronological order
+    dateRanges = dateRanges.sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    return dateRanges;
+};
 
 
 

@@ -258,6 +258,70 @@ export const getAllReserveOptions = async():Promise<ReserveOptions> => {
 
 }
 
+export const getReserveDtoById = async(reserveId:number):Promise<ReserveDto|null> => {
+  // Retrieve all Reserve records matching the IDs
+  const reserve = await prisma.reserve.findUnique({
+    where: {
+      id: reserveId ,
+    },
+    include: {
+      tents: {
+        where: {
+          OR: [
+            { promotionId: null },     // Fetch tents with null promotionId
+            { promotionId: undefined }, // Fetch tents with undefined promotionId (though undefined is often unnecessary in Prisma)
+          ],
+        },
+      },
+      products: {
+        where: {
+          OR: [
+            { promotionId: null },     // Fetch products with null promotionId
+            { promotionId: undefined }, // Fetch products with undefined promotionId
+          ],
+        },
+      },
+      experiences: {
+        where: {
+          OR: [
+            { promotionId: null },     // Fetch experiences with null promotionId
+            { promotionId: undefined }, // Fetch experiences with undefined promotionId
+          ],
+        },
+      },
+      promotions: true,
+      user:true,
+    }
+  });
+
+  if(!reserve) return null;
+  // Map over the reserves to ensure the data types match your DTO structure
+  const enrichedReserve = ({
+    ...reserve,
+    user_name: reserve.user.firstName,
+    user_email: reserve.user.email,
+    tents: reserve.tents.map((tent) => ({
+      ...tent,
+      promotionId: tent.promotionId ?? undefined,  // Convert null to undefined for compatibility
+    })),
+    products: reserve.products.map((product) => ({
+      ...product,
+      promotionId: product.promotionId ?? undefined,  // Convert null to undefined
+    })),
+    experiences: reserve.experiences.map((experience) => ({
+      ...experience,
+      promotionId: experience.promotionId ?? undefined,  // Convert null to undefined
+    })),
+    promotions: reserve.promotions.map((promotion) => ({
+      ...promotion,
+    })),
+  });
+
+  return enrichedReserve;
+
+}
+
+
 export const getAllReserves = async ( filters: ReserveFilters, pagination: Pagination): Promise<PaginatedReserve> => {
   const { dateFrom, dateTo, payment_status } = filters;
   const { page, pageSize } = pagination;
@@ -322,6 +386,7 @@ export const getAllReserves = async ( filters: ReserveFilters, pagination: Pagin
         },
       },
       promotions: true,
+      user:true,
     },
     orderBy: {
       createdAt: 'desc',
@@ -331,6 +396,8 @@ export const getAllReserves = async ( filters: ReserveFilters, pagination: Pagin
   // Map over the reserves to ensure the data types match your DTO structure
   const enrichedReserves = reserves.map((reserve) => ({
     ...reserve,
+    user_name: reserve.user.firstName,
+    user_email: reserve.user.email,
     tents: reserve.tents.map((tent) => ({
       ...tent,
       promotionId: tent.promotionId ?? undefined,  // Convert null to undefined for compatibility
@@ -395,6 +462,7 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
         dateFrom: tent.dateFrom,
         dateTo: tent.dateTo,
         aditionalPeople: tent.aditionalPeople,
+        aditionalPeoplePrice:tent.aditionalPeoplePrice,
         confirmed: confirmed,
         promotionId: tent.promotionId ?? undefined,  // Handle optional promotionId
       }))
@@ -618,6 +686,8 @@ export const upsertReserveDetails = async (
       name: tent.name,
       price: tent.price,
       nights: tent.nights,
+      aditionalPeople:tent.aditionalPeople,
+      aditionalPeoplePrice:tent.aditionalPeoplePrice,
       reserveId: idReserve, // Establish the relationship
       promotionId: tent.promotionId ?? undefined,  // Handle optional promotionId
     })),

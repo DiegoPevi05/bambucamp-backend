@@ -4,6 +4,7 @@ import { body, query, param, validationResult } from 'express-validator';
 import {CustomError} from '../middleware/errors';
 import {PaymentStatus} from '@prisma/client';
 import {formatStrToDate} from '../lib/utils';
+import { generateSalesNote } from '../config/receipt/pdf';
 
 export const getAllPublicTentsForReservation = [
     query('dateFrom').notEmpty().withMessage('validation.dateFromRequired'),
@@ -172,6 +173,44 @@ export const getAllReserves = async (req: Request, res: Response) => {
     }
   }
 };
+
+
+export const downloadReserveBill =  [
+  param('id').notEmpty().withMessage("validation.idRequired"),
+  async (req: Request, res: Response) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
+    }
+
+    try {
+      // Generate PDF as a byte array
+      const pdfBuffer = await reserveService.downloadReserveBill(Number(req.params.id), req.t);
+
+      // Set response headers and send PDF as a byte array
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename=reserve_${req.params.id}.pdf`,
+        'Content-Length': pdfBuffer.length,
+      });
+
+      res.status(200).send(pdfBuffer);
+    } catch (error) {
+      console.log(error);
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: req.t(error.message) });
+      } else {
+        res.status(500).json({ error: req.t('error.failedToDownloadBill') });
+      }
+    }
+  }
+]
 
 export const createReserveByUser = [
   body('tents').isArray().withMessage('validation.tentsMustBeArray'),

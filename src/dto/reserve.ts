@@ -15,6 +15,7 @@ export interface ReserveTentDto {
   dateTo:Date;
   confirmed:boolean;
   aditionalPeople:number;
+  aditionalPeoplePrice:number;
   promotionId?:number;
   tentDB?:Tent;
 }
@@ -79,6 +80,8 @@ export interface ReserveOptions {
 
 export interface ReserveDto {
   userId: number;
+  user_name?:string;
+  user_email?:string;
   external_id:string;
   tents: ReserveTentDto[];
   products: ReserveProductDto[];
