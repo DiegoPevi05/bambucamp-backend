@@ -21,6 +21,7 @@ export const generateSalesNote = async (reserve:ReserveDto, t: (key: string) => 
 
         // Extract dynamic data from request or a database
         const data = {
+            title:reserve.external_id,
             external_id: reserve.external_id,
             username: `${reserve.user_name ?? ""} | ${reserve.user_email ?? ""}`,
             CheckIn: `${getRangeDatesForReserve(reserve)[0].label}`,

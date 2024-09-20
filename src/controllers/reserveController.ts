@@ -4,7 +4,7 @@ import { body, query, param, validationResult } from 'express-validator';
 import {CustomError} from '../middleware/errors';
 import {PaymentStatus} from '@prisma/client';
 import {formatStrToDate} from '../lib/utils';
-import { generateSalesNote } from '../config/receipt/pdf';
+import {ReserveEntityType} from '../dto/reserve';
 
 export const getAllPublicTentsForReservation = [
     query('dateFrom').notEmpty().withMessage('validation.dateFromRequired'),
@@ -191,7 +191,7 @@ export const downloadReserveBill =  [
 
     try {
       // Generate PDF as a byte array
-      const pdfBuffer = await reserveService.downloadReserveBill(Number(req.params.id), req.t);
+      const pdfBuffer = await reserveService.downloadReserveBill(Number(req.params.id),req.user, req.t);
 
       // Set response headers and send PDF as a byte array
       res.set({
@@ -237,7 +237,7 @@ export const createReserveByUser = [
 
       const language = req.language || 'en';
       await reserveService.createReserveByUser(req.body, req.user, language);
-      res.status(201).json({ message: req.t('message.reserveCreated') });
+      res.status(201).json({ message: req.t('message.reserveCreatedByUser') });
     } catch (error) {
       console.log(error);
       if (error instanceof CustomError) {
@@ -562,4 +562,37 @@ export const updateExperienceReserve = [
       }
     }
   }
+];
+
+export const confirmEntity = [
+  // Validate that 'entityType' and 'reserveId' exist
+  body('entityType').notEmpty().withMessage('validation.entityTypeRequired'),
+  body('reserveId').notEmpty().isInt().withMessage('validation.reserveIdRequired'),
+  body('entityId').optional().isInt().withMessage('validation.entityIdInvalid'),
+
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg),
+      }));
+      return res.status(400).json({ error: localizedErrors });
+    }
+
+    try {
+      const { entityType, reserveId, entityId } = req.body;
+
+      // Call the confirmEntity function
+      await reserveService.confirmEntity(entityType, reserveId, entityId);
+
+      res.status(201).json({ message: req.t((entityType == ReserveEntityType.RESERVE ? 'message.reserveConfirmed' : 'message.entityConfirmed' ), { entityType }) });
+    } catch (error) {
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: req.t(error.message) });
+      } else {
+        res.status(500).json({ error: req.t('error.failedToConfirmEntity') });
+      }
+    }
+  },
 ];

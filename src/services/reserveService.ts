@@ -1,5 +1,5 @@
 import * as reserveRepository from '../repositories/ReserveRepository';
-import { PaginatedReserve, ReserveDto, ReserveExperienceDto, ReserveFilters, ReserveFormDto, ReserveOptions, ReserveProductDto, ReservePromotionDto, ReserveTentDto, createReserveExperienceDto, createReserveProductDto } from "../dto/reserve";
+import { PaginatedReserve, ReserveDto, ReserveEntityType, ReserveExperienceDto, ReserveFilters, ReserveFormDto, ReserveOptions, ReserveProductDto, ReservePromotionDto, ReserveTentDto, createReserveExperienceDto, createReserveProductDto } from "../dto/reserve";
 import * as promotionRepository from '../repositories/PromotionRepository';
 import *  as userRepository from '../repositories/userRepository';
 import * as productService from './productService';
@@ -7,7 +7,7 @@ import * as experienceService from './experienceService';
 import * as utils from '../lib/utils';
 import { BadRequestError, NotFoundError, UnauthorizedError } from "../middleware/errors";
 import {sendReservationEmail} from '../config/email/mail';
-import { PaymentStatus, Reserve, ReserveStatus, User} from '@prisma/client';
+import { PaymentStatus, Reserve, ReserveStatus, Role, User} from '@prisma/client';
 import { calculatePrice } from '../lib/utils';
 import {PublicTent} from '../dto/tent';
 import {generateSalesNote} from '../config/receipt/pdf';
@@ -537,11 +537,18 @@ export const updateConfirmStatusExperienceReserve = async (id: number, confirmed
   return await reserveRepository.updateExperienceReserve(id,confirmed);
 };
 
-export const downloadReserveBill = async(reserveId:number, t: (key: string) => string):Promise<Buffer> => {
+export const downloadReserveBill = async(reserveId:number, user:User|undefined , t: (key: string) => string):Promise<Buffer> => {
+
+  if(!user) throw new UnauthorizedError('error.unauthorized');
+
   const reserve = await reserveRepository.getReserveDtoById(reserveId);
 
   if (!reserve) {
     throw new NotFoundError('error.noReservefoundInDB');
+  }
+
+  if(user.role === Role.CLIENT && user.id != reserve.userId){
+    throw new UnauthorizedError('error.unauthorized')
   }
 
   if(reserve.reserve_status != ReserveStatus.COMPLETE || reserve.payment_status != PaymentStatus.PAID){
@@ -555,6 +562,40 @@ export const downloadReserveBill = async(reserveId:number, t: (key: string) => s
   return buffer;
 
 }
+
+
+export const confirmEntity = async (entityType: ReserveEntityType, reserveId: number, entityId?: number ) => {
+
+  switch (entityType) {
+    case ReserveEntityType.RESERVE:
+      // Confirm entire reserve
+      return await reserveRepository.confirmReserve(reserveId);
+
+    case ReserveEntityType.TENT:
+      if (!entityId) throw new BadRequestError('validation.idRequired');
+      // Confirm a specific tent
+      return await reserveRepository.confirmTent(entityId);
+
+
+    case ReserveEntityType.PRODUCT:
+      if (!entityId) throw new BadRequestError('validation.idRequired');
+      // Confirm a specific product
+      return await reserveRepository.confirmProduct(entityId);
+
+    case ReserveEntityType.EXPERIENCE:
+      if (!entityId) throw new BadRequestError('validation.idRequired');
+      // Confirm a specific experience
+      return await reserveRepository.confirmExperience(entityId);
+
+    case ReserveEntityType.PROMOTION:
+      if (!entityId) throw new BadRequestError('validation.idRequired');
+      // Confirm a specific promotion
+      return await reserveRepository.confirmPromotion(entityId);
+
+    default:
+      throw new BadRequestError('error.InvalidTypeProvided');
+  }
+};
 
 
 

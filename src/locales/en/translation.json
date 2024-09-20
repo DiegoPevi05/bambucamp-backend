@@ -7,6 +7,7 @@
 		"nights": "Nights"
 	},
 	"error": {
+		"failedToConfirmEntity": "Failed to confirm the entity.",
 		"reserveNotPayOrComplete": "Reserve is not paid or complete",
 		"failedToDownloadBill": "Failed to generate Bill",
 		"failedToGeneratePDF": "Failed to generate PDF",
@@ -125,6 +126,7 @@
 		"failedToUpdateExperienceReserveStatus": "Failed to confirm the experience in the reserve"
 	},
 	"message": {
+		"entityConfirmed": "{{entityType}} has been successfully confirmed.",
 		"reviewDeleted": "Review deleted",
 		"productReserveCreated": "Product Added to the reserve",
 		"productReserveDeleted": "Product Remove from the reserve",
@@ -237,6 +239,10 @@
 		"faqDeleted": "Faq deleted"
 	},
 	"validation": {
+		"InvalidTypeProvided": "Invalid type of entity",
+		"entityTypeRequired": "Entity type is required.",
+		"reserveIdRequired": "Reserve ID is required.",
+		"entityIdInvalid": "Entity ID must be a valid integer.",
 		"reviewRequired": "Review is required",
 		"dayRequired": "Day is required",
 		"starsRequired": "Stars are required",

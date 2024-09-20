@@ -7,6 +7,7 @@
 		"nights": "Noches"
 	},
 	"error": {
+		"failedToConfirmEntity": "No se pudo confirmar la entidad.",
 		"reserveNotPayOrComplete": "La reserva no esta pagada o completa",
 		"failedToDownloadBill": "Error al generar el comprobante de pago",
 		"failedToGeneratePDF": "Error al generar el pdf",
@@ -125,6 +126,7 @@
 		"failedToUpdateExperienceReserveStatus": "Fallo al confirmar la experiencia en la reserva"
 	},
 	"message": {
+		"entityConfirmed": "{{entityType}} ha sido confirmado exitosamente.",
 		"reserveCreated": "Reserva creada",
 		"reserveUpdated": "Reserva actualizada",
 		"reserveDeleted": "Reserva eliminada",
@@ -237,6 +239,10 @@
 		"faqDeleted": "Faq borrada"
 	},
 	"validation": {
+		"InvalidTypeProvided": "Tipo de entidad invalido",
+		"entityTypeRequired": "El tipo de entidad es obligatorio.",
+		"reserveIdRequired": "El ID de la reserva es obligatorio.",
+		"entityIdInvalid": "El ID de la entidad debe ser un número entero válido.",
 		"headerRequired": "El encabezado del glamping es obligatorio",
 		"titleRequired": "El título es obligatorio",
 		"descriptionRequired": "La descripción es obligatoria",

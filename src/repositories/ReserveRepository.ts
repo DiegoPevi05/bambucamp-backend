@@ -753,3 +753,97 @@ export const deleteReserve = async (id: number): Promise<Reserve> => {
     where: { id }
   });
 };
+
+
+export const confirmReserve = async (reserveId: number): Promise<void> => {
+  // Update all related tents, products, experiences, promotions to confirmed
+  await prisma.reserve.update({
+    where: { id: reserveId },
+    data: {
+      reserve_status: ReserveStatus.CONFIRMED,
+      tents: {
+        updateMany: { data: { confirmed: true }, where: { reserveId } }
+      },
+      products: {
+        updateMany: { data: { confirmed: true }, where: { reserveId } }
+      },
+      experiences: {
+        updateMany: { data: { confirmed: true }, where: { reserveId } }
+      },
+      promotions: {
+        updateMany: { data: { confirmed: true }, where: { reserveId } }
+      }
+    }
+  });
+};
+
+export const confirmTent = async (reserveTentId: number): Promise<void> => {
+  // Ensure the tent belongs to the provided reserveId before updating
+  const tent = await prisma.reserveTent.findFirst({
+    where: { id: reserveTentId }
+  });
+
+  if (!tent) {
+    throw new NotFoundError('error.noTentFoundInDB');
+  }
+
+  // Update the tent to confirmed
+  await prisma.reserveTent.update({
+    where: { id: reserveTentId },
+    data: { confirmed: true }
+  });
+};
+
+export const confirmProduct = async (reserveProductId: number): Promise<void> => {
+  // Ensure the product belongs to the provided reserveId before updating
+  const product = await prisma.reserveProduct.findFirst({
+    where: { id: reserveProductId }
+  });
+
+  if (!product) {
+    throw new NotFoundError('error.noProductFoundInDB');
+  }
+
+  // Update the product to confirmed
+  await prisma.reserveProduct.update({
+    where: { id: reserveProductId },
+    data: { confirmed: true }
+  });
+};
+
+export const confirmExperience = async (reserveExperienceId: number): Promise<void> => {
+  // Ensure the experience belongs to the provided reserveId before updating
+  const experience = await prisma.reserveExperience.findFirst({
+    where: { id: reserveExperienceId }
+  });
+
+  if (!experience) {
+    throw new NotFoundError('error.noExperienceFoundInDB');
+  }
+
+  // Update the experience to confirmed
+  await prisma.reserveExperience.update({
+    where: { id: reserveExperienceId },
+    data: { confirmed: true }
+  });
+};
+
+export const confirmPromotion = async (reservePromotionId: number): Promise<void> => {
+  // Ensure the promotion belongs to the provided reserveId before updating
+  const promotion = await prisma.reservePromotion.findFirst({
+    where: { id: reservePromotionId }
+  });
+
+  if (!promotion) {
+    throw new NotFoundError('error.noPromotionFoundInDB');
+  }
+
+  // Update the promotion to confirmed
+  await prisma.reservePromotion.update({
+    where: { id: reservePromotionId },
+    data: { confirmed: true }
+  });
+};
+
+
+

@@ -24,12 +24,15 @@ router.put('/reserve/product/admin/:id',authenticateToken,checkRole('ADMIN','SUP
 router.delete('/reserve/product/admin/:id',authenticateToken,checkRole('ADMIN','SUPERVISOR'), reserveController.deleteProductReserve);
 
 
+
 router.post('/reserve/experience',authenticateToken,checkRole('CLIENT'), reserveController.createExperienceReserveByUser);
 router.post('/reserve/experience/admin',authenticateToken,checkRole('ADMIN','SUPERVISOR'), reserveController.createExperienceReserve);
 router.put('/reserve/experience/admin/:id',authenticateToken,checkRole('ADMIN','SUPERVISOR'), reserveController.updateExperienceReserve);
 router.delete('/reserve/experience/:id',authenticateToken,checkRole('ADMIN','SUPERVISOR'), reserveController.deleteExperienceReserve);
 
 router.get('/bill/:id',authenticateToken,checkRole('CLIENT','ADMIN','SUPERVISOR'),reserveController.downloadReserveBill);
+
+router.post('/reserve/confirm',authenticateToken,checkRole('ADMIN','SUPERVISOR'), reserveController.confirmEntity);
 
 export default router;
 

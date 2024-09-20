@@ -5,6 +5,14 @@ import { ExperiencePublicDto } from './experience';
 import { PromotionDto } from './promotion';
 import { DiscountCodeDto } from './discountcode'; 
 
+export enum ReserveEntityType {
+  RESERVE = 'RESERVE',
+  TENT = 'TENT',
+  PRODUCT = 'PRODUCT',
+  EXPERIENCE = 'EXPERIENCE',
+  PROMOTION = 'PROMOTION',
+}
+
 export interface ReserveTentDto {
   id?:number;
   idTent:number;

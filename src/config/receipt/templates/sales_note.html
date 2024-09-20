@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Boleta de Venta Electrónica</title>
+	<title>{{title}}</title>
 	<style>
 		@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
 
@@ -161,6 +161,15 @@
 			border-bottom: 1px solid var(--primary-color);
 		}
 
+		th {
+			font-size: 12px;
+
+		}
+
+		td {
+			font-size: 11px;
+		}
+
 		table tr:first-child th:first-child {
 			border-top-left-radius: 12px;
 		}
@@ -298,10 +307,10 @@
 					</tr>
 				</thead>
 				<tbody>
-					{{promotions_items}}
-					{{tents_items}}
-					{{experiences_items}}
-					{{products_items}}
+					{{{promotions_items}}}
+					{{{tents_items}}}
+					{{{experiences_items}}}
+					{{{products_items}}}
 				</tbody>
 			</table>
 		</div>
