@@ -58,6 +58,9 @@ export const createUser = [
   body('phoneNumber').notEmpty().withMessage('validation.phoneNumberRequired'),
   body('email').isEmail().withMessage('validation.emailInvalid'),
   body('role').isIn(['SUPERVISOR','CLIENT']).withMessage('validation.roleInvalid'),
+  body('document_id').notEmpty().withMessage("validation.documentIdInvalid"),
+  body('document_type').notEmpty().withMessage("validation.documentTypeInvalid"),
+  body('nationality').notEmpty().withMessage("validation.nationalityRequired"),
   body('password')
     .isLength({ min: 8 }).withMessage('validation.passwordLength')
     .matches(/[a-zA-Z]/).withMessage('validation.passwordLetter')
@@ -95,6 +98,9 @@ export const updateUser = [
   body('phoneNumber').notEmpty().withMessage('validation.phoneNumberRequired'),
   body('email').isEmail().withMessage('validation.emailInvalid'),
   body('role').isIn(['SUPERVISOR','CLIENT']).withMessage('validation.roleInvalid'),
+  body('document_id').notEmpty().withMessage("validation.documentIdInvalid"),
+  body('document_type').notEmpty().withMessage("validation.documentTypeInvalid"),
+  body('nationality').notEmpty().withMessage("validation.nationalityRequired"),
   body('password')
     .optional()
     .isLength({ min: 8 }).withMessage('validation.passwordLength')

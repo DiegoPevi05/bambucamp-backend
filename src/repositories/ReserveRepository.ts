@@ -63,6 +63,56 @@ export const searchAvailableTents = async (dateFrom: Date, dateTo: Date): Promis
   return tents;
 };
 
+export const getCalendarDates = async (page: number): Promise<{ date: Date, label: string, available: boolean }[]> => {
+  const currentDate = new Date();
+  const targetDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + page);
+  const endOfMonth = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0);
+
+  const datesInMonth: { date: Date, label: string, available: boolean }[] = [];
+
+  // Fetch all active tents
+  const activeTents = await prisma.tent.findMany({
+    where: { status: "ACTIVE" },
+    select: { id: true },
+  });
+
+  const activeTentIds = activeTents.map(tent => tent.id);
+
+  // Loop through each day of the month
+  for (let day = 1; day <= endOfMonth.getDate(); day++) {
+    const date = new Date(targetDate.getFullYear(), targetDate.getMonth(), day);
+
+    // Skip past dates
+    if (date < currentDate) {
+      datesInMonth.push({ date, label: date.toDateString(), available: false });
+      continue;
+    }
+
+    // Fetch reservations for the specific date
+    const reservedTents = await prisma.reserveTent.findMany({
+      where: {
+        dateFrom: { lte: date },
+        dateTo: { gte: date },
+      },
+      select: { idTent: true },
+    });
+
+    const reservedTentIds = reservedTents.map(reserveTent => reserveTent.idTent);
+    
+    // Check if all active tents are reserved on this date
+    const allReserved = activeTentIds.every(tentId => reservedTentIds.includes(tentId));
+    const available = !allReserved;
+
+    datesInMonth.push({
+      date,
+      label: date.toDateString(),
+      available,
+    });
+  }
+
+  return datesInMonth;
+};
+
 export const getMyReservesByMonth = async (page: number, userId?: number): Promise<{ reserves: { id:number, external_id:string, dateFrom:Date, dateTo:Date }[] }> => {
   const currentDate = new Date();
 

@@ -96,6 +96,7 @@ export interface ReserveDto {
   experiences: ReserveExperienceDto[];
   promotions:ReservePromotionDto[];
   dateSale: Date;
+  eta?:Date|null;
   price_is_calculated: boolean;
   discount_code_id: number;
   discount_code_name:string;
@@ -110,6 +111,14 @@ export interface ReserveDto {
 
 export interface ReserveFormDto {
   userId: number;
+  user_email?:string,
+  user_firstname?:string;
+  user_lastname?:string;
+  user_phone_number?:string;
+  user_document_type?:string;
+  user_document_id?:string;
+  user_nationality?:string;
+  eta?:Date;
   external_id:string;
   tents: ReserveTentDto[];
   products: ReserveProductDto[];

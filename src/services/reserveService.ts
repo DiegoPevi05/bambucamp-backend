@@ -4,9 +4,10 @@ import * as promotionRepository from '../repositories/PromotionRepository';
 import *  as userRepository from '../repositories/userRepository';
 import * as productService from './productService';
 import * as experienceService from './experienceService';
+import * as authService from './authService';
 import * as utils from '../lib/utils';
 import { BadRequestError, NotFoundError, UnauthorizedError } from "../middleware/errors";
-import {sendReservationEmail} from '../config/email/mail';
+import {sendNewReservationEmailUser} from '../config/email/mail';
 import { PaymentStatus, Reserve, ReserveStatus, Role, User} from '@prisma/client';
 import { calculatePrice } from '../lib/utils';
 import {PublicTent} from '../dto/tent';
@@ -15,6 +16,10 @@ import {generateSalesNote} from '../config/receipt/pdf';
 interface Pagination {
   page: number;
   pageSize: number;
+}
+
+export const getCalendarDates = async(page:number) => {
+  return await reserveRepository.getCalendarDates(page);
 }
 
 export const searchAvailableTents = async (dateFromInput:string,dateToInput:string) => {
@@ -38,11 +43,11 @@ export const searchAvailableTents = async (dateFromInput:string,dateToInput:stri
 };
 
 export const getAllMyReservesCalendarUser = async(page:number,userId:number) => {
-  return reserveRepository.getMyReservesByMonth(page,userId);
+  return await reserveRepository.getMyReservesByMonth(page,userId);
 }
 
 export const getAllMyReservesCalendar = async(page:number,userId?:number) => {
-  return reserveRepository.getMyReservesByMonth(page,userId);
+  return await reserveRepository.getMyReservesByMonth(page,userId);
 }
 
 export const getAllMyReservesUser = async (pagination: Pagination, userId: number) => {
@@ -99,14 +104,18 @@ export const getReserveById = async (id: number) => {
   return await reserveRepository.getReserveById(id);
 };
 
-export const createReserveByUser = async (data: ReserveFormDto, user: User, language:string) => {
-  data.userId = user.id;
+export const createReserveByUser = async (data: ReserveFormDto, language:string) => {
+
   data.price_is_calculated = true;
   data.payment_status = PaymentStatus.UNPAID;
   data.reserve_status = ReserveStatus.NOT_CONFIRMED; 
   const reserve = await createReserve(data);
-  if(reserve == null) throw new BadRequestError("error.failedToCreateReserve")
-  await sendReservationEmail({ email:user.email, firstName:user.firstName}, reserve, language );
+
+  if(reserve == null){
+    throw new BadRequestError("error.failedToCreateReserve")
+  }
+
+  await sendNewReservationEmailUser({ email:data.user_email ?? "", firstName:data.user_firstname ?? ""}, language );
 };
 
 
@@ -114,6 +123,7 @@ export const createReserve = async (data: ReserveFormDto):Promise<ReserveDto|nul
 
   let reserveDto:ReserveDto = {
     userId:0,
+    eta: new Date(),
     external_id:"",
     dateSale: new Date(),
     tents:[],
@@ -132,7 +142,13 @@ export const createReserve = async (data: ReserveFormDto):Promise<ReserveDto|nul
     reserve_status:ReserveStatus.CONFIRMED,
   };
 
-  reserveDto.userId           = Number(data.userId);
+
+  let user = await authService.createReserveUser(data);
+
+  reserveDto.userId           = user.id;
+  reserveDto.eta              = data.eta;
+
+
   reserveDto.tents            = utils.normalizeTimesInTents(data.tents);
   reserveDto.experiences      = utils.normalizeTimesInExperience(data.experiences);
   reserveDto.products         = data.products;
@@ -259,7 +275,9 @@ export const updateReserve = async (id:number, data: ReserveFormDto) => {
     reserve.userId = user.id;
   }
 
-
+  if(data.eta && reserve.eta != data.eta){
+    reserve.eta         = new Date(data.eta);
+  }
 
   if(data.reserve_status && reserve.reserve_status != data.reserve_status){
     reserve.reserve_status = data.reserve_status;
@@ -469,10 +487,6 @@ export const deleteProductReserve = async (id: number) => {
   return await reserveRepository.deleteProductReserve(id);
 };
 
-export const updateConfirmStatusProductReserve = async (id: number, confirmed:boolean) => {
-  return await reserveRepository.updateProductReserve(id,confirmed);
-};
-
 export const AddExperienceReserveByUser = async(userId: number, data: createReserveExperienceDto[]) => {
 
   // Assume all data objects belong to the same reserve
@@ -533,10 +547,6 @@ export const deleteExperienceReserve = async (id: number) => {
   return await reserveRepository.deleteExperienceReserve(id);
 };
 
-export const updateConfirmStatusExperienceReserve = async (id: number, confirmed:boolean) => {
-  return await reserveRepository.updateExperienceReserve(id,confirmed);
-};
-
 export const downloadReserveBill = async(reserveId:number, user:User|undefined , t: (key: string) => string):Promise<Buffer> => {
 
   if(!user) throw new UnauthorizedError('error.unauthorized');
@@ -564,11 +574,15 @@ export const downloadReserveBill = async(reserveId:number, user:User|undefined ,
 }
 
 
-export const confirmEntity = async (entityType: ReserveEntityType, reserveId: number, entityId?: number ) => {
+export const confirmEntity = async (entityType: ReserveEntityType, reserveId: number, language:string, entityId?: number ) => {
+
+
 
   switch (entityType) {
     case ReserveEntityType.RESERVE:
-      // Confirm entire reserve
+
+      await authService.confirmReservation(reserveId,language);
+
       return await reserveRepository.confirmReserve(reserveId);
 
     case ReserveEntityType.TENT:

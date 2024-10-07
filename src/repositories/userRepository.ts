@@ -1,5 +1,5 @@
 import { PrismaClient, User } from '@prisma/client';
-import {  UserFilters, PaginatedUsers, UserDto } from '../dto/user';
+import {  UserFilters, PaginatedUsers, UserDto,UserFormDto } from '../dto/user';
 
 const prisma = new PrismaClient();
 
@@ -50,6 +50,9 @@ export const getAllUsers = async (filters: UserFilters, pagination: Pagination):
       lastLogin: true,
       lastPasswordChanged: true,
       emailVerified: true,
+      document_id:true,
+      document_type:true,
+      nationality:true,
       createdAt: true,
       updatedAt: true
     }
@@ -90,6 +93,13 @@ export const createUser = async (data: UserDto): Promise<User> => {
   });
 };
 
+export const createClientUser = async(data:UserFormDto):Promise<User> => {
+  return await prisma.user.create({
+    data
+  })
+}
+
+
 export const updateUser = async(userId:Number,data:UserDto):Promise<User> => {
   return await prisma.user.update({
     where:{ id : Number(userId) },
@@ -120,6 +130,13 @@ export const updatePasswordResetToken = async (email: string, token: string): Pr
 export const updatePassword = async (email: string, hashedPassword:string, token:string): Promise<User> => {
   return await prisma.user.update({
     where: { email:email, passwordResetCode:token  },
+    data: { password: hashedPassword }
+  });
+};
+
+export const updatePasswordWithoutToken = async (email: string, hashedPassword:string): Promise<User> => {
+  return await prisma.user.update({
+    where: { email:email  },
     data: { password: hashedPassword }
   });
 };

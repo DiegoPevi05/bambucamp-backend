@@ -21,6 +21,9 @@ model User {
   firstName                   String
   lastName                    String
   phoneNumber                 String
+  document_type               String   @default("DNI")
+  document_id                 String   @default("null")
+  nationality                 String   @default("null")
   isDisabled                  Boolean  @default(false)
   lastLogin                   DateTime?
   lastPasswordChanged         DateTime?
@@ -191,6 +194,7 @@ model Reserve {
   products              ReserveProduct[] 
   experiences           ReserveExperience[]
   promotions            ReservePromotion[]
+  eta                   DateTime?         
   dateSale              DateTime          @default(now())
   price_is_calculated   Boolean           @default(false)
   discount_code_id      Int               @default(0)         

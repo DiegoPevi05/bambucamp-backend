@@ -156,17 +156,39 @@ export const generateResetPasswordTemplate = (name:string , code:string, languag
   return emailTemplate;
 }
 
+export const generateNewReservationTemplateUser = (firstName:string, language:string):string => {
+  const { header, footer } = generateTemplate(language);
 
-export const generateReservationTemplate = (reserve:ReserveDto,language:string) => {
+  const templatePath = path.join(__dirname, `templates/new-reserve.html`);
+  let emailTemplate = fs.readFileSync(templatePath, 'utf8');
+  emailTemplate = emailTemplate.replace('{{title}}', language == "es" ? "Gracias por realizar tu reserva" : "Thanks for your reservation" );
+  emailTemplate = emailTemplate.replace('{{greeting_message}}', language == "es" ? `Hola ${firstName}, tu reserva se encuentra en proceso, sigue los siguientes pasos para confirmar tu reserva.` : `Hi ${firstName}, your reservation is in process, folow the indications to confirm your reservation.` );
+  emailTemplate = emailTemplate.replace('{{indications}}', language == "es" ? "Por favor, realiza el pago del 50% en cualquiera de las siguientes cuentas, una vez realizado el pago enviar el comprobante de pago mediante whatsapp a +51 120-000-000: " : "Please make a 50% payment to one of the following accounts, once the payment is made send the payment receipt through whatsapp to +51 120-000-000: " );
+  emailTemplate = emailTemplate.replace('{{indication_1}}',"BBVA 1-00-0000-00000-0 o BCP 1-00-000-0000-00000.");
+  emailTemplate = emailTemplate.replace('{{indication_2}}', language == "es" ? "Yape +51 120-200-400" : "Plin +51 120-200-200" );
+  // Inject header and footer into content
+  emailTemplate = emailTemplate.replace('{{header_email}}', header).replace('{{footer_email}}', footer);
+
+  return emailTemplate;
+};
+
+export const generateNewReservationTemplateAdmin = (name:string, email:string, reserve:ReserveDto, language:string):string => {
+
+  return "text";
+};
+
+
+export const generateReservationTemplate = (title:string, greeting_message_1:string, greeting_message_2:string,greeting_message_3:string,reserve:ReserveDto,language:string):string => {
 
   const { header, footer } = generateTemplate(language);
 
   const templatePath = path.join(__dirname, `templates/reservation.html`);
   let emailTemplate = fs.readFileSync(templatePath, 'utf8');
 
-  emailTemplate = emailTemplate.replace('{{title}}', language == "es" ? "Gracias por tu confianza" : "Restoration of Account" );
-  emailTemplate = emailTemplate.replace('{{greeting_message_1}}', language == "es" ? "Esperamos disfrutes tu reserva." : "Hi" );
-  emailTemplate = emailTemplate.replace('{{greeting_message_2}}', language == "es" ? "Aqui estan los detalles de tu reserva." : "Here’s your restoration password code" );
+  emailTemplate = emailTemplate.replace('{{title}}', title);
+  emailTemplate = emailTemplate.replace('{{greeting_message_1}}', greeting_message_1);
+  emailTemplate = emailTemplate.replace('{{greeting_message_2}}', greeting_message_2);
+  emailTemplate = emailTemplate.replace('{{greeting_message_3}}', greeting_message_3);
 
   emailTemplate = emailTemplate.replace('{{reserve_label}}', language == "es" ? "RESERVA" : "RESERVE" );
   emailTemplate = emailTemplate.replace('{{experiences_label}}', language == "es" ? "Experiencias" : "Experiencies" );
@@ -304,3 +326,5 @@ export const generateReservationTemplate = (reserve:ReserveDto,language:string) 
   return emailTemplate;
 
 }
+
+

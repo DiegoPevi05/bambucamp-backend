@@ -11,6 +11,9 @@ export const signUp = [
   body('lastName').notEmpty().withMessage("validation.lastNameRequired"),
   body('phoneNumber').notEmpty().withMessage("validation.phoneNumberRequired"),
   body('email').isEmail().withMessage("validation.emailInvalid"),
+  body('document_id').notEmpty().withMessage("validation.documentIdInvalid"),
+  body('document_type').notEmpty().withMessage("validation.documentTypeInvalid"),
+  body('nationality').notEmpty().withMessage("validation.nationalityRequired"),
   body('password')
     .isLength({ min: 8 }).withMessage("validation.passwordLength")
     .matches(/[a-zA-Z]/).withMessage('validation.passwordLetter')

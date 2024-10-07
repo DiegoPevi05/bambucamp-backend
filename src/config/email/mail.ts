@@ -1,6 +1,6 @@
 import nodemailer, { TransportOptions } from 'nodemailer';
 import {ReserveDto} from '../../dto/reserve';
-import { generateContactFormTemplateUser,generateContactFormTemplateAdmin, generateVerificationLinkTemplate, generateResetPasswordTemplate, generateReservationTemplate  } from './helper';
+import { generateContactFormTemplateUser,generateContactFormTemplateAdmin, generateVerificationLinkTemplate, generateResetPasswordTemplate, generateReservationTemplate, generateNewReservationTemplateUser  } from './helper';
 
 // Load SMTP configuration from environment variables
 const CLIENT_HOSTNAME =  process.env.CLIENT_HOSTNAME || 'http://localhost:5174';
@@ -96,20 +96,52 @@ const sendPasswordResetEmail = async (user: { email: string; firstName: string }
   await sendEmail(email, language === 'en' ? 'Reset Your Password' : 'Recuperar contraseña', emailTemplate);
 };
 
-const sendReservationEmail = async(user: { email:string, firstName:string }, reserve:ReserveDto, language:string  ) => {
+const sendNewReservationEmailUser = async(user: { email:string, firstName:string}, language:string  ) => {
 
-  const { email } = user;
+  const { email, firstName } = user;
   const chosenLanguage = language === 'es' ? 'es' : 'en'; 
 
-  let emailTemplate = generateReservationTemplate(reserve,chosenLanguage);
+  let emailTemplate = generateNewReservationTemplateUser(firstName ,chosenLanguage);
+
+  await sendEmail(email, language === 'en' ? 'Thanks for your reserve' : 'Gracias por realizar tu reserva', emailTemplate);
+}
+
+const sendNewReservationEmailAdmin = async(user: { email:string, firstName:string }, reserve:ReserveDto, language:string  ) => {
+
+  const { email, firstName } = user;
+  const chosenLanguage = language === 'es' ? 'es' : 'en'; 
+
+  let title = language == "es" ? "Nueva Reserva" : "New Reserve"
+  let greeting_message_1  = language == "es" ? `El usuario ${firstName}, con correo ${email} ha realizado una reserva, puedes confirmarla en el panel de administrador` : `User ${firstName}, with email ${email} has made a new reservation, you can confirm it in the admin panel` ;
+  let greeting_message_2  = language == "es" ? "Aqui estan los detalles de la reserva." : "Here’s their reservation details"  
+
+  let emailTemplate = generateReservationTemplate(title,greeting_message_1,greeting_message_2,"", reserve,chosenLanguage);
+
+  await sendEmail(ADMIN_EMAIL, language === 'en' ? 'New Reservation' : 'Nueva reserva', emailTemplate);
+}
+
+const sendConfirmationReservationEmail = async(user: { email:string, firstName:string, password:string }, reserve:ReserveDto, language:string  ) => {
+  const { email, password } = user;
+  const chosenLanguage = language === 'es' ? 'es' : 'en'; 
+  let title = language == "es" ? "Gracias por tu confianza" : "Restoration of Account"
+  let greeting_message_1  = language == "es" ? "Esperamos disfrutes tu reserva." : "Hope you enjoy your reservation " ;
+  let greeting_message_2  = language == "es" ? "Aqui estan los detalles de tu reserva." : "Here’s your reservation details"  
+
+  const admin_panel_link = `${CLIENT_HOSTNAME}/dashboard`;
+  let greeting_message_3  = language == "es" ? `Puedes ingresar al panel para hacer seguimiento de tu reserva con el siguiente  <a href="${admin_panel_link} target="_blank"> enlace</a>, tu contraseña de cliente es ${password}, el usuario para ingresar es el correo con el que has hecho la reserva.` : `You can access to the dashboard to do the follow up of your reservation in the following link  <a href="${admin_panel_link} target="_blank"> link</a>, your client password is ${password}, the user to log in the emaila address wich you made the reserve.`;  
+
+  let emailTemplate = generateReservationTemplate(title,greeting_message_1,greeting_message_2,greeting_message_3, reserve,chosenLanguage);
 
   await sendEmail(email, language === 'en' ? 'Reservation confirmed' : 'Reservacion confirmada', emailTemplate);
 }
+
 
 export {
   sendContactFormConfirmation,
   sendContactFormAdmin,
   sendVerificationEmail,
   sendPasswordResetEmail,
-  sendReservationEmail
+  sendNewReservationEmailUser,
+  sendNewReservationEmailAdmin,
+  sendConfirmationReservationEmail
 };

@@ -6,6 +6,29 @@ import {PaymentStatus} from '@prisma/client';
 import {formatStrToDate} from '../lib/utils';
 import {ReserveEntityType} from '../dto/reserve';
 
+export const getCalendarDates = async (req: Request, res: Response) => {
+    try {
+      const { page = '0' } = req.query;
+
+      if (!req.user) {
+        return res.status(401).json({ error: req.t('error.unauthorized') });
+      };
+
+      const pageParsed = parseInt(page as string, 10);
+
+      const PaginatedReserves = await reserveService.getCalendarDates(pageParsed);
+
+      res.json(PaginatedReserves);
+
+    } catch (error) {
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: req.t('error.failedToFetchReserves') });
+      }
+    }
+}
+
 export const getAllPublicTentsForReservation = [
     query('dateFrom').notEmpty().withMessage('validation.dateFromRequired'),
     query('dateTo').notEmpty().withMessage('validation.dateToRequired'),
@@ -217,6 +240,14 @@ export const createReserveByUser = [
   body('products').isArray().withMessage('validation.productsMustBeArray'),
   body('experiences').isArray().withMessage('validation.experiencesMustBeArray'),
   body('promotions').isArray().withMessage('validation.promotionsMustBeArray'),
+  body('user_firstname').notEmpty().withMessage('validation.nameRequired'),
+  body('user_lastname').notEmpty().withMessage('validation.lastNameRequired'),
+  body('user_phone_number').notEmpty().withMessage('validation.phoneNumberRequired'),
+  body('user_document_type').notEmpty().withMessage('validation.documentTypeRequired'),
+  body('user_document_id').notEmpty().withMessage('validation.documentIdRequired'),
+  body('user_nationality').notEmpty().withMessage('validation.nationalityRequired'),
+  body('user_eta').notEmpty().withMessage('validation.etaRequired'),
+  body('user_email').isEmail().withMessage('validation.emailInvalid'),
 
   async (req: Request, res: Response) => {
 
@@ -231,15 +262,11 @@ export const createReserveByUser = [
     }
 
     try {
-      if (!req.user) {
-        return res.status(401).json({ error: req.t('error.unauthorized') });
-      };
 
       const language = req.language || 'en';
-      await reserveService.createReserveByUser(req.body, req.user, language);
+      await reserveService.createReserveByUser(req.body, language);
       res.status(201).json({ message: req.t('message.reserveCreatedByUser') });
     } catch (error) {
-      console.log(error);
       if (error instanceof CustomError) {
         res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
@@ -250,11 +277,18 @@ export const createReserveByUser = [
 ];
 
 export const createReserve = [
-  body('userId').notEmpty().withMessage('validation.userIdRequired'),
   body('tents').isArray().withMessage('validation.tentsMustBeArray'),
   body('products').isArray().withMessage('validation.productsMustBeArray'),
   body('experiences').isArray().withMessage('validation.experiencesMustBeArray'),
   body('promotions').isArray().withMessage('validation.promotionsMustBeArray'),
+  body('user_firstname').notEmpty().withMessage('validation.nameRequired'),
+  body('user_lastname').notEmpty().withMessage('validation.lastNameRequired'),
+  body('user_phone_number').notEmpty().withMessage('validation.phoneNumberRequired'),
+  body('user_document_type').notEmpty().withMessage('validation.documentTypeRequired'),
+  body('user_document_id').notEmpty().withMessage('validation.documentIdRequired'),
+  body('user_nationality').notEmpty().withMessage('validation.nationalityRequired'),
+  body('user_eta').notEmpty().withMessage('validation.etaRequired'),
+  body('user_email').isEmail().withMessage('validation.emailInvalid'),
 
   async (req: Request, res: Response) => {
 
@@ -416,34 +450,6 @@ export const deleteProductReserve = [
   }
 ];
 
-export const updateProductReserve = [
-  param('id').notEmpty().withMessage("validation.idRequired"),
-  body('confirmed').notEmpty().withMessage("validation.confirmedRequired"),
-
-  async (req: Request, res: Response) => {
-
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const localizedErrors = errors.array().map((error) => ({
-        ...error,
-        msg: req.t(error.msg)
-      }));
-
-      return res.status(400).json({ error: localizedErrors });
-    }
-
-    try {
-      await reserveService.updateConfirmStatusProductReserve(Number(req.params.id),req.body.confirmed);
-      res.status(201).json({ message: req.t('message.productReserveStatusUpdated') });
-    } catch (error) {
-      if (error instanceof CustomError) {
-        res.status(error.statusCode).json({ error: req.t(error.message) });
-      } else {
-        res.status(500).json({ error: req.t('error.failedToUpdateProductReserveStatus') });
-      }
-    }
-  }
-];
 
 export const createExperienceReserveByUser = [
   body('experiences').isArray().withMessage('validation.experiencesMustBeArray'),
@@ -530,35 +536,6 @@ export const deleteExperienceReserve = [
         res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
         res.status(500).json({ error: req.t('error.failedToDeleteExperienceReserve') });
-      }
-    }
-  }
-];
-
-export const updateExperienceReserve = [
-  param('id').notEmpty().withMessage("validation.idRequired"),
-  body('confirmed').notEmpty().withMessage("validation.confirmedRequired"),
-
-  async (req: Request, res: Response) => {
-
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const localizedErrors = errors.array().map((error) => ({
-        ...error,
-        msg: req.t(error.msg)
-      }));
-
-      return res.status(400).json({ error: localizedErrors });
-    }
-
-    try {
-      await reserveService.updateConfirmStatusExperienceReserve(Number(req.params.id),req.body.confirmed);
-      res.status(201).json({ message: req.t('message.experienceReserveStatusUpdated') });
-    } catch (error) {
-      if (error instanceof CustomError) {
-        res.status(error.statusCode).json({ error: req.t(error.message) });
-      } else {
-        res.status(500).json({ error: req.t('error.failedToUpdateExperienceReserveStatus') });
       }
     }
   }

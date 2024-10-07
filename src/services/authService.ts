@@ -1,10 +1,15 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import * as userRepository from '../repositories/userRepository';
+import * as reserveRepository from '../repositories/ReserveRepository';
+import * as utils from '../lib/utils';
 import { UserDto} from '../dto/user';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../config/email/mail';
 import { randomUUID } from 'crypto';
 import {BadRequestError, NotFoundError} from '../middleware/errors';
+import {ReserveFormDto} from '../dto/reserve';
+import {Role, User} from '@prisma/client';
+import {sendNewReservationEmailAdmin, sendConfirmationReservationEmail} from '../config/email/mail';
 
 
 const JWT_SECRET = process.env.JWT_SECRET || 'default_secret';
@@ -145,7 +150,65 @@ export const signIn = async (email: string, password: string) => {
       lastName: user.lastName,
       phoneNumber: user.phoneNumber,
       email: user.email,
-      role: user.role
+      role: user.role,
+      nationality: user.nationality,
+      document_id: user.document_id,
+      document_type:user.document_type
     } 
   };
 };
+
+/*************************CREATE RESERVE USER FUNCTION************************************/
+
+export const createReserveUser = async(data: ReserveFormDto):Promise<User> => {
+
+  const userExistant = await userRepository.getUserByEmail(data.user_email ? data.user_email.toLowerCase() : "");
+  if(!userExistant){
+
+    return await userRepository.createClientUser(
+      { 
+        role: Role.CLIENT, 
+        document_type:data.user_document_type ?? "",
+        document_id:data.user_document_id ?? "",
+        nationality: data.user_nationality ?? "",
+        firstName: data.user_firstname ?? "" ,
+        lastName:data.user_lastname ?? "",
+        phoneNumber: data.user_phone_number ?? "",
+        email: data.user_email ?? "",  
+        password: randomUUID().slice(0, 6),
+        isDisabled:false,
+        emailVerified:false
+      }
+    );
+  }
+  
+  return userExistant;
+}
+
+/*************************VERIFY USER AND NOTIFY USER ************************************/
+export const confirmReservation = async(reserveId:number, language:string) => {
+
+    const reserve = await reserveRepository.getReserveDtoById(reserveId);
+
+    if (!reserve) {
+      throw new NotFoundError('error.noReservefoundInDB');
+    }
+
+    const user = await userRepository.getUserById(reserve.userId);
+
+    if(!user){
+      throw new NotFoundError('error.noUserFoundInDB')
+    }
+
+    const password  = utils.generateRandomPassword();
+    const hashedPassword = await bcrypt.hash(user.password,10);
+
+    if (!user.emailVerified) {
+      await userRepository.updateEmailVerified(user.email);
+      await userRepository.updatePasswordWithoutToken(user.email.toLowerCase(), hashedPassword);
+    }
+    // Confirm entire reserve
+    await sendNewReservationEmailAdmin({ email:user.email, firstName:user.firstName}, reserve ,language );
+    await sendConfirmationReservationEmail({ email:user.email, firstName:user.firstName, password}, reserve, language)
+}
+

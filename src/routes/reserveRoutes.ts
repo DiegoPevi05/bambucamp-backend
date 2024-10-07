@@ -4,6 +4,8 @@ import { authenticateToken, checkRole } from '../middleware/auth';
 const router = express.Router();
 
 
+router.get('/calendar',reserveController.getCalendarDates);
+
 router.get('/tents',reserveController.getAllPublicTentsForReservation);
 router.get('/me',authenticateToken,checkRole('CLIENT'),reserveController.getAllMyReservesUser);
 router.get('/me/calendar',authenticateToken,checkRole('CLIENT'),reserveController.getAllMyReservesCalendarUser);
@@ -13,21 +15,19 @@ router.get('/me/admin/calendar',authenticateToken,checkRole('ADMIN','SUPERVISOR'
 
 router.get('/',authenticateToken,checkRole('ADMIN','SUPERVISOR'),reserveController.getAllReserves);
 router.get('/options',authenticateToken,checkRole('ADMIN','SUPERVISOR'),reserveController.getAllReserveOptions);
-router.post('/reserve',authenticateToken,checkRole('CLIENT'), reserveController.createReserveByUser);
+router.post('/reserve', reserveController.createReserveByUser);
 router.post('/',authenticateToken,checkRole('ADMIN','SUPERVISOR'), reserveController.createReserve);
 router.put('/:id',authenticateToken,checkRole('ADMIN','SUPERVISOR'), reserveController.updateReserve);
 router.delete('/:id',authenticateToken,checkRole('ADMIN','SUPERVISOR'), reserveController.deleteReserve);
 
 router.post('/reserve/product',authenticateToken,checkRole('CLIENT'), reserveController.createProductReserveByUser);
 router.post('/reserve/product/admin',authenticateToken,checkRole('ADMIN','SUPERVISOR'), reserveController.createProductReserve);
-router.put('/reserve/product/admin/:id',authenticateToken,checkRole('ADMIN','SUPERVISOR'), reserveController.updateProductReserve);
 router.delete('/reserve/product/admin/:id',authenticateToken,checkRole('ADMIN','SUPERVISOR'), reserveController.deleteProductReserve);
 
 
 
 router.post('/reserve/experience',authenticateToken,checkRole('CLIENT'), reserveController.createExperienceReserveByUser);
 router.post('/reserve/experience/admin',authenticateToken,checkRole('ADMIN','SUPERVISOR'), reserveController.createExperienceReserve);
-router.put('/reserve/experience/admin/:id',authenticateToken,checkRole('ADMIN','SUPERVISOR'), reserveController.updateExperienceReserve);
 router.delete('/reserve/experience/:id',authenticateToken,checkRole('ADMIN','SUPERVISOR'), reserveController.deleteExperienceReserve);
 
 router.get('/bill/:id',authenticateToken,checkRole('CLIENT','ADMIN','SUPERVISOR'),reserveController.downloadReserveBill);

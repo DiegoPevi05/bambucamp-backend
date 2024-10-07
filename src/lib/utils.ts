@@ -654,5 +654,30 @@ export const getRangeDatesForReserve = (reserve:ReserveDto) => {
     return dateRanges;
 };
 
+export  const  generateRandomPassword = () => {
+  const length = 8;
+  const charset = {
+    letters: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+    numbers: '0123456789',
+    specials: '!@#$%^&*()_+~`|}{[]:;?><,./-=',
+  };
+
+  let password = '';
+  
+  // Ensure at least one character from each required set
+  password += charset.letters.charAt(Math.floor(Math.random() * charset.letters.length));
+  password += charset.numbers.charAt(Math.floor(Math.random() * charset.numbers.length));
+  password += charset.specials.charAt(Math.floor(Math.random() * charset.specials.length));
+  
+  // Fill the rest of the password length with random characters from all sets combined
+  const allChars = charset.letters + charset.numbers + charset.specials;
+  for (let i = password.length; i < length; i++) {
+    password += allChars.charAt(Math.floor(Math.random() * allChars.length));
+  }
+  
+  // Shuffle password to prevent predictable patterns
+  return password.split('').sort(() => Math.random() - 0.5).join('');
+}
+
 
 
