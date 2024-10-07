@@ -1,0 +1,283 @@
+{{header_email}}
+<tr>
+	<td class="email-container-content-message" align="left">
+		<table width="100%" cellspacing="0" cellpadding="0">
+			<tbody>
+				<tr>
+					<td class="email-container-content-frame-message">
+						<table width="100%" cellspacing="0" cellpadding="0">
+							<tbody>
+								<tr>
+									<td align="center" class="email-container-content-message-header">
+										<h1>{{title}}</h1>
+									</td>
+								</tr>
+								<tr>
+									<td align="center" class="email-container-content-message-padding-body">
+										<table border="0" width="30%" height="100%" cellpadding="0" cellspacing="0"
+											style="display: inline-table; width: 30% !important;">
+											<tbody>
+												<tr>
+													<td class="email-container-content-message-divider">
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</td>
+								</tr>
+								<tr>
+									<td class="email-container-content-message-body">
+										<p>{{greeting_message_1}}<br>{{greeting_message_2}}
+										</p>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+
+<table cellpadding="0" cellspacing="0" align="center">
+	<tbody>
+		<tr>
+			<td align="center">
+				<table bgcolor="#ffffff" align="center" cellpadding="0" cellspacing="0" width="600">
+					<tbody>
+						<tr>
+							<td class="block-spacer-structure-padding">
+								<table cellpadding="0" cellspacing="0" width="100%">
+									<tbody>
+										<tr>
+											<td class="block-spacer-structure-frame">
+												<table cellpadding="0" cellspacing="0" width="100%">
+													<tbody>
+														<tr>
+															<td class="block-spacer"></td>
+														</tr>
+													</tbody>
+												</table>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<table cellpadding="0" cellspacing="0" class="email-reserve-content">
+	<tbody>
+		<tr>
+			<td class="email-reserve-line">
+				<table class="email-reserve-header-body" cellpadding="0" cellspacing="0">
+					<tbody>
+						<tr>
+							<td class="email-reserve-header-structure">
+								<table cellpadding="0" cellspacing="0" width="100%">
+									<tbody>
+										<tr>
+											<td class="email-reserve-header-frame">
+												<table cellpadding="0" cellspacing="0" width="100%">
+													<tbody>
+														<tr>
+															<td class="email-reserve-header-text">
+																<h3><b>{{RESERVA}} {{idReserve}}</b></h3>
+															</td>
+														</tr>
+														<tr>
+															<td class="email-reserve-header-block-spacer">
+																<table class="email-reserve-block-table-spacer" cellpadding="0" cellspacing="0">
+																	<tbody>
+																		<tr>
+																			<td class="email-reserve-block-td-spacer">
+																			</td>
+																		</tr>
+																	</tbody>
+																</table>
+															</td>
+														</tr>
+													</tbody>
+												</table>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</td>
+						</tr>
+						{{tents}}
+						<tr>
+							<td class="email-reserve-content-structure-experience">
+								<table cellpadding="0" cellspacing="0" class="email-reserve-content-experience">
+									<tbody>
+										<tr>
+											<td class="email-reserve-content-container-frame">
+												<table cellpadding="0" cellspacing="0" width="100%">
+													<tbody>
+														<tr>
+															<td class="email-reserve-content-experience-header">
+																<h3>{{experiences_label}}</h3>
+															</td>
+														</tr>
+														{{experiences}}
+													</tbody>
+												</table>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</td>
+						</tr>
+
+						<tr>
+							<td class="email-reserve-content-structure-product">
+								<table cellpadding="0" cellspacing="0" class="email-reserve-content-product">
+									<tbody>
+										<tr>
+											<td class="email-reserve-content-container-frame">
+												<table cellpadding="0" cellspacing="0" width="100%">
+													<tbody>
+														<tr>
+															<td class="email-reserve-content-product-header">
+																<h3>{{products_label}}</h3>
+															</td>
+														</tr>
+														{{products}}
+													</tbody>
+												</table>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td class="email-reserve-content-footer-structure">
+								<table cellpadding="0" cellspacing="0" class="email-reserve-content-column-left">
+									<tbody>
+										<tr>
+											<td class="email-reserve-content-frame-left">
+												<table cellpadding="0" cellspacing="0" width="100%">
+													<tbody>
+														<tr>
+															<td class="email-block-total-text">
+																<p>
+																	<strong></strong>{{subtotal_label}}<br>{{discount_label}}<strong><br>{{total_label}}</strong><br>
+																</p>
+															</td>
+														</tr>
+													</tbody>
+												</table>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+								<table cellpadding="0" cellspacing="0" class="email-reserve-content-column-right">
+									<tbody>
+										<tr>
+											<td class="email-reserve-content-frame-right">
+												<table cellpadding="0" cellspacing="0" width="100%">
+													<tbody>
+														<tr>
+															<td class="email-block-total-text">
+																<p>{{netImport}}<br>{{discounted}}<br><strong>{{grossImport}}</strong></p>
+															</td>
+														</tr>
+													</tbody>
+												</table>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+
+
+
+
+
+
+
+<table cellpadding="0" cellspacing="0" align="center">
+	<tbody>
+		<tr>
+			<td align="center">
+				<table bgcolor="#ffffff" align="center" cellpadding="0" cellspacing="0" width="600">
+					<tbody>
+						<tr>
+							<td class="block-spacer-structure-padding">
+								<table cellpadding="0" cellspacing="0" width="100%">
+									<tbody>
+										<tr>
+											<td class="block-spacer-structure-frame">
+												<table cellpadding="0" cellspacing="0" width="100%">
+													<tbody>
+														<tr>
+															<td class="block-spacer"></td>
+														</tr>
+													</tbody>
+												</table>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<table cellpadding="0" cellspacing="0" align="center">
+	<tbody>
+		<tr>
+			<td align="center">
+				<table bgcolor="#ffffff" align="center" cellpadding="0" cellspacing="0" width="600">
+					<tbody>
+						<tr>
+							<td class="block-spacer-structure-padding">
+								<table cellpadding="0" cellspacing="0" width="100%">
+									<tbody>
+										<tr>
+											<td class="block-spacer-structure-frame">
+												<table cellpadding="0" cellspacing="0" width="100%">
+													<tbody>
+														<tr>
+															<td class="block-spacer"></td>
+														</tr>
+													</tbody>
+												</table>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</td>
+		</tr>
+	</tbody>
+</table>
+{{footer_email}}

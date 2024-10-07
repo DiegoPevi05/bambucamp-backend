@@ -1,8 +1,6 @@
 import nodemailer, { TransportOptions } from 'nodemailer';
-import fs from 'fs';
-import path from 'path';
 import {ReserveDto} from '../../dto/reserve';
-import * as utils from '../../lib/utils';
+import { generateContactFormTemplateUser,generateContactFormTemplateAdmin, generateVerificationLinkTemplate, generateResetPasswordTemplate, generateReservationTemplate  } from './helper';
 
 // Load SMTP configuration from environment variables
 const CLIENT_HOSTNAME =  process.env.CLIENT_HOSTNAME || 'http://localhost:5174';
@@ -57,12 +55,8 @@ const sendEmail = async (to: string, subject: string, html: string) => {
 const sendContactFormConfirmation = async(props:{ email:string, name:string }, language:string) => {
   const { email, name } = props;
   const chosenLanguage = language === 'es' ? 'es' : 'en'; 
-  const templatePath = path.join(__dirname, `templates/contact-form-user-email-${chosenLanguage}.html`);
-  let emailTemplate = fs.readFileSync(templatePath, 'utf8');
 
-  emailTemplate = emailTemplate.replace('{{email}}', email);
-  emailTemplate = emailTemplate.replace('{{name}}', name);
-  emailTemplate = emailTemplate.replace('{{currentYear}}', new Date().getFullYear().toString());
+  let emailTemplate = generateContactFormTemplateUser(name,chosenLanguage);
 
   await sendEmail(email, language === 'en' ? 'Thanks for contact us' : 'Gracias por contactarnos', emailTemplate);
 
@@ -71,13 +65,8 @@ const sendContactFormConfirmation = async(props:{ email:string, name:string }, l
 const sendContactFormAdmin = async(props:{ email:string, name:string, message:string }, language:string) => {
   const { email, name, message } = props;
   const chosenLanguage = language === 'es' ? 'es' : 'en'; 
-  const templatePath = path.join(__dirname, `templates/contact-form-admin-email-${chosenLanguage}.html`);
-  let emailTemplate = fs.readFileSync(templatePath, 'utf8');
 
-  emailTemplate = emailTemplate.replace('{{email}}', email);
-  emailTemplate = emailTemplate.replace('{{name}}', name);
-  emailTemplate = emailTemplate.replace('{{message}}', message);
-  emailTemplate = emailTemplate.replace('{{currentYear}}', new Date().getFullYear().toString());
+  let emailTemplate = generateContactFormTemplateAdmin(name,email,message,chosenLanguage);
 
   await sendEmail(ADMIN_EMAIL , language === 'en' ? 'Someone wants to contact' : 'Alguien quiere contactarte', emailTemplate);
 
@@ -85,17 +74,13 @@ const sendContactFormAdmin = async(props:{ email:string, name:string, message:st
 
 // Function to send verification email
 const sendVerificationEmail = async (user: { email: string; firstName: string }, verificationCode: string, language:string) => {
+  const { email, firstName } = user;
   const verificationLink = `${CLIENT_HOSTNAME}/validated-account?email=${user.email}&code=${verificationCode}`;
   const chosenLanguage = language === 'es' ? 'es' : 'en'; 
-  const templatePath = path.join(__dirname, `templates/verification-email-${chosenLanguage}.html`);
-  let emailTemplate = fs.readFileSync(templatePath, 'utf8');
 
-  // Replace placeholders with actual values
-  emailTemplate = emailTemplate.replace('{{name}}', user.firstName);
-  emailTemplate = emailTemplate.replace('{{verificationLink}}', verificationLink);
-  emailTemplate = emailTemplate.replace('{{currentYear}}', new Date().getFullYear().toString());
+  let emailTemplate = generateVerificationLinkTemplate(firstName,verificationLink,chosenLanguage)
 
-  await sendEmail(user.email, language === 'en' ? 'Verify Your Email' : 'Validar Correo Electronico', emailTemplate);
+  await sendEmail(email, language === 'en' ? 'Verify Your Email' : 'Validar Correo Electronico', emailTemplate);
 };
 
 
@@ -103,149 +88,22 @@ const sendVerificationEmail = async (user: { email: string; firstName: string },
 // Function to send password reset email
 const sendPasswordResetEmail = async (user: { email: string; firstName: string }, resetCode: string, language:string) => {
 
+  const { email, firstName } = user;
   const chosenLanguage = language === 'es' ? 'es' : 'en'; 
 
-  const templatePath = path.join(__dirname, `templates/reset-password-${chosenLanguage}.html`);
-  let emailTemplate = fs.readFileSync(templatePath, 'utf8');
+  let emailTemplate = generateResetPasswordTemplate(firstName, resetCode, chosenLanguage);
 
-  // Replace placeholders with actual values
-  emailTemplate = emailTemplate.replace('{{name}}', user.firstName);
-  emailTemplate = emailTemplate.replace('{{code}}', resetCode);
-  emailTemplate = emailTemplate.replace('{{currentYear}}', new Date().getFullYear().toString());
-
-  await sendEmail(user.email, language === 'en' ? 'Reset Your Password' : 'Recuperar contraseña', emailTemplate);
+  await sendEmail(email, language === 'en' ? 'Reset Your Password' : 'Recuperar contraseña', emailTemplate);
 };
 
 const sendReservationEmail = async(user: { email:string, firstName:string }, reserve:ReserveDto, language:string  ) => {
 
+  const { email } = user;
   const chosenLanguage = language === 'es' ? 'es' : 'en'; 
-  const templatePath = path.join(__dirname, `templates/reservation-${chosenLanguage}.html`);
-  let emailTemplate = fs.readFileSync(templatePath, 'utf8');
 
-  let tentsHtml = '';
+  let emailTemplate = generateReservationTemplate(reserve,chosenLanguage);
 
-  reserve.tents.forEach(tent => {
-    const tentHtml = `
-                  <tr>
-                    <td class="email-reserve-content-structure">
-                      <table cellpadding="0" cellspacing="0" class="email-reserve-content-left">
-                        <tbody>
-                          <tr>
-                            <td class="email-reserve-content-structure-frame">
-                              <table cellpadding="0" cellspacing="0" width="100%">
-                                <tbody>
-                                  <tr>
-                                    <td align="center" class="email-reserve-block-image"
-                                      ><a target="_blank"
-                                        href="https://viewstripo.email"><img class="email-reserve-block-image-img"
-                                          src="https://tlr.stripocdn.email/content/guids/CABINET_66f950c6b738d24a0c0ae438e5a17e95/images/70881620388152279.jpg"
-                                          alt=${"image-reserve-"+tent.idTent}"image-reserve" ></a></td>
-                                  </tr>
-                                </tbody>
-                              </table>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                      <table cellpadding="0" cellspacing="0" class="email-reserve-content-right">
-                        <tbody>
-                          <tr>
-                            <td class="email-reserve-content-container-frame">
-                              <table cellpadding="0" cellspacing="0" width="100%">
-                                <tbody>
-                                  <tr>
-                                    <td class="email-reserve-content-header">
-                                      <h3>${tent.name}</h3>
-                                      <p class="email-reserve-content-paragraph">
-                                        <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Desde" : "From" }</span>:&nbsp;${utils.formatDate(tent.dateFrom)}&nbsp;<br>
-                                        <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Hasta" : "To" }</span>:&nbsp;${utils.formatDate(tent.dateTo)}&nbsp;<br>
-                                        <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Personas" : "People" }</span>:&nbsp;${tent.nights}&nbsp;<br>
-                                        <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Precio" : "Price" }</span>:&nbsp;${utils.formatPrice(tent.price)}/${chosenLanguage == "es" ? "por" : "per" }&nbsp;${chosenLanguage == "es" ? "noche" : "night" }<br>
-                                        <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Qty. noches" : "Qty. nights" }</span>:&nbsp;${tent.nights}<br>
-                                        <span class="email-reserve-content-label">&nbsp;${utils.formatPrice(tent.price)}&nbsp;x&nbsp;${tent.nights}&nbsp;${chosenLanguage == "es" ? "noches" : "nights" }</span><br>
-                                        <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Total" : "Total" }</span>:&nbsp;${utils.formatPrice(tent.price*tent.nights)}<br>
-                                      </p>
-                                    </td>
-                                  </tr>
-                                </tbody>
-                              </table>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </td>
-                  </tr>
-    `;
-    tentsHtml += tentHtml;
-  });
-
-  // Replace the placeholder in the template with the generated tents HTML
-  emailTemplate = emailTemplate.replace('{{tents}}', tentsHtml);
-
-  let experiencesHtml = '';
-
-  reserve.experiences.forEach(experience => {
-    const experienceHtml = `
-          <tr>
-            <td class="email-reserve-content-header">
-              <p class="email-reserve-content-experience-paragraph">
-                <span class="email-reserve-content-label">${experience.name}</span>&nbsp;
-              </p>
-              <p class="email-reserve-content-experience-paragraph">
-                  <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Dia" : "Day" }</span>:&nbsp;${utils.formatDateToYYYYMMDD(experience.day)}&nbsp;
-              </p>
-              <p class="email-reserve-content-experience-paragraph">
-                  <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Precio" : "price" }</span>:&nbsp;${utils.formatPrice(experience.price)}/${chosenLanguage == "es" ? "por" : "per" }&nbsp;${chosenLanguage == "es" ? "cantidad" : "quantity" }
-              </p>
-              <p class="email-reserve-content-experience-paragraph">
-                  <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Cantidad" : "Quantity" }</span>:&nbsp;${experience.quantity}&nbsp;
-              </p>
-              <p class="email-reserve-content-experience-paragraph">
-                  <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Total" : "Total" }</span>:&nbsp;${utils.formatPrice(experience.price * experience.quantity)}
-              </p>
-            </td>
-          </tr>
-    `;
-    experiencesHtml += experienceHtml;
-  });
-
-  // Replace the placeholder in the template with the generated tents HTML
-  emailTemplate = emailTemplate.replace('{{experiences}}', experiencesHtml);
-
-  let productsHtml = '';
-
-  reserve.products.forEach(product => {
-    const productHtml = `
-        <tr>
-          <td class="email-reserve-content-header">
-            <p class="email-reserve-content-product-paragraph">
-              <span class="email-reserve-content-label">${product.name}</span>&nbsp;
-            </p>
-            <p class="email-reserve-content-product-paragraph">
-              <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Precio" : "price" }</span>:&nbsp;${utils.formatPrice(product.price)}/${chosenLanguage == "es" ? "por" : "per" }&nbsp;${chosenLanguage == "es" ? "cantidad" : "quantity" }
-            </p>
-            <p class="email-reserve-content-product-paragraph">
-                <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Cantidad" : "Quantity" }</span>:&nbsp;${product.quantity}&nbsp;
-            </p>
-            <p class="email-reserve-content-product-paragraph">
-                <span class="email-reserve-content-label">${chosenLanguage == "es" ? "Total" : "Total" }</span>:&nbsp;${utils.formatPrice(product.quantity * product.price)}
-            </p>
-          </td>
-        </tr>
-    `;
-    productsHtml += productHtml;
-  });
-
-  emailTemplate = emailTemplate.replace('{{products}}', productsHtml);
-
-  // Replace the placeholder in the template with the generated tents HTML
-  emailTemplate = emailTemplate.replace('{{idReserve}}', "BAMBU-001");
-  emailTemplate = emailTemplate.replace('{{netImport}}', utils.formatPrice(reserve.net_import));
-  emailTemplate = emailTemplate.replace('{{discounted}}', reserve.discount.toString()+"%");
-  emailTemplate = emailTemplate.replace('{{grossImport}}', utils.formatPrice(reserve.gross_import));
-  emailTemplate = emailTemplate.replace('{{currentYear}}', new Date().getFullYear().toString());
-
-  await sendEmail(user.email, language === 'en' ? 'Reservation confirmed' : 'Reservacion confirmada', emailTemplate);
+  await sendEmail(email, language === 'en' ? 'Reservation confirmed' : 'Reservacion confirmada', emailTemplate);
 }
 
 export {

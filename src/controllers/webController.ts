@@ -26,6 +26,7 @@ export const contactForm = [
       await webService.contactForm(req.body, language);
       res.status(201).json({ message: req.t("message.messageSended") });
     } catch (error) {
+      console.log(error);
       if (error instanceof CustomError) {
         res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
