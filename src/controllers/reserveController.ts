@@ -10,10 +10,6 @@ export const getCalendarDates = async (req: Request, res: Response) => {
     try {
       const { page = '0' } = req.query;
 
-      if (!req.user) {
-        return res.status(401).json({ error: req.t('error.unauthorized') });
-      };
-
       const pageParsed = parseInt(page as string, 10);
 
       const PaginatedReserves = await reserveService.getCalendarDates(pageParsed);
