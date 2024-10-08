@@ -142,6 +142,7 @@ export const getAllMyReservesAdmin = async (req: Request, res: Response) => {
       res.json(PaginatedReserves);
 
     } catch (error) {
+      console.log(error);
       if (error instanceof CustomError) {
         res.status(error.statusCode).json({ error: error.message });
       } else {
@@ -556,8 +557,9 @@ export const confirmEntity = [
     try {
       const { entityType, reserveId, entityId } = req.body;
 
+      const language = req.language || 'en';
       // Call the confirmEntity function
-      await reserveService.confirmEntity(entityType, reserveId, entityId);
+      await reserveService.confirmEntity(entityType, reserveId,language, entityId);
 
       res.status(201).json({ message: req.t((entityType == ReserveEntityType.RESERVE ? 'message.reserveConfirmed' : 'message.entityConfirmed' ), { entityType }) });
     } catch (error) {

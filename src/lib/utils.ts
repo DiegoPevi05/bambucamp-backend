@@ -336,20 +336,20 @@ export const calculateReservePrice = (tents: { tent: Tent; nights: number, aditi
 export const parseImagesInReserves = (reserves: ReserveDto[]) => {
   reserves.forEach((reserve) => {
     reserve?.tents?.forEach((tent) => {
-      if (tent?.tentDB) {
-        tent.tentDB.images = JSON.parse(tent.tentDB.images ? tent.tentDB.images : '[]');
+      if (tent?.tentDB && typeof tent.tentDB.images === 'string') {
+        tent.tentDB.images = JSON.parse(tent.tentDB.images.replace(/\\\\/g, '\\\\') || '[]');
       }
     });
     
     reserve?.products?.forEach((product) => {
-      if (product?.productDB) {
-        product.productDB.images = JSON.parse(product.productDB.images ? product.productDB.images : '[]');
+      if (product?.productDB && typeof product.productDB.images === 'string') {
+        product.productDB.images = JSON.parse(product.productDB.images.replace(/\\\\/g, '\\\\') || '[]');
       }
     });
 
     reserve?.experiences?.forEach((experience) => {
-      if (experience?.experienceDB) {
-        experience.experienceDB.images = JSON.parse(experience.experienceDB.images ? experience.experienceDB.images : '[]');
+      if (experience?.experienceDB && typeof experience.experienceDB.images === 'string') {
+        experience.experienceDB.images = JSON.parse(experience.experienceDB.images.replace(/\\\\/g, '\\\\') || '[]');
       }
     });
   });

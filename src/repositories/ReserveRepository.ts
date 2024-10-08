@@ -503,6 +503,7 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
     canceled_status: data.canceled_status,
     payment_status: data.payment_status,
     reserve_status: data.reserve_status,
+    eta:data.eta,
     tents: {
       create: data.tents.map(tent => ({
         idTent: tent.idTent,

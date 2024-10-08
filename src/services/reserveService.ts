@@ -52,7 +52,7 @@ export const getAllMyReservesCalendar = async(page:number,userId?:number) => {
 
 export const getAllMyReservesUser = async (pagination: Pagination, userId: number) => {
   const MyReserves = await reserveRepository.getMyReserves(pagination, userId);
-  
+
   if (MyReserves?.reserves) {
     utils.parseImagesInReserves(MyReserves.reserves);
   }
@@ -115,9 +115,10 @@ export const createReserveByUser = async (data: ReserveFormDto, language:string)
     throw new BadRequestError("error.failedToCreateReserve")
   }
 
-  await sendNewReservationEmailUser({ email:data.user_email ?? "", firstName:data.user_firstname ?? ""}, language );
+  await sendNewReservationEmailUser({ email:data.user_email ?? "", firstName:data.user_firstname ?? ""},reserve, language );
 
   await sendNewReservationEmailAdmin({ email:data.user_email ?? "", firstName:data.user_firstname ?? ""}, reserve ,language );
+
 };
 
 
@@ -148,13 +149,14 @@ export const createReserve = async (data: ReserveFormDto):Promise<ReserveDto|nul
   let user = await authService.createReserveUser(data);
 
   reserveDto.userId           = user.id;
-  reserveDto.eta              = data.eta;
+
 
 
   reserveDto.tents            = utils.normalizeTimesInTents(data.tents);
   reserveDto.experiences      = utils.normalizeTimesInExperience(data.experiences);
   reserveDto.products         = data.products;
 
+  if(data.eta) reserveDto.eta = new Date(data.eta);
   if(data.reserve_status) reserveDto.reserve_status = data.reserve_status;
   if(data.payment_status) reserveDto.payment_status = data.payment_status;
   if(data.canceled_reason) reserveDto.canceled_reason = data.canceled_reason;

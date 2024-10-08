@@ -96,12 +96,12 @@ const sendPasswordResetEmail = async (user: { email: string; firstName: string }
   await sendEmail(email, language === 'en' ? 'Reset Your Password' : 'Recuperar contraseña', emailTemplate);
 };
 
-const sendNewReservationEmailUser = async(user: { email:string, firstName:string}, language:string  ) => {
+const sendNewReservationEmailUser = async(user: { email:string, firstName:string}, reserve:ReserveDto, language:string  ) => {
 
   const { email, firstName } = user;
   const chosenLanguage = language === 'es' ? 'es' : 'en'; 
 
-  let emailTemplate = generateNewReservationTemplateUser(firstName ,chosenLanguage);
+  let emailTemplate = generateNewReservationTemplateUser(firstName, reserve,chosenLanguage);
 
   await sendEmail(email, language === 'en' ? 'Thanks for your reserve' : 'Gracias por realizar tu reserva', emailTemplate);
 }
@@ -123,7 +123,7 @@ const sendNewReservationEmailAdmin = async(user: { email:string, firstName:strin
 const sendConfirmationReservationEmail = async(user: { email:string, firstName:string, password:string }, reserve:ReserveDto, language:string  ) => {
   const { email, password } = user;
   const chosenLanguage = language === 'es' ? 'es' : 'en'; 
-  let title = language == "es" ? "Gracias por tu confianza" : "Restoration of Account"
+  let title = language == "es" ? "Gracias por tu confianza" : "Thanks for your trust"
   let greeting_message_1  = language == "es" ? "Esperamos disfrutes tu reserva." : "Hope you enjoy your reservation " ;
   let greeting_message_2  = language == "es" ? "Aqui estan los detalles de tu reserva." : "Here’s your reservation details"  
 
