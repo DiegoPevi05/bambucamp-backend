@@ -163,18 +163,13 @@ export const generateNewReservationTemplateUser = (firstName:string, language:st
   let emailTemplate = fs.readFileSync(templatePath, 'utf8');
   emailTemplate = emailTemplate.replace('{{title}}', language == "es" ? "Gracias por realizar tu reserva" : "Thanks for your reservation" );
   emailTemplate = emailTemplate.replace('{{greeting_message}}', language == "es" ? `Hola ${firstName}, tu reserva se encuentra en proceso, sigue los siguientes pasos para confirmar tu reserva.` : `Hi ${firstName}, your reservation is in process, folow the indications to confirm your reservation.` );
-  emailTemplate = emailTemplate.replace('{{indications}}', language == "es" ? "Por favor, realiza el pago del 50% en cualquiera de las siguientes cuentas, una vez realizado el pago enviar el comprobante de pago mediante whatsapp a +51 120-000-000: " : "Please make a 50% payment to one of the following accounts, once the payment is made send the payment receipt through whatsapp to +51 120-000-000: " );
+  emailTemplate = emailTemplate.replace('{{indications_header}}', language == "es" ? "Por favor, realiza el pago del 50% en cualquiera de las siguientes cuentas, una vez realizado el pago enviar el comprobante de pago mediante whatsapp a +51 120-000-000: " : "Please make a 50% payment to one of the following accounts, once the payment is made send the payment receipt through whatsapp to +51 120-000-000: " );
   emailTemplate = emailTemplate.replace('{{indication_1}}',"BBVA 1-00-0000-00000-0 o BCP 1-00-000-0000-00000.");
   emailTemplate = emailTemplate.replace('{{indication_2}}', language == "es" ? "Yape +51 120-200-400" : "Plin +51 120-200-200" );
   // Inject header and footer into content
   emailTemplate = emailTemplate.replace('{{header_email}}', header).replace('{{footer_email}}', footer);
 
   return emailTemplate;
-};
-
-export const generateNewReservationTemplateAdmin = (name:string, email:string, reserve:ReserveDto, language:string):string => {
-
-  return "text";
 };
 
 
@@ -315,9 +310,10 @@ export const generateReservationTemplate = (title:string, greeting_message_1:str
 
   // Replace the placeholder in the template with the generated tents HTML
   emailTemplate = emailTemplate.replace('{{idReserve}}', "BAMBU-001");
-  emailTemplate = emailTemplate.replace('{{netImport}}', utils.formatPrice(reserve.net_import));
-  emailTemplate = emailTemplate.replace('{{discounted}}', reserve.discount.toString()+"%");
   emailTemplate = emailTemplate.replace('{{grossImport}}', utils.formatPrice(reserve.gross_import));
+  emailTemplate = emailTemplate.replace('{{discounted}}', reserve.discount.toString()+"%");
+  emailTemplate = emailTemplate.replace('{{netImport}}', utils.formatPrice(reserve.net_import));
+
 
 
   // Inject header and footer into content

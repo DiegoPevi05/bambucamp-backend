@@ -207,8 +207,7 @@ export const confirmReservation = async(reserveId:number, language:string) => {
       await userRepository.updateEmailVerified(user.email);
       await userRepository.updatePasswordWithoutToken(user.email.toLowerCase(), hashedPassword);
     }
-    // Confirm entire reserve
-    await sendNewReservationEmailAdmin({ email:user.email, firstName:user.firstName}, reserve ,language );
+
     await sendConfirmationReservationEmail({ email:user.email, firstName:user.firstName, password}, reserve, language)
 }
 

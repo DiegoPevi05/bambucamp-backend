@@ -150,10 +150,10 @@ export const checkRoomSize = (tents: Tent[], qtypeople:number, qtyKids:number, a
   return true;
 };
 
-export const applyDiscount = async (netImport: number, discountCodeId: number | undefined, discountRaw?: number|undefined): Promise<{netImport: number, discount:number, discount_name:string|null }> => {
+export const applyDiscount = async (grossImport: number, discountCodeId: number | undefined, discountRaw?: number|undefined): Promise<{netImport: number, discount:number, discount_name:string|null }> => {
 
   if (!discountCodeId) {
-    return {netImport, discount:0, discount_name:null};
+    return {netImport:grossImport, discount:0, discount_name:null};
   }
 
   const discount = await discountCodeRepository.getDiscountCodeById(discountCodeId);
@@ -164,17 +164,17 @@ export const applyDiscount = async (netImport: number, discountCodeId: number | 
 
     await discountCodeRepository.updateDiscountCodeStock(discountCodeId,newStock);
 
-    return {netImport: (netImport - (netImport * discount.discount) / 100 ) , discount: discount.discount,discount_name:discount.code} ;
+    return {netImport: (grossImport - (grossImport * discount.discount) / 100 ) , discount: discount.discount,discount_name:discount.code} ;
 
   }else{
 
     if(discountRaw && discountRaw >= 0 && discountRaw <= 100){
 
-      return {netImport: (netImport - (netImport * discountRaw) / 100), discount:0, discount_name:null};
+      return {netImport: (grossImport - (grossImport * discountRaw) / 100), discount:0, discount_name:null};
 
     }else{
 
-      return {netImport, discount:0, discount_name:null};
+      return {netImport:grossImport, discount:0, discount_name:null};
     }
   }
 };
@@ -512,7 +512,7 @@ export const formatDateToYYYYMMDD = (date: Date): string => {
 }
 
 export const formatPrice = (price:number) => {
-  return price.toLocaleString("en-US", {style: "currency", currency: "USD"});
+  return price.toLocaleString("es-PE", { style: "currency", currency: "PEN" });
 };
 
 export const formatDate = (date:Date) => {

@@ -242,8 +242,8 @@ export const createReserveByUser = [
   body('user_document_type').notEmpty().withMessage('validation.documentTypeRequired'),
   body('user_document_id').notEmpty().withMessage('validation.documentIdRequired'),
   body('user_nationality').notEmpty().withMessage('validation.nationalityRequired'),
-  body('user_eta').notEmpty().withMessage('validation.etaRequired'),
   body('user_email').isEmail().withMessage('validation.emailInvalid'),
+  body('eta').notEmpty().withMessage('validation.etaRequired'),
 
   async (req: Request, res: Response) => {
 
@@ -263,6 +263,7 @@ export const createReserveByUser = [
       await reserveService.createReserveByUser(req.body, language);
       res.status(201).json({ message: req.t('message.reserveCreatedByUser') });
     } catch (error) {
+      console.log(error);
       if (error instanceof CustomError) {
         res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
@@ -283,7 +284,6 @@ export const createReserve = [
   body('user_document_type').notEmpty().withMessage('validation.documentTypeRequired'),
   body('user_document_id').notEmpty().withMessage('validation.documentIdRequired'),
   body('user_nationality').notEmpty().withMessage('validation.nationalityRequired'),
-  body('user_eta').notEmpty().withMessage('validation.etaRequired'),
   body('user_email').isEmail().withMessage('validation.emailInvalid'),
 
   async (req: Request, res: Response) => {

@@ -7,7 +7,7 @@ import * as experienceService from './experienceService';
 import * as authService from './authService';
 import * as utils from '../lib/utils';
 import { BadRequestError, NotFoundError, UnauthorizedError } from "../middleware/errors";
-import {sendNewReservationEmailUser} from '../config/email/mail';
+import {sendNewReservationEmailUser,sendNewReservationEmailAdmin} from '../config/email/mail';
 import { PaymentStatus, Reserve, ReserveStatus, Role, User} from '@prisma/client';
 import { calculatePrice } from '../lib/utils';
 import {PublicTent} from '../dto/tent';
@@ -116,6 +116,8 @@ export const createReserveByUser = async (data: ReserveFormDto, language:string)
   }
 
   await sendNewReservationEmailUser({ email:data.user_email ?? "", firstName:data.user_firstname ?? ""}, language );
+
+  await sendNewReservationEmailAdmin({ email:data.user_email ?? "", firstName:data.user_firstname ?? ""}, reserve ,language );
 };
 
 
@@ -234,23 +236,26 @@ export const createReserve = async (data: ReserveFormDto):Promise<ReserveDto|nul
       })
 
       // Calculate total price
-      data.gross_import = utils.calculateReservePrice(
+      reserveDto.gross_import = utils.calculateReservePrice(
         tentsWithQuantities, 
         productsWithQuantities, 
         experiencesWithQuantities,
         promotionWithQuantities
       );
 
-      const { netImport, discount, discount_name } = await utils.applyDiscount(data.gross_import, data.discount_code_id);
-      data.discount_code_name = discount_name != null ? discount_name : "";
-      data.net_import = netImport;
-      data.discount = discount;
+      const { netImport, discount, discount_name } = await utils.applyDiscount(reserveDto.gross_import, data.discount_code_id);
+      reserveDto.discount_code_id = data.discount_code_id;
+      reserveDto.discount_code_name = discount_name != null ? discount_name : "";
+      reserveDto.discount = discount;
+      reserveDto.net_import = netImport;
 
   }else{
-      const { netImport, discount, discount_name } = await utils.applyDiscount(data.net_import, data.discount_code_id, data.discount);
-      data.discount_code_name = discount_name != null ? discount_name : "";
-      data.net_import = netImport;
-      data.discount = discount;
+      const { netImport, discount, discount_name } = await utils.applyDiscount(data.gross_import, data.discount_code_id, data.discount);
+      reserveDto.discount_code_id = data.discount_code_id;
+      reserveDto.gross_import = data.gross_import;
+      reserveDto.discount_code_name = discount_name != null ? discount_name : "";
+      reserveDto.discount = discount;
+      reserveDto.net_import = netImport;
 
   }
 
