@@ -655,11 +655,11 @@ export const getRangeDatesForReserve = (reserve:ReserveDto) => {
 };
 
 export  const  generateRandomPassword = () => {
-  const length = 12;
+  const length = 10;
   const charset = {
     letters: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
     numbers: '0123456789',
-    specials: '!@#$%^&*()_+~`|}{[]:;?><,./-=',
+    specials: '!@#$%^&*',
   };
 
   let password = '';

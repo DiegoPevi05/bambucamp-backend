@@ -54,13 +54,13 @@ export const getUserById = async (req: Request, res: Response) => {
 
 export const createUser = [
   body('firstName').notEmpty().withMessage('validation.nameRequired'),
-  body('lastName').notEmpty().withMessage('validation.lastNameRequired'),
-  body('phoneNumber').notEmpty().withMessage('validation.phoneNumberRequired'),
   body('email').isEmail().withMessage('validation.emailInvalid'),
   body('role').isIn(['SUPERVISOR','CLIENT']).withMessage('validation.roleInvalid'),
-  body('document_id').notEmpty().withMessage("validation.documentIdInvalid"),
-  body('document_type').notEmpty().withMessage("validation.documentTypeInvalid"),
-  body('nationality').notEmpty().withMessage("validation.nationalityRequired"),
+  body('lastName').optional(),
+  body('phoneNumber').optional(),
+  body('document_id').optional(),
+  body('document_type').optional(),
+  body('nationality').optional(),
   body('password')
     .isLength({ min: 8 }).withMessage('validation.passwordLength')
     .matches(/[a-zA-Z]/).withMessage('validation.passwordLetter')
@@ -94,13 +94,13 @@ export const createUser = [
 
 export const updateUser = [
   body('firstName').notEmpty().withMessage('validation.nameRequired'),
-  body('lastName').notEmpty().withMessage('validation.lastNameRequired'),
-  body('phoneNumber').notEmpty().withMessage('validation.phoneNumberRequired'),
   body('email').isEmail().withMessage('validation.emailInvalid'),
   body('role').isIn(['SUPERVISOR','CLIENT']).withMessage('validation.roleInvalid'),
-  body('document_id').notEmpty().withMessage("validation.documentIdInvalid"),
-  body('document_type').notEmpty().withMessage("validation.documentTypeInvalid"),
-  body('nationality').notEmpty().withMessage("validation.nationalityRequired"),
+  body('lastName').optional(),
+  body('phoneNumber').optional(),
+  body('document_id').optional(),
+  body('document_type').optional(),
+  body('nationality').optional(),
   body('password')
     .optional()
     .isLength({ min: 8 }).withMessage('validation.passwordLength')

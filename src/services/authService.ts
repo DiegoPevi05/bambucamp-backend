@@ -9,7 +9,7 @@ import { randomUUID } from 'crypto';
 import {BadRequestError, NotFoundError} from '../middleware/errors';
 import {ReserveFormDto} from '../dto/reserve';
 import {Role, User} from '@prisma/client';
-import {sendNewReservationEmailAdmin, sendConfirmationReservationEmail} from '../config/email/mail';
+import { sendConfirmationReservationEmail} from '../config/email/mail';
 
 
 const JWT_SECRET = process.env.JWT_SECRET || 'default_secret';
@@ -201,7 +201,7 @@ export const confirmReservation = async(reserveId:number, language:string) => {
     }
 
     const password  = utils.generateRandomPassword();
-    const hashedPassword = await bcrypt.hash(user.password,10);
+    const hashedPassword = await bcrypt.hash(password,10);
 
     if (!user.emailVerified) {
       await userRepository.updateEmailVerified(user.email);

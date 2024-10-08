@@ -142,7 +142,7 @@ export const generateResetPasswordTemplate = (name:string , code:string, languag
 
   const { header, footer } = generateTemplate(language);
 
-  const templatePath = path.join(__dirname, `templates/verification-email.html`);
+  const templatePath = path.join(__dirname, `templates/reset-password.html.html`);
   let emailTemplate = fs.readFileSync(templatePath, 'utf8');
   emailTemplate = emailTemplate.replace('{{title}}', language == "es" ? "Restauracion de Cuenta" : "Restoration of Account" );
   emailTemplate = emailTemplate.replace('{{greeting_hi}}', language == "es" ? "Hola" : "Hi" );
