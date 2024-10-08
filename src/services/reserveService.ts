@@ -467,9 +467,11 @@ export const AddProductReserveByUser = async(userId: number, data: createReserve
 };
 
 export const AddProductReserve = async(reserve: Reserve | null, data: createReserveProductDto[]) => {
-
   // If reserve is not provided, fetch it from the repository
+  let priceIsConfirmed:boolean = false;
+
   if (!reserve) {
+    priceIsConfirmed = true;
     const reserveId = data[0].reserveId;
     reserve = await reserveRepository.getReserveById(reserveId);
 
@@ -482,6 +484,9 @@ export const AddProductReserve = async(reserve: Reserve | null, data: createRese
     const isStock = await productService.checkProductStock(productData.idProduct, productData.quantity);
       if (!isStock) {
         throw new NotFoundError('error.noProductsFoundInStock');
+      }
+      if(priceIsConfirmed){
+        productData.confirmed = true;
       }
       return productData;
     })
@@ -528,7 +533,10 @@ export const AddExperienceReserveByUser = async(userId: number, data: createRese
 
 export const AddExperienceReserve = async(reserve: Reserve | null, data: createReserveExperienceDto[]) => {
   // If reserve is not provided, fetch it from the repository (assuming all belong to the same reserve)
+  let priceIsConfirmed:boolean = false;
+
   if (!reserve) {
+    priceIsConfirmed = true;
     const reserveId = data[0].reserveId;
     reserve = await reserveRepository.getReserveById(reserveId);
 
@@ -543,6 +551,11 @@ export const AddExperienceReserve = async(reserve: Reserve | null, data: createR
       date_parsed.setUTCHours(17, 0, 0, 0);  // This modifies the date in place
       experienceData.day = date_parsed;
     }
+
+    if(priceIsConfirmed){
+      experienceData.confirmed = true;
+    }
+
     return experienceData;
   });
 
