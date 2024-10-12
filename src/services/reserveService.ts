@@ -42,6 +42,18 @@ export const searchAvailableTents = async (dateFromInput:string,dateToInput:stri
   return TentsPublic;
 };
 
+export const searchAdminAvailableTents = async (dateFromInput:string,dateToInput:string) => {
+  const dateFrom = new Date(dateFromInput);
+  const dateTo = new Date(dateToInput);
+  const tents = await reserveRepository.searchAvailableTents(dateFrom, dateTo);
+
+  tents.forEach((tent) => {
+    tent.images = JSON.parse(tent.images ? tent.images : '[]');
+  });
+
+  return tents;
+};
+
 export const getAllMyReservesCalendarUser = async(page:number,userId:number) => {
   return await reserveRepository.getMyReservesByMonth(page,userId);
 }

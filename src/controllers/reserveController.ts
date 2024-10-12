@@ -53,6 +53,36 @@ export const getAllPublicTentsForReservation = [
       }
     }
 ] 
+
+export const getAdminTentsForReservation = [
+    query('dateFrom').notEmpty().withMessage('validation.dateFromRequired'),
+    query('dateTo').notEmpty().withMessage('validation.dateToRequired'),
+    async (req: Request, res: Response) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+          const localizedErrors = errors.array().map((error) => ({
+            ...error,
+            msg: req.t(error.msg)
+          }));
+
+          return res.status(400).json({ error: localizedErrors });
+        }
+      try {
+
+        const { dateFrom, dateTo } = req.query;
+
+        const tents = await reserveService.searchAdminAvailableTents(dateFrom as string, dateTo as string);
+        res.json(tents);
+      } catch (error) {
+        if (error instanceof CustomError) {
+          res.status(error.statusCode).json({ error: req.t(error.message) });
+        } else {
+          res.status(500).json({ error: req.t("error.failedToFetchTents") });
+        }
+      }
+    }
+] 
+
 export const getAllMyReservesCalendarUser = async (req: Request, res: Response) => {
     try {
       const { page = '0' } = req.query;
