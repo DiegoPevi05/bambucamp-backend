@@ -87,6 +87,7 @@ export interface ReserveOptions {
 }
 
 export interface ReserveDto {
+  id?:number;
   userId: number;
   user_name?:string;
   user_email?:string;

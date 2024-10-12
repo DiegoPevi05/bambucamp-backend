@@ -121,7 +121,7 @@ export const createReserveByUser = async (data: ReserveFormDto, language:string)
   data.price_is_calculated = true;
   data.payment_status = PaymentStatus.UNPAID;
   data.reserve_status = ReserveStatus.NOT_CONFIRMED; 
-  const reserve = await createReserve(data);
+  const reserve = await createReserve(data, language);
 
   if(reserve == null){
     throw new BadRequestError("error.failedToCreateReserve")
@@ -134,7 +134,7 @@ export const createReserveByUser = async (data: ReserveFormDto, language:string)
 };
 
 
-export const createReserve = async (data: ReserveFormDto):Promise<ReserveDto|null> => {
+export const createReserve = async (data: ReserveFormDto, language:string):Promise<ReserveDto|null> => {
 
   let reserveDto:ReserveDto = {
     userId:0,
@@ -179,7 +179,6 @@ export const createReserve = async (data: ReserveFormDto):Promise<ReserveDto|nul
   if(data.gross_import) reserveDto.gross_import = Number(data.gross_import);
   if(data.discount) reserveDto.discount = Number(data.discount);
   if(data.net_import) reserveDto.net_import = Number(data.net_import);
-
 
 
   if(data.promotions.length > 0){
@@ -272,8 +271,15 @@ export const createReserve = async (data: ReserveFormDto):Promise<ReserveDto|nul
       reserveDto.net_import = netImport;
 
   }
+  
+  const reserve = await reserveRepository.createReserve(reserveDto);
 
-  return await reserveRepository.createReserve(reserveDto);
+  if(reserveDto.reserve_status == ReserveStatus.CONFIRMED && reserve &&  reserve.id){
+    await authService.confirmReservation(reserve.id,language);
+
+  }
+
+  return reserve;
 };
 
 export const updateReserve = async (id:number, data: ReserveFormDto) => {

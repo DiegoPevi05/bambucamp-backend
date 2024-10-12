@@ -579,6 +579,7 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
   if (reserve) {
     const enrichedReserve: ReserveDto = {
       ...reserve,
+      id:createdReserve.id,
       tents: reserve.tents.map(tent => ({
         ...tent,
         promotionId: tent.promotionId ?? undefined,  // Handle null values

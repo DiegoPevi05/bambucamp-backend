@@ -330,7 +330,9 @@ export const createReserve = [
     }
 
     try {
-      await reserveService.createReserve(req.body);
+
+      const language = req.language || 'en';
+      await reserveService.createReserve(req.body,language);
       res.status(201).json({ message: req.t('message.reserveCreated') });
     } catch (error) {
       if (error instanceof CustomError) {
