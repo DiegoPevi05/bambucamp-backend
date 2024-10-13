@@ -991,21 +991,27 @@ export const getNetSalesStatistics = async (filters: SalesFilters, language:stri
       dailyData[dateKey] = (dailyData[dateKey] || 0) + reserve.net_import;
     }
 
-    if(type === "P"){
+    // Generate the last 7 days with a default quantity of 0
+    const weekDays = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      const dateKey = date.toISOString().slice(0, 10);
+      return { date: dateKey, amount: 0 };
+    });
 
-      salesData = Object.entries(dailyData).map(([date, amount]) => ({ date, amount }));
+    weekDays.forEach(day => {
+      if (dailyData[day.date]) {
+        day.amount = dailyData[day.date];
+      }
+    });
 
-    }else{
-      const rawSalesData:{date:string, amount:number}[] = Object.entries(dailyData).map(([date, amount]) => ({ date, amount }));
-
-      let lastAmount = 0;
-
-      for(const {date,amount} of rawSalesData ){
-
-        lastAmount =+ amount; 
-
-        salesData.push({ date, amount:lastAmount });
-
+    if (type === "P") {
+      salesData = weekDays;
+    } else {
+      let accumulatedAmount = 0;
+      for (const day of weekDays) {
+        accumulatedAmount += day.amount;
+        salesData.push({ date: day.date, amount: accumulatedAmount });
       }
     }
 
@@ -1150,15 +1156,30 @@ export const getReserveQuantityStatistics = async (filters: SalesFilters, langua
       dailyData[dateKey] = (dailyData[dateKey] || 0) + 1;
     }
 
+    // Generate the last 7 days with a default quantity of 0
+    const weekDays = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      const dateKey = date.toISOString().slice(0, 10);
+      return { date: dateKey, quantity: 0 };
+    });
+
+    weekDays.forEach(day => {
+      if (dailyData[day.date]) {
+        day.quantity = dailyData[day.date];
+      }
+    });
+
     if (type === "P") {
-      quantityData = Object.entries(dailyData).map(([date, quantity]) => ({ date, quantity }));
+      quantityData = weekDays;
     } else {
       let accumulatedQuantity = 0;
-      for (const [date, quantity] of Object.entries(dailyData)) {
-        accumulatedQuantity += quantity;
-        quantityData.push({ date, quantity: accumulatedQuantity });
+      for (const day of weekDays) {
+        accumulatedQuantity += day.quantity;
+        quantityData.push({ date: day.date, quantity: accumulatedQuantity });
       }
     }
+
   } else if (step === "M") {
     let currentWeekStart = new Date(today);
     currentWeekStart.setDate(today.getDate() - today.getDay());
