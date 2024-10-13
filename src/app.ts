@@ -19,6 +19,7 @@ import i18next from './config/i18n';
 import {chatHandler} from './services/chatService';
 import chatRoutes from './routes/chatRoutes';
 import webRoutes from './routes/webRoutes';
+import statisticRoutes from './routes/statisticRoutes';
 
 const app = express();
 const server = http.createServer(app);
@@ -55,6 +56,7 @@ app.use('/reserves', reserveRoutes);
 app.use('/notifications', notificationRoutes);
 app.use('/web', webRoutes);
 app.use('/chats', chatRoutes);
+app.use('/statistics', statisticRoutes);
 
 chatHandler(io);
 

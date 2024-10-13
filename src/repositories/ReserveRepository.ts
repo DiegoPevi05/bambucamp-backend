@@ -897,5 +897,328 @@ export const confirmPromotion = async (reservePromotionId: number): Promise<void
   });
 };
 
+interface SalesFilters {
+  step: "W"|"M"|"Y";
+  type:"A"|"P";
+}
+
+export const getNetSalesStatistics = async (filters: SalesFilters, language:string): Promise<{ date: string; amount: number }[]> => {
+  const { step, type } = filters;
+  const today = new Date();
+  let startDate: Date | undefined;
+
+  if (step === "W") {
+    // Weekly - Last 7 days
+    startDate = new Date(today);
+    startDate.setDate(today.getDate() - 7);
+  } else if (step === "M") {
+    // Monthly - Last 5 weeks
+    startDate = new Date(today);
+    startDate.setDate(today.getDate() - (7 * 5));
+  } else if (step === "Y") {
+    // Yearly - Last 12 months
+    startDate = new Date(today);
+    startDate.setFullYear(today.getFullYear() - 1);
+  }
+
+  const reservedTentIds = await prisma.reserveTent.findMany({
+    where: {
+      AND: [
+        {
+          dateFrom: {
+            lte: startDate,
+          },
+        },
+        {
+          dateTo: {
+            gte: today,
+          },
+        },
+        {
+          reserve: {
+            reserve_status: {
+              in: ["COMPLETE"],
+            },
+          },
+        },
+      ],
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    select: {
+      reserve: {
+        select: {
+          net_import: true, // Ensure external_id is selected
+        },
+      },
+      reserveId:true,
+      dateFrom: true,
+      dateTo: true,
+    },
+  });
+
+  // Aggregate the latest dateFrom per reserveId
+  const reserveMap: Record<string, { dateFrom: Date; net_import: number }> = {};
+
+  reservedTentIds.forEach(({ reserveId, dateFrom, reserve }) => {
+    if (
+      !reserveMap[reserveId] || 
+      reserveMap[reserveId].dateFrom > dateFrom
+    ) {
+      reserveMap[reserveId] = {
+        dateFrom,
+        net_import: reserve?.net_import || 0,
+      };
+    }
+  });
+
+  // Convert the dictionary to an array of objects
+  const reservesWithLatestDate = Object.entries(reserveMap).map(([reserveId, data]) => ({
+    reserveId,
+    dateFrom: data.dateFrom,
+    net_import: data.net_import,
+  }));
+
+  // Aggregate results based on the step
+  let salesData: { date: string; amount: number }[] = [];
+
+  if (step === "W") {
+    // Group by day for the last 7 days
+    const dailyData: Record<string, number> = {};
+    for (const reserve of reservesWithLatestDate) {
+      const dateKey = reserve.dateFrom.toISOString().slice(0, 10); // YYYY-MM-DD
+      dailyData[dateKey] = (dailyData[dateKey] || 0) + reserve.net_import;
+    }
+
+    if(type === "P"){
+
+      salesData = Object.entries(dailyData).map(([date, amount]) => ({ date, amount }));
+
+    }else{
+      const rawSalesData:{date:string, amount:number}[] = Object.entries(dailyData).map(([date, amount]) => ({ date, amount }));
+
+      let lastAmount = 0;
+
+      for(const {date,amount} of rawSalesData ){
+
+        lastAmount =+ amount; 
+
+        salesData.push({ date, amount:lastAmount });
+
+      }
+    }
+
+  } else if (step === "M") {
+    // Group by week for the last 5 weeks
+    let currentWeekStart = new Date(today);
+    currentWeekStart.setDate(today.getDate() - today.getDay()); // Start of current week (Sunday)
+    
+    const weekIntervals = [];
+    for (let i = 0; i < 5; i++) {
+      const weekEnd = new Date(currentWeekStart); // End of the current week
+      const weekStart = new Date(currentWeekStart);
+      weekStart.setDate(weekStart.getDate() - 6); // Start of the week (7-day range)
+
+      weekIntervals.push({ start: new Date(weekStart), end: new Date(weekEnd) });
+
+      // Move back one week
+      currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+    }
+
+    let accumulatedAmount = 0;
+    for (const { start, end } of weekIntervals) {
+      const weeklyAmount = reservesWithLatestDate
+        .filter(reserve => reserve.dateFrom >= start && reserve.dateFrom <= end)
+        .reduce((sum, reserve) => sum + reserve.net_import, 0);
+
+      const dateLabel = `${start.toISOString().slice(0, 10)}`;
+
+      if (type === "A") {
+            accumulatedAmount += weeklyAmount;
+            salesData.push({ date: dateLabel, amount: accumulatedAmount });
+          } else {
+            salesData.push({ date: dateLabel, amount: weeklyAmount });
+          }
+      }
+  } else if (step === "Y") {
+    // Group by month for the last 12 months
+    const monthIntervals = [];
+    let currentMonth = new Date(today);
+    currentMonth.setDate(1); // Set to the first day of the current month
+
+    for (let i = 0; i < 12; i++) {
+      const monthStart = new Date(currentMonth);
+      const monthEnd = new Date(currentMonth);
+      monthEnd.setMonth(monthEnd.getMonth() + 1);
+      monthEnd.setDate(0); // Last day of the current month
+
+      monthIntervals.push({ start: new Date(monthStart), end: new Date(monthEnd) });
+
+      currentMonth.setMonth(currentMonth.getMonth() - 1); // Move back one month
+    }
+
+    let accumulatedAmount = 0;
+    for (const { start, end } of monthIntervals) {
+      const monthlyAmount = reservesWithLatestDate
+        .filter(reserve => reserve.dateFrom >= start && reserve.dateFrom <= end)
+        .reduce((sum, reserve) => sum + reserve.net_import, 0);
+
+      const dateLabel = start.toLocaleString('default', { month: 'long' });
+
+      if (type === "A") {
+        accumulatedAmount += monthlyAmount;
+        salesData.push({ date: dateLabel, amount: accumulatedAmount });
+      } else {
+        salesData.push({ date: dateLabel, amount: monthlyAmount });
+      }
+    }
+  }
+
+  return salesData.reverse(); // Reverse to order from oldest to newest
+};
 
 
+export const getReserveQuantityStatistics = async (filters: SalesFilters, language:string): Promise<{ date: string; quantity: number }[]> => {
+  const { step, type } = filters;
+  const today = new Date();
+  let startDate: Date | undefined;
+
+  if (step === "W") {
+    startDate = new Date(today);
+    startDate.setDate(today.getDate() - 7); // Weekly - Last 7 days
+  } else if (step === "M") {
+    startDate = new Date(today);
+    startDate.setDate(today.getDate() - (7 * 5)); // Monthly - Last 5 weeks
+  } else if (step === "Y") {
+    startDate = new Date(today);
+    startDate.setFullYear(today.getFullYear() - 1); // Yearly - Last 12 months
+  }
+
+  const reservedTentIds = await prisma.reserveTent.findMany({
+    where: {
+      AND: [
+        {
+          dateFrom: {
+            lte: startDate,
+          },
+        },
+        {
+          dateTo: {
+            gte: today,
+          },
+        },
+        {
+          reserve: {
+            reserve_status: {
+              in: ["COMPLETE"],
+            },
+          },
+        },
+      ],
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    select: {
+      reserveId: true,
+      dateFrom: true,
+      dateTo: true,
+    },
+  });
+
+  // Aggregate the latest dateFrom per reserveId
+  const reserveMap: Record<string, Date> = {};
+
+  reservedTentIds.forEach(({ reserveId, dateFrom }) => {
+    if (!reserveMap[reserveId] || reserveMap[reserveId] > dateFrom) {
+      reserveMap[reserveId] = dateFrom;
+    }
+  });
+
+  const reservesWithLatestDate = Object.entries(reserveMap).map(([reserveId, dateFrom]) => ({
+    reserveId,
+    dateFrom,
+  }));
+
+  let quantityData: { date: string; quantity: number }[] = [];
+
+  if (step === "W") {
+    const dailyData: Record<string, number> = {};
+    for (const reserve of reservesWithLatestDate) {
+      const dateKey = reserve.dateFrom.toISOString().slice(0, 10);
+      dailyData[dateKey] = (dailyData[dateKey] || 0) + 1;
+    }
+
+    if (type === "P") {
+      quantityData = Object.entries(dailyData).map(([date, quantity]) => ({ date, quantity }));
+    } else {
+      let accumulatedQuantity = 0;
+      for (const [date, quantity] of Object.entries(dailyData)) {
+        accumulatedQuantity += quantity;
+        quantityData.push({ date, quantity: accumulatedQuantity });
+      }
+    }
+  } else if (step === "M") {
+    let currentWeekStart = new Date(today);
+    currentWeekStart.setDate(today.getDate() - today.getDay());
+
+    const weekIntervals = [];
+    for (let i = 0; i < 5; i++) {
+      const weekEnd = new Date(currentWeekStart);
+      const weekStart = new Date(currentWeekStart);
+      weekStart.setDate(weekStart.getDate() - 6);
+
+      weekIntervals.push({ start: new Date(weekStart), end: new Date(weekEnd) });
+      currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+    }
+
+    let accumulatedQuantity = 0;
+    for (const { start, end } of weekIntervals) {
+      const weeklyQuantity = reservesWithLatestDate
+        .filter(reserve => reserve.dateFrom >= start && reserve.dateFrom <= end)
+        .length;
+
+      const dateLabel = `${start.toISOString().slice(0, 10)}`;
+
+      if (type === "A") {
+        accumulatedQuantity += weeklyQuantity;
+        quantityData.push({ date: dateLabel, quantity: accumulatedQuantity });
+      } else {
+        quantityData.push({ date: dateLabel, quantity: weeklyQuantity });
+      }
+    }
+  } else if (step === "Y") {
+    const monthIntervals = [];
+    let currentMonth = new Date(today);
+    currentMonth.setDate(1);
+
+    for (let i = 0; i < 12; i++) {
+      const monthStart = new Date(currentMonth);
+      const monthEnd = new Date(currentMonth);
+      monthEnd.setMonth(monthEnd.getMonth() + 1);
+      monthEnd.setDate(0);
+
+      monthIntervals.push({ start: new Date(monthStart), end: new Date(monthEnd) });
+      currentMonth.setMonth(currentMonth.getMonth() - 1);
+    }
+
+    let accumulatedQuantity = 0;
+    for (const { start, end } of monthIntervals) {
+      const monthlyQuantity = reservesWithLatestDate
+        .filter(reserve => reserve.dateFrom >= start && reserve.dateFrom <= end)
+        .length;
+
+      const dateLabel = start.toLocaleString(language || 'default', { month: 'long' });
+
+      if (type === "A") {
+        accumulatedQuantity += monthlyQuantity;
+        quantityData.push({ date: dateLabel, quantity: accumulatedQuantity });
+      } else {
+        quantityData.push({ date: dateLabel, quantity: monthlyQuantity });
+      }
+    }
+  }
+
+  return quantityData.reverse();
+};
