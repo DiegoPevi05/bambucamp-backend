@@ -15,7 +15,7 @@ export const generateTemplate = (language: string): TemplateData => {
   const data_email = {
     homepage: CLIENT_HOSTNAME,
     logo_link: `${CLIENT_HOSTNAME}/backend-public/logo.png`,
-    tent_link: `${CLIENT_HOSTNAME}/backend-public/tent.jpg`,
+    tent_link: `${CLIENT_HOSTNAME}/backend-public/tent.jpeg`,
     reservation_label: language === "es" ? "RESERVAR" : "RESERVATION",
     reservation_link: `${CLIENT_HOSTNAME}/booking`,
     glampings_label: language === "es" ? "GLAMPINGS" : "GLAMPINGS",
@@ -219,7 +219,7 @@ export const generateReservationTemplate = (title:string, greeting_message_1:str
                                     <td align="center" class="email-reserve-block-image"
                                       ><a target="_blank"
                                         href="https://viewstripo.email"><img class="email-reserve-block-image-img"
-                                          src="https://tlr.stripocdn.email/content/guids/CABINET_66f950c6b738d24a0c0ae438e5a17e95/images/70881620388152279.jpg"
+                                          src=${tent.tentDB?.images[0]}
                                           alt=${"image-reserve-"+tent.idTent}"image-reserve" ></a></td>
                                   </tr>
                                 </tbody>
