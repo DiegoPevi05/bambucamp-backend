@@ -6,6 +6,12 @@ import * as utils from '../../lib/utils';
 // Load SMTP configuration from environment variables
 const CLIENT_HOSTNAME =  process.env.CLIENT_HOSTNAME || 'http://localhost:5174';
 
+const formatImagePath = (image: string): string => {
+  image = image.replace(/\\/g, '/'); // Assign the result of replace to image
+  image = image.replace("public", `${CLIENT_HOSTNAME}/backend-public`); // Same here
+  return image;
+};
+
 type TemplateData = {
   header: string;
   footer: string;
@@ -218,8 +224,8 @@ export const generateReservationTemplate = (title:string, greeting_message_1:str
                                   <tr>
                                     <td align="center" class="email-reserve-block-image"
                                       ><a target="_blank"
-                                        href="https://viewstripo.email"><img class="email-reserve-block-image-img"
-                                          src=${tent.tentDB?.images[0]}
+                                        href="${CLIENT_HOSTNAME}"><img class="email-reserve-block-image-img"
+                                          src=${`${formatImagePath(tent.tentDB?.images[0] ?? "none")}`}
                                           alt=${"image-reserve-"+tent.idTent}"image-reserve" ></a></td>
                                   </tr>
                                 </tbody>
