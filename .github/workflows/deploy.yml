@@ -32,6 +32,7 @@ jobs:
         echo JWT_SECRET=${{ secrets.JWT_SECRET }} >> .env
         echo PORT=${{ secrets.PORT }} >> .env
         echo ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }} >> .env
+        echo ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }} >> .env
         echo SMTP_HOST=${{ secrets.SMTP_HOST }} >> .env
         echo SMTP_PORT=${{ secrets.SMTP_PORT }} >> .env
         echo SMTP_USER=${{ secrets.SMTP_USER }} >> .env
