@@ -7,6 +7,9 @@
     "dev": "ts-node-dev src/server.ts",
     "start": "ts-node src/server.ts"
   },
+  "prisma": {
+    "seed": "ts-node --transpile-only prisma/init/init.ts"
+  },
   "keywords": [],
   "author": "digitalprocessit",
   "license": "ISC",
