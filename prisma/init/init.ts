@@ -135,7 +135,6 @@ async function main() {
   // Loop through all created tents and copy images
   for (let tent of allTents) {
     const newPaths = await moveImagesToSubFolder(tent.id, "tents", tent.images);
-    console.log(newPaths)
 
     // Optionally update the tent with the new image paths if needed
     await prisma.tent.update({
