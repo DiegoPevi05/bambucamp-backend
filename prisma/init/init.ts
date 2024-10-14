@@ -43,7 +43,9 @@ const moveImagesToSubFolder = async (ObjectId: number, category: string, subfold
     const ext = path.extname(image); // Get the original extension
 
     // Create a new name using the current timestamp and the original extension
-    const newImageName = `${Date.now()}${ext}`;
+    //const newImageName = `${Date.now()}${ext}`;
+    const uniqueSuffix = `${Date.now()}-${Math.floor(Math.random() * 10000)}`; // Add randomness
+    const newImageName = `${uniqueSuffix}${ext}`;
     const newPath = path.join(subFolderPath, newImageName);
 
     // Copy the file to the new location with the new name
@@ -133,6 +135,7 @@ async function main() {
   // Loop through all created tents and copy images
   for (let tent of allTents) {
     const newPaths = await moveImagesToSubFolder(tent.id, "tents", tent.images);
+    console.log(newPaths)
 
     // Optionally update the tent with the new image paths if needed
     await prisma.tent.update({
