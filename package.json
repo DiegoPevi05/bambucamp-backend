@@ -5,7 +5,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node-dev src/server.ts",
-    "start": "ts-node src/server.ts"
+    "start": "ts-node src/server.ts",
+    "admin:reset": "ts-node --transpile-only prisma/init/resetAdmin.ts",
   },
   "prisma": {
     "seed": "ts-node --transpile-only prisma/init/init.ts"
