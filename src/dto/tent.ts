@@ -10,6 +10,8 @@ export interface TentDto {
   status: string;
   aditional_people_price:number;
   max_aditional_people:number;
+  max_kids:number;
+  kids_bundle_price:number;
   custom_price?: string;
   existing_images?:string;
 }

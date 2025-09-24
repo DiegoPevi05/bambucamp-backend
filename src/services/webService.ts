@@ -1,16 +1,23 @@
-import {ContactForm, FaqDto, PaginatedFaqs, PaginatedReviews, PublicFaqDto, PublicReviewDto, ReviewDto} from '../dto/web';
+import {ComplaintForm, ContactForm, FaqDto, PaginatedFaqs, PaginatedReviews, PublicFaqDto, PublicReviewDto, ReviewDto} from '../dto/web';
 import * as webRepository from '../repositories/WebRepository';
 import * as tentService  from '../services/tentService';
 import * as promotionService from '../services/promotionService';
 import { webContent } from '../dto/web';
 import {Review} from '@prisma/client';
-import { sendContactFormAdmin, sendContactFormConfirmation } from '../config/email/mail';
+import { sendComplaintFormAdmin, sendComplaintFormConfirmation, sendContactFormAdmin, sendContactFormConfirmation } from '../config/email/mail';
 
 export const contactForm = async(props:ContactForm, language:string) => {
   const { email, name, message, saveinfo } = props;
 
   await sendContactFormConfirmation({email, name }, language);
   await sendContactFormAdmin({email, name, message }, language);
+}
+
+export const complaintForm = async(props:ComplaintForm, language:string) => {
+  const { email, name, phone, documentId, claimType, description, reservationCode } = props;
+
+  await sendComplaintFormConfirmation({ email, name }, language);
+  await sendComplaintFormAdmin({ email, name, phone, documentId, claimType, description, reservationCode }, language);
 }
 
 export const getWebContent = async () => {

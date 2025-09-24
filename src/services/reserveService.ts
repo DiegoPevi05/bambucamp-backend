@@ -205,56 +205,74 @@ export const createReserve = async (data: ReserveFormDto, language:string):Promi
     throw new BadRequestError("error.noTentsAvailable");
   }
 
+  const tentsDbMap = new Map(tentsDb.map(tent => [tent.id, tent]));
+
+  reserveDto.tents = reserveDto.tents.map(tent => {
+    const foundTent = tentsDbMap.get(tent.idTent);
+    if (!foundTent) {
+      throw new NotFoundError("error.noAllTentsFound");
+    }
+    const basePricePerNight = calculatePrice(foundTent.price, foundTent.custom_price);
+    tent.name = tent.name ?? foundTent.title;
+    tent.price = basePricePerNight;
+    tent.nights = Number(tent.nights ?? 0);
+    tent.aditionalPeople = Number(tent.aditionalPeople ?? 0);
+    tent.aditionalPeoplePrice = foundTent.aditional_people_price;
+    tent.kids = Number(tent.kids ?? 0);
+    tent.kidsPrice = Number(tent.kidsPrice ?? 0);
+    return tent;
+  });
+
+  const tentsWithQuantities = reserveDto.tents.map(tent => {
+    const foundTent = tentsDbMap.get(tent.idTent);
+    if (!foundTent) {
+      throw new NotFoundError("error.noAllTentsFound");
+    }
+    return {
+      tent: foundTent,
+      nights: Number(tent.nights ?? 0),
+      aditionalPeople: tent.aditionalPeople,
+      kids: tent.kids,
+    };
+  });
+
+  const productsWithQuantities = data.products.map(product => {
+    const foundProduct = productsDb.find(p => p.id === product.idProduct);
+    if (!foundProduct) {
+      throw new NotFoundError("error.noAllProductsFound");
+    }
+    return {
+      product: foundProduct,
+      quantity: product.quantity
+    };
+  });
+
+  const experiencesWithQuantities = data.experiences.map(experience => {
+    const foundExperience = experiencesDb.find(e => e.id === experience.idExperience);
+    if (!foundExperience) {
+      throw new NotFoundError("error.noAllExperiencesFound");
+    }
+    return {
+      experience: foundExperience,
+      quantity: experience.quantity
+    };
+  });
+
+  const promotionWithQuantities = data.promotions.map(promotion => ({
+    promotionId: promotion.idPromotion,
+    price: promotion.price
+  }));
+
+  const priceComputation = utils.calculateReservePrice(
+    tentsWithQuantities,
+    productsWithQuantities,
+    experiencesWithQuantities,
+    promotionWithQuantities
+  );
+
   if(data.price_is_calculated){
 
-      const tentsWithQuantities = data.tents.map(tent => {
-        const foundTent = tentsDb.find(t => t.id === tent.idTent);
-        if (!foundTent) {
-          throw new NotFoundError("error.noAllTentsFound");
-        }
-        return {
-          tent: foundTent,
-          nights: tent.nights,
-          aditionalPeople: tent.aditionalPeople,
-        };
-      });
-
-      const productsWithQuantities = data.products.map(product => {
-        const foundProduct = productsDb.find(p => p.id === product.idProduct);
-        if (!foundProduct) {
-          throw new NotFoundError("error.noAllProductsFound");
-        }
-        return {
-          product: foundProduct,
-          quantity: product.quantity
-        };
-      });
-
-      const experiencesWithQuantities = data.experiences.map(experience => {
-        const foundExperience = experiencesDb.find(e => e.id === experience.idExperience);
-        if (!foundExperience) {
-          throw new NotFoundError("error.noAllExperiencesFound");
-        }
-        return {
-          experience: foundExperience,
-          quantity: experience.quantity
-        };
-      });
-
-      const promotionWithQuantities = data.promotions.map(promotion => {
-        return {
-          promotionId:promotion.idPromotion,
-          price:promotion.price
-        }
-      })
-
-      // Calculate total price
-      reserveDto.gross_import = utils.calculateReservePrice(
-        tentsWithQuantities, 
-        productsWithQuantities, 
-        experiencesWithQuantities,
-        promotionWithQuantities
-      );
+      reserveDto.gross_import = priceComputation.total;
 
       const { netImport, discount, discount_name } = await utils.applyDiscount(reserveDto.gross_import, data.discount_code_id);
       reserveDto.discount_code_id = data.discount_code_id;
@@ -271,6 +289,19 @@ export const createReserve = async (data: ReserveFormDto, language:string):Promi
       reserveDto.net_import = netImport;
 
   }
+
+  const tentBreakdown = priceComputation.tentBreakdown;
+  reserveDto.tents = reserveDto.tents.map(tent => {
+    const breakdown = tentBreakdown.find(detail => detail.idTent === tent.idTent);
+    if (breakdown) {
+      tent.aditionalPeople = breakdown.aditionalPeople;
+      tent.aditionalPeoplePrice = breakdown.aditionalPeoplePrice;
+      tent.kids = breakdown.kids;
+      tent.kidsPrice = breakdown.kidsPricePerNight;
+      tent.price = breakdown.basePricePerNight;
+    }
+    return tent;
+  });
   
   const reserve = await reserveRepository.createReserve(reserveDto);
 
@@ -370,56 +401,79 @@ export const updateReserve = async (id:number, data: ReserveFormDto) => {
     throw new BadRequestError("error.noTentsAvailable");
   }
 
+  const tentsDbMap = new Map(tentsDb.map(tent => [tent.id, tent]));
+
+  reserve_tents = reserve_tents.map(tent => {
+    if (tent.promotionId) {
+      tent.kids = Number(tent.kids ?? 0);
+      tent.kidsPrice = Number(tent.kidsPrice ?? 0);
+      return tent;
+    }
+    const foundTent = tentsDbMap.get(tent.idTent);
+    if (!foundTent) {
+      throw new NotFoundError("error.noAllTentsFound");
+    }
+    const basePricePerNight = calculatePrice(foundTent.price, foundTent.custom_price);
+    tent.name = tent.name ?? foundTent.title;
+    tent.price = basePricePerNight;
+    tent.nights = Number(tent.nights ?? 0);
+    tent.aditionalPeople = Number(tent.aditionalPeople ?? 0);
+    tent.aditionalPeoplePrice = foundTent.aditional_people_price;
+    tent.kids = Number(tent.kids ?? 0);
+    tent.kidsPrice = Number(tent.kidsPrice ?? 0);
+    return tent;
+  });
+
+  const directTentsWithQuantities = data.tents.map(tent => {
+    const foundTent = tentsDbMap.get(tent.idTent);
+    if (!foundTent) {
+      throw new NotFoundError("error.noAllTentsFound");
+    }
+    const directTent = reserve_tents.find(rt => !rt.promotionId && rt.idTent === tent.idTent);
+    return {
+      tent: foundTent,
+      nights: Number(tent.nights ?? 0),
+      aditionalPeople: directTent ? directTent.aditionalPeople : Number(tent.aditionalPeople ?? 0),
+      kids: directTent ? directTent.kids : Number(tent.kids ?? 0),
+    };
+  });
+
+  const productsWithQuantities = data.products.map(product => {
+    const foundProduct = productsDb.find(p => p.id === product.idProduct);
+    if (!foundProduct) {
+      throw new NotFoundError("error.noAllProductsFound");
+    }
+    return {
+      product: foundProduct,
+      quantity: product.quantity
+    };
+  });
+
+  const experiencesWithQuantities = data.experiences.map(experience => {
+    const foundExperience = experiencesDb.find(e => e.id === experience.idExperience);
+    if (!foundExperience) {
+      throw new NotFoundError("error.noAllExperiencesFound");
+    }
+    return {
+      experience: foundExperience,
+      quantity: experience.quantity
+    };
+  });
+
+  const promotionWithQuantities = data.promotions.map(promotion => ({
+    promotionId: promotion.idPromotion,
+    price: promotion.price
+  }));
+
+  const priceComputation = utils.calculateReservePrice(
+    directTentsWithQuantities,
+    productsWithQuantities,
+    experiencesWithQuantities,
+    promotionWithQuantities
+  );
+
   if(data.price_is_calculated){
-      // Map quantities to the respective tents, products, and experiences
-      const tentsWithQuantities = data.tents.map(tent => {
-        const foundTent = tentsDb.find(t => t.id === tent.idTent);
-        if (!foundTent) {
-          throw new NotFoundError("error.noAllTentsFound");
-        }
-        return {
-          tent: foundTent,
-          nights: tent.nights,
-          aditionalPeople: tent.aditionalPeople,
-        };
-      });
-
-      const productsWithQuantities = data.products.map(product => {
-        const foundProduct = productsDb.find(p => p.id === product.idProduct);
-        if (!foundProduct) {
-          throw new NotFoundError("error.noAllProductsFound");
-        }
-        return {
-          product: foundProduct,
-          quantity: product.quantity
-        };
-      });
-
-      const experiencesWithQuantities = data.experiences.map(experience => {
-        const foundExperience = experiencesDb.find(e => e.id === experience.idExperience);
-        if (!foundExperience) {
-          throw new NotFoundError("error.noAllExperiencesFound");
-        }
-        return {
-          experience: foundExperience,
-          quantity: experience.quantity
-        };
-      });
-
-      const promotionWithQuantities = data.promotions.map(promotion => {
-        return {
-          promotionId:promotion.idPromotion,
-          price:promotion.price
-        }
-      })
-
-      // Calculate total price
-      reserve.gross_import = utils.calculateReservePrice(
-        tentsWithQuantities, 
-        productsWithQuantities, 
-        experiencesWithQuantities,
-        promotionWithQuantities
-      );
+      reserve.gross_import = priceComputation.total;
 
       const { netImport, discount, discount_name } = await utils.applyDiscount(reserve.gross_import, reserve.discount_code_id);
       reserve.discount_code_id = reserve.discount_code_id;
@@ -436,6 +490,22 @@ export const updateReserve = async (id:number, data: ReserveFormDto) => {
       reserve.net_import = netImport;
 
   }
+
+  const tentBreakdown = priceComputation.tentBreakdown;
+  reserve_tents = reserve_tents.map(tent => {
+    if (tent.promotionId) {
+      return tent;
+    }
+    const breakdown = tentBreakdown.find(detail => detail.idTent === tent.idTent);
+    if (breakdown) {
+      tent.aditionalPeople = breakdown.aditionalPeople;
+      tent.aditionalPeoplePrice = breakdown.aditionalPeoplePrice;
+      tent.kids = breakdown.kids;
+      tent.kidsPrice = breakdown.kidsPricePerNight;
+      tent.price = breakdown.basePricePerNight;
+    }
+    return tent;
+  });
 
   await promotionRepository.reducePromotionStock(data.promotions);
 

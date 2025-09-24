@@ -6,6 +6,7 @@ const router = express.Router();
 
 router.get('/',webController.getWebContent);
 router.post('/contact',webController.contactForm);
+router.post('/complaint',webController.complaintForm);
 
 
 router.get('/faqs',authenticateToken,checkRole('ADMIN','SUPERVISOR'),webController.getAllFaqs);

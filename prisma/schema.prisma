@@ -52,6 +52,8 @@ model Tent {
   custom_price    String          @default("[]") @db.Text
   aditional_people_price Float    @default(0)
   max_aditional_people Int        @default(0)
+  max_kids        Int             @default(1)
+  kids_bundle_price Float         @default(0)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt @default(now())
 }
@@ -221,6 +223,8 @@ model ReserveTent {
   dateTo          DateTime        
   aditionalPeople Int       @default(0)
   aditionalPeoplePrice Float @default(0)
+  kids            Int       @default(0)
+  kidsPrice       Float     @default(0)
   reserve         Reserve   @relation(fields: [reserveId], references: [id], onDelete: Cascade)
   confirmed       Boolean   @default(false)
   promotionId     Int?

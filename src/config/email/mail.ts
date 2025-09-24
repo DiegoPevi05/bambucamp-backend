@@ -1,6 +1,6 @@
 import nodemailer, { TransportOptions } from 'nodemailer';
 import {ReserveDto} from '../../dto/reserve';
-import { generateContactFormTemplateUser,generateContactFormTemplateAdmin, generateVerificationLinkTemplate, generateResetPasswordTemplate, generateReservationTemplate, generateNewReservationTemplateUser  } from './helper';
+import { generateComplaintFormTemplateAdmin, generateComplaintFormTemplateUser, generateContactFormTemplateUser,generateContactFormTemplateAdmin, generateVerificationLinkTemplate, generateResetPasswordTemplate, generateReservationTemplate, generateNewReservationTemplateUser  } from './helper';
 
 // Load SMTP configuration from environment variables
 const CLIENT_HOSTNAME =  process.env.CLIENT_HOSTNAME || 'http://localhost:5174';
@@ -64,12 +64,38 @@ const sendContactFormConfirmation = async(props:{ email:string, name:string }, l
 
 const sendContactFormAdmin = async(props:{ email:string, name:string, message:string }, language:string) => {
   const { email, name, message } = props;
-  const chosenLanguage = language === 'es' ? 'es' : 'en'; 
+  const chosenLanguage = language === 'es' ? 'es' : 'en';
 
   let emailTemplate = generateContactFormTemplateAdmin(name,email,message,chosenLanguage);
 
   await sendEmail(ADMIN_EMAIL , language === 'en' ? 'Someone wants to contact' : 'Alguien quiere contactarte', emailTemplate);
 
+}
+
+const sendComplaintFormConfirmation = async(props:{ email:string, name:string }, language:string) => {
+  const { email, name } = props;
+  const chosenLanguage = language === 'es' ? 'es' : 'en';
+
+  const emailTemplate = generateComplaintFormTemplateUser(name, chosenLanguage);
+
+  await sendEmail(email, language === 'en' ? 'We received your complaint' : 'Hemos recibido tu reclamo', emailTemplate);
+}
+
+const sendComplaintFormAdmin = async(props:{ email:string, name:string, phone:string, documentId:string, claimType:string, description:string, reservationCode?:string }, language:string) => {
+  const { email, name, phone, documentId, claimType, description, reservationCode } = props;
+  const chosenLanguage = language === 'es' ? 'es' : 'en';
+
+  const emailTemplate = generateComplaintFormTemplateAdmin({
+    name,
+    email,
+    phone,
+    documentId,
+    claimType,
+    description,
+    reservationCode,
+  }, chosenLanguage);
+
+  await sendEmail(ADMIN_EMAIL , language === 'en' ? 'New complaint received' : 'Nuevo reclamo recibido', emailTemplate);
 }
 
 // Function to send verification email
@@ -139,6 +165,8 @@ const sendConfirmationReservationEmail = async(user: { email:string, firstName:s
 export {
   sendContactFormConfirmation,
   sendContactFormAdmin,
+  sendComplaintFormConfirmation,
+  sendComplaintFormAdmin,
   sendVerificationEmail,
   sendPasswordResetEmail,
   sendNewReservationEmailUser,

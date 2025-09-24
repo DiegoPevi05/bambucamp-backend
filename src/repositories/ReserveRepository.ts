@@ -514,6 +514,8 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
         dateTo: tent.dateTo,
         aditionalPeople: tent.aditionalPeople,
         aditionalPeoplePrice:tent.aditionalPeoplePrice,
+        kids: tent.kids,
+        kidsPrice: tent.kidsPrice,
         confirmed: confirmed,
         promotionId: tent.promotionId ?? undefined,  // Handle optional promotionId
       }))
@@ -740,6 +742,8 @@ export const upsertReserveDetails = async (
       nights: tent.nights,
       aditionalPeople:tent.aditionalPeople,
       aditionalPeoplePrice:tent.aditionalPeoplePrice,
+      kids: tent.kids,
+      kidsPrice: tent.kidsPrice,
       reserveId: idReserve, // Establish the relationship
       promotionId: tent.promotionId ?? undefined,  // Handle optional promotionId
     })),

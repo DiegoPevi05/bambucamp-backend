@@ -123,6 +123,56 @@ export const generateContactFormTemplateAdmin = (name:string, email:string, mess
   return emailTemplate;
 }
 
+export const generateComplaintFormTemplateUser = (name:string , language:string):string => {
+
+  const { header, footer } = generateTemplate(language);
+
+  const templatePath = path.join(__dirname, `templates/complaint-form-user-email.html`);
+  let emailTemplate = fs.readFileSync(templatePath, 'utf8');
+  emailTemplate = emailTemplate.replace('{{title}}', language == "es" ? "Libro de Reclamaciones" : "Complaint Form" );
+  emailTemplate = emailTemplate.replace('{{greeting_hi}}', language == "es" ? "Hola" : "Hi" );
+  emailTemplate = emailTemplate.replace('{{greeting_message}}', language == "es" ? "Hemos recibido tu reclamo y nos pondremos en contacto muy pronto." : "We have received your complaint and will contact you shortly." );
+
+  emailTemplate = emailTemplate.replace('{{name}}', name);
+
+  emailTemplate = emailTemplate.replace('{{header_email}}', header).replace('{{footer_email}}', footer);
+
+  return emailTemplate;
+}
+
+export const generateComplaintFormTemplateAdmin = (
+  complaint:{ name:string; email:string; phone:string; documentId:string; claimType:string; description:string; reservationCode?:string },
+  language:string
+):string =>  {
+
+  const { header, footer } = generateTemplate(language);
+
+  const templatePath = path.join(__dirname, `templates/complaint-form-admin-email.html`);
+  let emailTemplate = fs.readFileSync(templatePath, 'utf8');
+  emailTemplate = emailTemplate.replace('{{title}}', language == "es" ? "Nuevo reclamo recibido" : "New Complaint Form" );
+  const intro = language == "es" ? "Se ha recibido un nuevo registro en el libro de reclamaciones con los siguientes datos:" : "A new complaint has been submitted with the following details:";
+  emailTemplate = emailTemplate.replace('{{intro}}', intro);
+  emailTemplate = emailTemplate.replace('{{name}}', complaint.name);
+  emailTemplate = emailTemplate.replace('{{email}}', complaint.email);
+  emailTemplate = emailTemplate.replace('{{phone}}', complaint.phone);
+  emailTemplate = emailTemplate.replace('{{documentId}}', complaint.documentId);
+  emailTemplate = emailTemplate.replace('{{claimType}}', complaint.claimType);
+  emailTemplate = emailTemplate.replace('{{description}}', complaint.description);
+  const reservationLabel = complaint.reservationCode && complaint.reservationCode.trim().length > 0 ? complaint.reservationCode : (language == "es" ? "No proporcionado" : "Not provided");
+  emailTemplate = emailTemplate.replace('{{reservationCode}}', reservationLabel);
+  emailTemplate = emailTemplate.replace('{{label_name}}', language == "es" ? "Nombre:" : "Name:");
+  emailTemplate = emailTemplate.replace('{{label_email}}', language == "es" ? "Email:" : "Email:");
+  emailTemplate = emailTemplate.replace('{{label_phone}}', language == "es" ? "Teléfono:" : "Phone:");
+  emailTemplate = emailTemplate.replace('{{label_document}}', language == "es" ? "Documento:" : "Document:" );
+  emailTemplate = emailTemplate.replace('{{label_claim_type}}', language == "es" ? "Tipo de reclamo:" : "Claim type:" );
+  emailTemplate = emailTemplate.replace('{{label_reservation}}', language == "es" ? "Código de reserva:" : "Reservation code:" );
+  emailTemplate = emailTemplate.replace('{{label_description}}', language == "es" ? "Descripción:" : "Description:" );
+
+  emailTemplate = emailTemplate.replace('{{header_email}}', header).replace('{{footer_email}}', footer);
+
+  return emailTemplate;
+}
+
 export const generateVerificationLinkTemplate = (name:string , verificationLink:string, language:string):string => {
 
   const { header, footer } = generateTemplate(language);
