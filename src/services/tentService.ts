@@ -54,6 +54,8 @@ export const createTent = async (data: TentDto, files: MulterFile[] | { [fieldna
   data.price          = Number(data.price);
   data.aditional_people_price = Number(data.aditional_people_price);
   data.max_aditional_people = Number(data.max_aditional_people);
+  data.max_kids = Number(data.max_kids ?? 0);
+  data.kids_bundle_price = Number(data.kids_bundle_price ?? 0);
 
   const tent = await tentRepository.createTent(data); // Assume this returns the created tent's ID
 
@@ -102,6 +104,14 @@ export const updateTent = async (id:number, data: TentDto, files: MulterFile[] |
 
   if(data.max_aditional_people && data.max_aditional_people != tent.max_aditional_people){
     tent.max_aditional_people = data.max_aditional_people;
+  }
+
+  if(data.max_kids != null && data.max_kids != undefined && data.max_kids != tent.max_kids){
+    tent.max_kids = Number(data.max_kids);
+  }
+
+  if(data.kids_bundle_price != null && data.kids_bundle_price != undefined && data.kids_bundle_price != tent.kids_bundle_price){
+    tent.kids_bundle_price = Number(data.kids_bundle_price);
   }
 
 

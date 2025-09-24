@@ -16,7 +16,8 @@
 		"failedToDeleteReview": "Failed to delete review",
 		"failedToFetchFaqs": "Failed to fetch Faqs",
 		"failedToCreateReview": "Failed to create review",
-		"failedToSendContactForm": "Failed to send contact form",
+                "failedToSendContactForm": "Failed to send contact form",
+                "failedToSendComplaintForm": "Failed to send complaint form",
 		"failedToFetchWebContent": "Failed to fetch web content",
 		"failedToFetchReviews": "Failed to fetch reviews",
 		"failedToValidatePromotion": "Promotion is not valid",
@@ -36,7 +37,12 @@
 		"failedToUpdateReserve": "Failed to update reserve",
 		"failedToDeleteReserve": "Failed to delete reserve",
 		"noTentsAvailable": "Tents have no Availability for the days selected",
-		"noRoomSizeCorrect": "The room size is not correct",
+                "noRoomSizeCorrect": "The room size is not correct",
+                "invalidAdditionalPeople": "Additional people value is invalid",
+                "maxAdditionalPeopleExceeded": "Additional people exceeds the allowed limit for this glamping",
+                "maxAdultsExceeded": "A maximum of three adults are allowed per glamping",
+                "invalidKidsCount": "Kids quantity is invalid",
+                "maxKidsExceeded": "Kids quantity exceeds the allowed limit for this glamping",
 		"promotionNotFound": "The promotion not found",
 		"promotionIsExpired": "The promotion has expired",
 		"promotionIsOutOfStock": "Promotion is out of stock",
@@ -233,7 +239,8 @@
 		"NotificationReserveUserUpdatedDescription": "Your reservation for the date {{date}} has been successfully updated.",
 		"notificationIsRead": "Notification was read",
 		"promotionValidated": "Promotion is valid",
-		"messageSended": "Message sent",
+                "messageSended": "Message sent",
+                "complaintSubmitted": "Complaint registered",
 		"reviewCreated": "Review created",
 		"faqCreated": "Faq created",
 		"faqDeleted": "Faq deleted"
@@ -286,8 +293,12 @@
 		"passwordRequired": "Password is Required",
 		"roleInvalid": "Role must be either SUPERVISOR or CLIENT",
 		"quantityRequired": "Quantiy is required",
-		"promotionRequired": "Promotion Id is required",
-		"questionRequired": "Question is required",
-		"answerRequired": "Answer is required"
-	}
+                "promotionRequired": "Promotion Id is required",
+                "questionRequired": "Question is required",
+                "answerRequired": "Answer is required",
+                "phoneRequired": "Phone is required",
+                "documentIdRequired": "Document ID is required",
+                "claimTypeRequired": "Claim type is required",
+                "complaintDescriptionRequired": "Complaint description is required"
+        }
 }

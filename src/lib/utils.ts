@@ -76,6 +76,24 @@ interface CustomPrice {
   price: number;
 }
 
+export interface TentPriceBreakdown {
+  idTent: number;
+  nights: number;
+  basePricePerNight: number;
+  aditionalPeople: number;
+  aditionalPeoplePrice: number;
+  kids: number;
+  kidsPricePerNight: number;
+}
+
+export interface ReservePriceResult {
+  total: number;
+  tentBreakdown: TentPriceBreakdown[];
+  productsTotal: number;
+  experiencesTotal: number;
+  promotionsTotal: number;
+}
+
 export const calculatePrice = (basePrice: number , customPrices: string | null): number => {
 
   if(customPrices === null) return basePrice;
@@ -298,39 +316,81 @@ export const getPromotions = async (promotions: ReservePromotionFormDto[]): Prom
 }
 
 
-export const calculateReservePrice = (tents: { tent: Tent; nights: number, aditionalPeople:number }[],
+export const calculateReservePrice = (
+  tents: { tent: Tent; nights: number; aditionalPeople: number; kids?: number }[],
   products: { product: Product; quantity: number }[],
   experiences: { experience: Experience; quantity: number }[],
-  promotions:{promotionId:number, price:number}[] ): number => {
+  promotions: { promotionId: number; price: number }[]
+): ReservePriceResult => {
 
-  // Calculate the total price for tents
-  const calculateTentsPrice = tents.reduce((acc, { tent, nights, aditionalPeople }) => {
+  const tentBreakdown: TentPriceBreakdown[] = tents.map(({ tent, nights, aditionalPeople, kids = 0 }) => {
     const pricePerTent = calculatePrice(tent.price, tent.custom_price);
+    const additionalAdults = Number(aditionalPeople ?? 0);
+    const kidsCount = Number(kids ?? 0);
 
-    if(tent.max_aditional_people < aditionalPeople){
-      throw new BadRequestError("error.noRoomSizeCorrect");
+    if (additionalAdults < 0) {
+      throw new BadRequestError('error.invalidAdditionalPeople');
     }
-    return acc + ( nights * (pricePerTent + (tent.aditional_people_price * aditionalPeople))); // is pending add to Tent addiontal people
+
+    if (tent.max_aditional_people < additionalAdults) {
+      throw new BadRequestError('error.maxAdditionalPeopleExceeded');
+    }
+
+    if (tent.qtypeople + additionalAdults > 3) {
+      throw new BadRequestError('error.maxAdultsExceeded');
+    }
+
+    if (kidsCount < 0) {
+      throw new BadRequestError('error.invalidKidsCount');
+    }
+
+    if (kidsCount > tent.max_kids) {
+      throw new BadRequestError('error.maxKidsExceeded');
+    }
+
+    let kidsPricePerNight = 0;
+    if (tent.kids_bundle_price > 0 && tent.max_kids > 0 && kidsCount === tent.max_kids) {
+      kidsPricePerNight = tent.kids_bundle_price;
+    }
+
+    return {
+      idTent: tent.id,
+      nights,
+      basePricePerNight: pricePerTent,
+      aditionalPeople: additionalAdults,
+      aditionalPeoplePrice: tent.aditional_people_price,
+      kids: kidsCount,
+      kidsPricePerNight,
+    };
+  });
+
+  const calculateTentsPrice = tentBreakdown.reduce((acc, breakdown) => {
+    const additionalAdultsCharge = breakdown.aditionalPeople * breakdown.aditionalPeoplePrice;
+    return acc + (breakdown.nights * (breakdown.basePricePerNight + additionalAdultsCharge + breakdown.kidsPricePerNight));
   }, 0);
 
-  // Calculate the total price for products
   const calculateProductsPrice = products.reduce((acc, { product, quantity }) => {
     const pricePerProduct = calculatePrice(product.price, product.custom_price);
-    return acc + (pricePerProduct * quantity); // Multiply by quantity
+    return acc + (pricePerProduct * quantity);
   }, 0);
 
-  // Calculate the total price for experiences
   const calculateExperiencesPrice = experiences.reduce((acc, { experience, quantity }) => {
     const pricePerExperience = calculatePrice(experience.price, experience.custom_price);
-    return acc + (pricePerExperience * quantity); // Multiply by quantity
+    return acc + (pricePerExperience * quantity);
   }, 0);
 
   const calculatePromotionsPrice = promotions.reduce((acc, { price }) => {
-    return acc + (1 * price); // Multiply by quantity
+    return acc + price;
   }, 0);
 
-  return calculateTentsPrice + calculateProductsPrice + calculateExperiencesPrice + calculatePromotionsPrice;
-}
+  return {
+    total: calculateTentsPrice + calculateProductsPrice + calculateExperiencesPrice + calculatePromotionsPrice,
+    tentBreakdown,
+    productsTotal: calculateProductsPrice,
+    experiencesTotal: calculateExperiencesPrice,
+    promotionsTotal: calculatePromotionsPrice,
+  };
+};
 
 
 export const parseImagesInReserves = (reserves: ReserveDto[]) => {
@@ -565,6 +625,8 @@ export const getPromotionItems = async(promotions:ReservePromotionFormDto[]):Pro
           confirmed:false,
           aditionalPeople:0,
           aditionalPeoplePrice:0,
+          kids:0,
+          kidsPrice:0,
           promotionId:promoDB.id
         }
         tents.push(tent);

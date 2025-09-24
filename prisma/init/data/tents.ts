@@ -15,6 +15,7 @@ export const TentsData = [
       bar: false,
       hotwater: true,
       airconditioning: false,
+      bonfire: true,
       grill: true,
     }),
     qtypeople: 2,
@@ -23,6 +24,8 @@ export const TentsData = [
     price: 490.0,
     aditional_people_price: 100.0,
     max_aditional_people: 1,
+    max_kids: 2,
+    kids_bundle_price: 150.0,
   },
   {
     header: 'Bambu Gold',
@@ -40,6 +43,7 @@ export const TentsData = [
       bar: false,
       hotwater: true,
       airconditioning: false,
+      bonfire: true,
       grill: true,
     }),
     qtypeople: 2,
@@ -48,6 +52,8 @@ export const TentsData = [
     price: 490.0,
     aditional_people_price: 100.0,
     max_aditional_people: 1,
+    max_kids: 2,
+    kids_bundle_price: 150.0,
   },
 
   // ===== SUITES =====
@@ -67,6 +73,7 @@ export const TentsData = [
       bar: false,
       hotwater: true,
       airconditioning: false,
+      bonfire: true,
       grill: true,       // asegurado
     }),
     qtypeople: 2,
@@ -75,6 +82,8 @@ export const TentsData = [
     price: 390.0,
     aditional_people_price: 100.0,
     max_aditional_people: 1,
+    max_kids: 1,
+    kids_bundle_price: 0,
   },
   {
     header: 'Bambu Suite',
@@ -92,6 +101,7 @@ export const TentsData = [
       bar: false,
       hotwater: false,
       airconditioning: false,
+      bonfire: true,
       grill: true,
     }),
     qtypeople: 2,
@@ -100,6 +110,8 @@ export const TentsData = [
     price: 390.0,
     aditional_people_price: 100.0,
     max_aditional_people: 1,
+    max_kids: 1,
+    kids_bundle_price: 0,
   },
   {
     header: 'Bambu Suite',
@@ -117,6 +129,7 @@ export const TentsData = [
       bar: false,
       hotwater: false,
       airconditioning: false,
+      bonfire: true,
       grill: true,
     }),
     qtypeople: 2,
@@ -125,6 +138,8 @@ export const TentsData = [
     price: 390.0,
     aditional_people_price: 100.0,
     max_aditional_people: 1,
+    max_kids: 1,
+    kids_bundle_price: 0,
   },
   {
     header: 'Bambu Suite',
@@ -142,6 +157,7 @@ export const TentsData = [
       bar: false,
       hotwater: false,
       airconditioning: false,
+      bonfire: true,
       grill: true,
     }),
     qtypeople: 2,
@@ -150,6 +166,8 @@ export const TentsData = [
     price: 390.0,
     aditional_people_price: 100.0,
     max_aditional_people: 1,
+    max_kids: 1,
+    kids_bundle_price: 0,
   },
   {
     header: 'Bambu Suite',
@@ -167,6 +185,7 @@ export const TentsData = [
       bar: false,
       hotwater: false,
       airconditioning: false,
+      bonfire: true,
       grill: true,
     }),
     qtypeople: 2,
@@ -175,5 +194,7 @@ export const TentsData = [
     price: 390.0,
     aditional_people_price: 100.0,
     max_aditional_people: 1,
+    max_kids: 1,
+    kids_bundle_price: 0,
   },
 ];

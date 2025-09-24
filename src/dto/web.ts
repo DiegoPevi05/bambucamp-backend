@@ -51,3 +51,13 @@ export interface ContactForm {
   message:string;
   saveinfo:boolean;
 }
+
+export interface ComplaintForm {
+  name:string;
+  email:string;
+  phone:string;
+  documentId:string;
+  claimType:string;
+  description:string;
+  reservationCode?:string;
+}

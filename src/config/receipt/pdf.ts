@@ -62,11 +62,11 @@ export const generateSalesNote = async (reserve:ReserveDto, t: (key: string) => 
                 tentsItems += `
                   <tr>
                     <td>${reserve.promotions.length + index + 1}</td>
-                    <td>${tent.name} | ${t("reserve.from")}: ${formatDateToYYYYMMDD(tent.dateFrom)} ${t("reserve.to")}: ${formatDateToYYYYMMDD(tent.dateTo)} ${tent.aditionalPeople > 0 ? `| ADP:${tent.aditionalPeople} ADPP: ${formatPrice(tent.aditionalPeoplePrice ?? 0)}` : ""}</td>
+                    <td>${tent.name} | ${t("reserve.from")}: ${formatDateToYYYYMMDD(tent.dateFrom)} ${t("reserve.to")}: ${formatDateToYYYYMMDD(tent.dateTo)} ${tent.aditionalPeople > 0 ? `| ADP:${tent.aditionalPeople} ADPP: ${formatPrice(tent.aditionalPeoplePrice ?? 0)}` : ""}${tent.kids > 0 ? ` | KDS:${tent.kids} KDPP: ${formatPrice(tent.kidsPrice ?? 0)}` : ""}</td>
                     <td>${t("reserve.nights")}</td>
-                    <td>${formatPrice(tent.price + (tent.aditionalPeople * (tent.aditionalPeoplePrice ?? 0)))}</td>
+                    <td>${formatPrice(tent.price + (tent.aditionalPeople * (tent.aditionalPeoplePrice ?? 0)) + (tent.kids > 0 ? (tent.kidsPrice ?? 0) : 0))}</td>
                     <td>${tent.nights}</td>
-                    <td>${formatPrice(tent.price * tent.nights + ((tent.aditionalPeoplePrice ?? 0) * tent.aditionalPeople * tent.nights))}</td>
+                    <td>${formatPrice(tent.price * tent.nights + ((tent.aditionalPeoplePrice ?? 0) * tent.aditionalPeople * tent.nights) + ((tent.kidsPrice ?? 0) * tent.nights))}</td>
                   </tr>
                 `;
             });

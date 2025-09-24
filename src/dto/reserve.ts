@@ -24,6 +24,8 @@ export interface ReserveTentDto {
   confirmed:boolean;
   aditionalPeople:number;
   aditionalPeoplePrice:number;
+  kids:number;
+  kidsPrice:number;
   promotionId?:number;
   tentDB?:Tent;
 }
