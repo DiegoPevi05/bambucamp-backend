@@ -1,19 +1,19 @@
 export const ExperiencesCategoriesData = [
   {
-    "name":"BAMBU AMOR"
+    "name": "BAMBU AMOR"
   },
   {
-    "name":"BAMBU EXPERIENCIA"
+    "name": "BAMBU EXPERIENCIA"
   },
   {
-    "name":"BAMBU AVENTURA",
+    "name": "BAMBU AVENTURA",
   },
   {
-    "name":"BAMBU TRASLADO"
+    "name": "BAMBU TRASLADO"
   }
 ]
 
-export const ExperiencesData:{header:string, name:string, description:string, price:number, duration:number, images:string, limit_age:number, qtypeople:number, categoryId:any, suggestions:string}[] = [
+export const ExperiencesData: { header: string, name: string, description: string, price: number, duration: number, images: string, limit_age: number, qtypeople: number, categoryId: any, suggestions: string }[] = [
   {
     header: 'Experiencia Extrema',
     name: 'Canotaje',
@@ -242,7 +242,7 @@ export const ExperiencesData:{header:string, name:string, description:string, pr
     "header": "Decoración Temática",
     "name": "Decoración Picnic",
     "description": "Servicio de decoración para un picnic especial al aire libre.",
-    "price": 50.0,
+    "price": 80.0,
     "duration": 120,
     "images": "decoracion_picnic",
     "limit_age": 18,
