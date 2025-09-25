@@ -552,6 +552,8 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
     }
   };
 
+  const previewByIndex = data.tents.map(tent => tent.preview);
+
   // Create the reserve in the database
   const createdReserve = await prisma.reserve.create({
     data: reserveData,
@@ -582,9 +584,10 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
     const enrichedReserve: ReserveDto = {
       ...reserve,
       id:createdReserve.id,
-      tents: reserve.tents.map(tent => ({
+      tents: reserve.tents.map((tent, index) => ({
         ...tent,
         promotionId: tent.promotionId ?? undefined,  // Handle null values
+        preview: previewByIndex[index],
       })),
       products: reserve.products.map(product => ({
         ...product,

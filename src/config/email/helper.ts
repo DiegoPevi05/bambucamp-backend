@@ -264,6 +264,36 @@ export const generateReservationTemplate = (title: string, greeting_message_1: s
   let tentsHtml = '';
 
   reserve.tents.forEach(tent => {
+    const preview = tent.preview;
+    const nightlyBase = preview?.nightlyBase ?? (preview ? preview.nightly : tent.price);
+    const nightlyTotal = preview?.nightly ?? tent.price;
+    const effectiveExtraAdults = preview?.effectiveExtraAdults ?? tent.aditionalPeople ?? 0;
+    const extraAdultPrice = tent.aditionalPeoplePrice ?? 0;
+    const kidsCount = tent.kids ?? 0;
+    const kidsBundlePrice = preview?.kidsBundlePrice ?? tent.kidsPrice ?? 0;
+    const kidsBundleApplies = (preview?.kidsBundleApplies ?? false) && kidsBundlePrice > 0;
+    const perWord = language == "es" ? "por" : "per";
+    const nightWord = language == "es" ? "noche" : "night";
+    const baseNightlyLabel = language == "es" ? "Tarifa base por noche" : "Base nightly rate";
+    const nightlyTotalLabel = language == "es" ? "Tarifa por noche con adicionales" : "Nightly total";
+    const extraAdultsLabel = language == "es" ? "Adultos adicionales" : "Extra adults";
+    const kidsLabel = language == "es" ? "Niños" : "Kids";
+    const kidsBundleLabel = language == "es" ? "Bundle de niños" : "Kids bundle";
+    const nightsLabel = language == "es" ? "Cantidad de noches" : "Qty. nights";
+    const totalLabel = language == "es" ? "Total" : "Total";
+    const fromLabel = language == "es" ? "Desde" : "From";
+    const toLabel = language == "es" ? "Hasta" : "To";
+
+    const extraAdultsLine = effectiveExtraAdults > 0
+      ? `<span class="email-reserve-content-label">${extraAdultsLabel}</span>:&nbsp;${effectiveExtraAdults}&nbsp;x&nbsp;${utils.formatPrice(extraAdultPrice)}/${perWord}&nbsp;${nightWord}<br>`
+      : '';
+    const kidsCountLine = kidsCount > 0
+      ? `<span class="email-reserve-content-label">${kidsLabel}</span>:&nbsp;${kidsCount}<br>`
+      : '';
+    const kidsBundleLine = kidsBundleApplies
+      ? `<span class="email-reserve-content-label">${kidsBundleLabel}</span>:&nbsp;${utils.formatPrice(kidsBundlePrice)}/${perWord}&nbsp;${nightWord}<br>`
+      : '';
+
     const tentHtml = `
                   <tr>
                     <td class="email-reserve-content-structure">
@@ -296,13 +326,15 @@ export const generateReservationTemplate = (title: string, greeting_message_1: s
                                     <td class="email-reserve-content-header">
                                       <h3>${tent.name}</h3>
                                       <p class="email-reserve-content-paragraph">
-                                        <span class="email-reserve-content-label">${language == "es" ? "Desde" : "From"}</span>:&nbsp;${utils.formatDate(tent.dateFrom)}&nbsp;<br>
-                                        <span class="email-reserve-content-label">${language == "es" ? "Hasta" : "To"}</span>:&nbsp;${utils.formatDate(tent.dateTo)}&nbsp;<br>
-                                        <span class="email-reserve-content-label">${language == "es" ? "Personas" : "People"}</span>:&nbsp;${tent.nights}&nbsp;<br>
-                                        <span class="email-reserve-content-label">${language == "es" ? "Precio" : "Price"}</span>:&nbsp;${utils.formatPrice(tent.price)}/${language == "es" ? "por" : "per"}&nbsp;${language == "es" ? "noche" : "night"}<br>
-                                        <span class="email-reserve-content-label">${language == "es" ? "Qty. noches" : "Qty. nights"}</span>:&nbsp;${tent.nights}<br>
-                                        <span class="email-reserve-content-label">&nbsp;${utils.formatPrice(tent.price)}&nbsp;x&nbsp;${tent.nights}&nbsp;${language == "es" ? "noches" : "nights"}</span><br>
-                                        <span class="email-reserve-content-label">${language == "es" ? "Total" : "Total"}</span>:&nbsp;${utils.formatPrice(tent.price * tent.nights)}<br>
+                                        <span class="email-reserve-content-label">${fromLabel}</span>:&nbsp;${utils.formatDate(tent.dateFrom)}&nbsp;<br>
+                                        <span class="email-reserve-content-label">${toLabel}</span>:&nbsp;${utils.formatDate(tent.dateTo)}&nbsp;<br>
+                                        ${kidsCountLine}
+                                        ${extraAdultsLine}
+                                        ${kidsBundleLine}
+                                        <span class="email-reserve-content-label">${baseNightlyLabel}</span>:&nbsp;${utils.formatPrice(nightlyBase)}/${perWord}&nbsp;${nightWord}<br>
+                                        <span class="email-reserve-content-label">${nightlyTotalLabel}</span>:&nbsp;${utils.formatPrice(nightlyTotal)}/${perWord}&nbsp;${nightWord}<br>
+                                        <span class="email-reserve-content-label">${nightsLabel}</span>:&nbsp;${tent.nights}<br>
+                                        <span class="email-reserve-content-label">${totalLabel}</span>:&nbsp;${utils.formatPrice(nightlyTotal * tent.nights)}<br>
                                       </p>
                                     </td>
                                   </tr>

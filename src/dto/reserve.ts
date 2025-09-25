@@ -13,6 +13,14 @@ export enum ReserveEntityType {
   PROMOTION = 'PROMOTION',
 }
 
+export interface TentNightlyPreview {
+  nightly: number;
+  nightlyBase: number;
+  kidsBundleApplies: boolean;
+  kidsBundlePrice: number;
+  effectiveExtraAdults: number;
+}
+
 export interface ReserveTentDto {
   id?:number;
   idTent:number;
@@ -28,6 +36,7 @@ export interface ReserveTentDto {
   kidsPrice:number;
   promotionId?:number;
   tentDB?:Tent;
+  preview?: TentNightlyPreview;
 }
 
 export interface ReserveProductDto {
