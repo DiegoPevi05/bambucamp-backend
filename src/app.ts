@@ -33,13 +33,13 @@ const server = http.createServer(app);
 app.use(i18nextMiddleware.handle(i18next));
 
 app.use(cors({
-  origin: [process.env.ADMIN_HOSTNAME || 'http://localhost:5173' , process.env.CLIENT_HOSTNAME_2 || 'http://localhost:5174', process.env.CLIENT_HOSTNAME || 'http://localhost:5173'], // Replace with your client’s origin
+  origin: [process.env.ADMIN_HOSTNAME || 'http://localhost:5173', process.env.CLIENT_HOSTNAME_2 || 'http://localhost:5174', process.env.CLIENT_HOSTNAME || 'http://localhost:5173'], // Replace with your client’s origin
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Include additional methods
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept-Language'],
 }));
 
 app.use(bodyParser.json());
-// Serve static files
+
 app.use('/public/images', express.static(path.join(__dirname, '../public/images')));
 
 app.use('/users', userRoutes);
@@ -47,7 +47,7 @@ app.use('/auth', authRoutes);
 app.use('/categories', categoryRoutes);
 app.use('/experiences', experienceRoutes);
 app.use('/products', productRoutes);
-app.use('/discounts',discountRoutes);
+app.use('/discounts', discountRoutes);
 app.use('/promotions', promotionRoutes);
 app.use('/tents', tentRoutes);
 app.use('/reserves', reserveRoutes);
