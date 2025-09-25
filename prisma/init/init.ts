@@ -1,12 +1,12 @@
 import fs from 'fs';
 import path from 'path';
 import { PrismaClient } from '@prisma/client';
-import { ReviewsData } from './data/reviews'; 
+import { ReviewsData } from './data/reviews';
 import { FaqsData } from './data/faqs';
 import bcrypt from 'bcryptjs';
-import {TentsData} from './data/tents';
-import {ProductsCategoriesData, ProductsData} from './data/products';
-import {ExperiencesCategoriesData, ExperiencesData} from './data/experiences';
+import { TentsData } from './data/tents';
+import { ProductsCategoriesData, ProductsData } from './data/products';
+import { ExperiencesCategoriesData, ExperiencesData } from './data/experiences';
 
 const getImageFiles = (folderPath: string) => {
   // Define common image file extensions
@@ -29,7 +29,7 @@ const moveImagesToSubFolder = async (ObjectId: number, category: string, subfold
 
   // Define the new subfolder path
   const subFolderPath = path.join(__dirname, `../../public/images/${category}/${ObjectId}`);
-  
+
   // Create the directory if it doesn't exist
   if (!fs.existsSync(subFolderPath)) {
     fs.mkdirSync(subFolderPath, { recursive: true });
@@ -50,7 +50,7 @@ const moveImagesToSubFolder = async (ObjectId: number, category: string, subfold
 
     // Copy the file to the new location with the new name
     await fs.promises.copyFile(oldPath, newPath);
-    
+
     // Push the new path relative to the public/images directory
     newPaths.push(newPath.replace(path.join(__dirname, '../../'), ''));
   }
@@ -60,7 +60,7 @@ const moveImagesToSubFolder = async (ObjectId: number, category: string, subfold
 
 // Helper function to delete all files and subdirectories in a directory
 const clearDirectory = (subfolder: string) => {
-  const directoryPath = path.join(__dirname,`../../public/images/${subfolder}`);
+  const directoryPath = path.join(__dirname, `../../public/images/${subfolder}`);
 
   if (fs.existsSync(directoryPath)) {
     fs.readdirSync(directoryPath).forEach((file) => {
@@ -80,18 +80,19 @@ const prisma = new PrismaClient();
 
 async function main() {
 
+  await prisma.reserve.deleteMany();
   //Delete All Users
   await prisma.user.deleteMany();
   //Create Admin User
   const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD ?? "password", 10);
 
   await prisma.user.create({
-    data:{
-      email:process.env.ADMIN_EMAIL ?? "admin@bambucamp.com",
-      firstName:"Admin",
-      lastName:"",
-      phoneNumber:"000-000-000",
-      password:hashedPassword,
+    data: {
+      email: process.env.ADMIN_EMAIL ?? "admin@bambucamp.com",
+      firstName: "Admin",
+      lastName: "",
+      phoneNumber: "000-000-000",
+      password: hashedPassword,
       isDisabled: false,
       emailVerified: true,
       createdAt: new Date(),
@@ -168,17 +169,17 @@ async function main() {
   for (let product of ProductsData) {
     const currentCategory = productCategories.find(category => category.name === product.categoryId);
 
-    if(!currentCategory){
+    if (!currentCategory) {
       continue;
     }
-    product.categoryId  = currentCategory.id;
+    product.categoryId = currentCategory.id;
 
     await prisma.product.create({
       data: product,
     })
   };
 
-  
+
   //before create All tents
   clearDirectory("experiences")
   //Delete All Experiences
@@ -202,10 +203,10 @@ async function main() {
   for (let experience of ExperiencesData) {
     const currentCategory = experienceCategories.find(category => category.name === experience.categoryId);
 
-    if(!currentCategory){
+    if (!currentCategory) {
       continue;
     }
-    experience.categoryId  = currentCategory.id;
+    experience.categoryId = currentCategory.id;
 
     await prisma.experience.create({
       data: experience,
