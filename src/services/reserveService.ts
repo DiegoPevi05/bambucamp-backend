@@ -294,11 +294,12 @@ export const createReserve = async (data: ReserveFormDto, language:string):Promi
   reserveDto.tents = reserveDto.tents.map(tent => {
     const breakdown = tentBreakdown.find(detail => detail.idTent === tent.idTent);
     if (breakdown) {
-      tent.aditionalPeople = breakdown.aditionalPeople;
+      tent.aditionalPeople = breakdown.preview.effectiveExtraAdults;
       tent.aditionalPeoplePrice = breakdown.aditionalPeoplePrice;
       tent.kids = breakdown.kids;
       tent.kidsPrice = breakdown.kidsPricePerNight;
-      tent.price = breakdown.basePricePerNight;
+      tent.price = breakdown.nightlyPrice;
+      tent.preview = breakdown.preview;
     }
     return tent;
   });
@@ -498,11 +499,12 @@ export const updateReserve = async (id:number, data: ReserveFormDto) => {
     }
     const breakdown = tentBreakdown.find(detail => detail.idTent === tent.idTent);
     if (breakdown) {
-      tent.aditionalPeople = breakdown.aditionalPeople;
+      tent.aditionalPeople = breakdown.preview.effectiveExtraAdults;
       tent.aditionalPeoplePrice = breakdown.aditionalPeoplePrice;
       tent.kids = breakdown.kids;
       tent.kidsPrice = breakdown.kidsPricePerNight;
-      tent.price = breakdown.basePricePerNight;
+      tent.price = breakdown.nightlyPrice;
+      tent.preview = breakdown.preview;
     }
     return tent;
   });

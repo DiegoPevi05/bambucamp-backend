@@ -59,14 +59,25 @@ export const generateSalesNote = async (reserve:ReserveDto, t: (key: string) => 
         if (reserve.tents.length > 0) {
             let tentsItems = '';
             reserve.tents.forEach((tent, index) => {
+                const preview = tent.preview;
+                const effectiveExtraAdults = preview?.effectiveExtraAdults ?? tent.aditionalPeople ?? 0;
+                const extraAdultPrice = tent.aditionalPeoplePrice ?? 0;
+                const kidsCount = tent.kids ?? 0;
+                const kidsBundlePrice = preview?.kidsBundlePrice ?? tent.kidsPrice ?? 0;
+                const fallbackNightly = tent.price + (effectiveExtraAdults * extraAdultPrice) + (kidsCount > 0 ? kidsBundlePrice : 0);
+                const nightlyTotal = preview?.nightly ?? fallbackNightly;
+                const totalPerTent = nightlyTotal * tent.nights;
+                const extraAdultsInfo = effectiveExtraAdults > 0 ? `| ADP:${effectiveExtraAdults} ADPP: ${formatPrice(extraAdultPrice)}` : "";
+                const kidsInfo = kidsCount > 0 ? ` | KDS:${kidsCount}${kidsBundlePrice > 0 ? ` KDPP: ${formatPrice(kidsBundlePrice)}` : ""}` : "";
+
                 tentsItems += `
                   <tr>
                     <td>${reserve.promotions.length + index + 1}</td>
-                    <td>${tent.name} | ${t("reserve.from")}: ${formatDateToYYYYMMDD(tent.dateFrom)} ${t("reserve.to")}: ${formatDateToYYYYMMDD(tent.dateTo)} ${tent.aditionalPeople > 0 ? `| ADP:${tent.aditionalPeople} ADPP: ${formatPrice(tent.aditionalPeoplePrice ?? 0)}` : ""}${tent.kids > 0 ? ` | KDS:${tent.kids} KDPP: ${formatPrice(tent.kidsPrice ?? 0)}` : ""}</td>
+                    <td>${tent.name} | ${t("reserve.from")}: ${formatDateToYYYYMMDD(tent.dateFrom)} ${t("reserve.to")}: ${formatDateToYYYYMMDD(tent.dateTo)} ${extraAdultsInfo}${kidsInfo}</td>
                     <td>${t("reserve.nights")}</td>
-                    <td>${formatPrice(tent.price + (tent.aditionalPeople * (tent.aditionalPeoplePrice ?? 0)) + (tent.kids > 0 ? (tent.kidsPrice ?? 0) : 0))}</td>
+                    <td>${formatPrice(nightlyTotal)}</td>
                     <td>${tent.nights}</td>
-                    <td>${formatPrice(tent.price * tent.nights + ((tent.aditionalPeoplePrice ?? 0) * tent.aditionalPeople * tent.nights) + ((tent.kidsPrice ?? 0) * tent.nights))}</td>
+                    <td>${formatPrice(totalPerTent)}</td>
                   </tr>
                 `;
             });

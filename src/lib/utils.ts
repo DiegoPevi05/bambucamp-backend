@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { Tent , Product, Experience, Notification } from '@prisma/client';
-import { ReserveDto, ReserveExperienceDto, ReserveProductDto, ReservePromotionDto, ReservePromotionFormDto, ReserveTentDto } from '../dto/reserve';
+import { ReserveDto, ReserveExperienceDto, ReserveProductDto, ReservePromotionDto, ReservePromotionFormDto, ReserveTentDto, TentNightlyPreview } from '../dto/reserve';
 import { PublicNotification } from '../dto/notification';
 import * as reserveRepository from '../repositories/ReserveRepository';
 import * as discountCodeRepository from '../repositories/DiscountCodeRepository';
@@ -80,10 +80,12 @@ export interface TentPriceBreakdown {
   idTent: number;
   nights: number;
   basePricePerNight: number;
+  nightlyPrice: number;
   aditionalPeople: number;
   aditionalPeoplePrice: number;
   kids: number;
   kidsPricePerNight: number;
+  preview: TentNightlyPreview;
 }
 
 export interface ReservePriceResult {
@@ -119,9 +121,72 @@ export const getCurrentCustomPrice = (customPrices: string): number => {
     return 0;
   }
   matchingPrices.sort((a, b) => b.dateTo.getTime() - a.dateTo.getTime());
-  
+
   return matchingPrices[0].price;
 }
+
+export const computeTentNightly = (
+  tent: Pick<
+    Tent,
+    |
+      'price'
+      | 'custom_price'
+      | 'qtykids'
+      | 'max_kids'
+      | 'kids_bundle_price'
+      | 'max_aditional_people'
+      | 'aditional_people_price'
+      | 'qtypeople'
+  >,
+  selection: { kids?: number; aditionalPeople?: number }
+): { preview: TentNightlyPreview; selectedKids: number } => {
+  const nightlyBase = calculatePrice(tent.price, tent.custom_price);
+
+  const maxKids = tent.max_kids ?? 0;
+  const rawSelectedKids = Number(selection.kids ?? 0);
+  if (rawSelectedKids < 0) {
+    throw new BadRequestError('error.invalidKidsCount');
+  }
+  if (rawSelectedKids > maxKids) {
+    throw new BadRequestError('error.maxKidsExceeded');
+  }
+
+  const selectedKids = Math.max(0, Math.min(rawSelectedKids, maxKids));
+
+  const rawExtraAdults = Number(selection.aditionalPeople ?? 0);
+  if (rawExtraAdults < 0) {
+    throw new BadRequestError('error.invalidAdditionalPeople');
+  }
+
+  const maxExtraAdults = tent.max_aditional_people ?? 0;
+  if (rawExtraAdults > maxExtraAdults) {
+    throw new BadRequestError('error.maxAdditionalPeopleExceeded');
+  }
+
+  const hasKids = selectedKids > 0;
+  const effectiveExtraAdults = hasKids ? 0 : rawExtraAdults;
+
+  if (tent.qtypeople + effectiveExtraAdults > 3) {
+    throw new BadRequestError('error.maxAdultsExceeded');
+  }
+
+  const kidsBundleEligible = tent.kids_bundle_price > 0 && tent.max_kids > 0;
+  const kidsBundleApplies = kidsBundleEligible && selectedKids === tent.max_kids && effectiveExtraAdults === 0;
+  const kidsBundlePrice = kidsBundleApplies ? tent.kids_bundle_price : 0;
+
+  const nightly = nightlyBase + (effectiveExtraAdults * tent.aditional_people_price) + kidsBundlePrice;
+
+  return {
+    preview: {
+      nightly,
+      nightlyBase,
+      kidsBundleApplies,
+      kidsBundlePrice,
+      effectiveExtraAdults,
+    },
+    selectedKids,
+  };
+};
 
 export const checkAvailability = async (tents: ReserveTentDto[]): Promise<boolean> => {
   // Find reservations that overlap with the provided tents' date ranges
@@ -324,49 +389,23 @@ export const calculateReservePrice = (
 ): ReservePriceResult => {
 
   const tentBreakdown: TentPriceBreakdown[] = tents.map(({ tent, nights, aditionalPeople, kids = 0 }) => {
-    const pricePerTent = calculatePrice(tent.price, tent.custom_price);
-    const additionalAdults = Number(aditionalPeople ?? 0);
-    const kidsCount = Number(kids ?? 0);
-
-    if (additionalAdults < 0) {
-      throw new BadRequestError('error.invalidAdditionalPeople');
-    }
-
-    if (tent.max_aditional_people < additionalAdults) {
-      throw new BadRequestError('error.maxAdditionalPeopleExceeded');
-    }
-
-    if (tent.qtypeople + additionalAdults > 3) {
-      throw new BadRequestError('error.maxAdultsExceeded');
-    }
-
-    if (kidsCount < 0) {
-      throw new BadRequestError('error.invalidKidsCount');
-    }
-
-    if (kidsCount > tent.max_kids) {
-      throw new BadRequestError('error.maxKidsExceeded');
-    }
-
-    let kidsPricePerNight = 0;
-    if (tent.kids_bundle_price > 0 && tent.max_kids > 0 && kidsCount === tent.max_kids) {
-      kidsPricePerNight = tent.kids_bundle_price;
-    }
+    const { preview, selectedKids } = computeTentNightly(tent, { kids, aditionalPeople });
 
     return {
       idTent: tent.id,
       nights,
-      basePricePerNight: pricePerTent,
-      aditionalPeople: additionalAdults,
+      basePricePerNight: preview.nightlyBase,
+      nightlyPrice: preview.nightly,
+      aditionalPeople: preview.effectiveExtraAdults,
       aditionalPeoplePrice: tent.aditional_people_price,
-      kids: kidsCount,
-      kidsPricePerNight,
+      kids: selectedKids,
+      kidsPricePerNight: preview.kidsBundlePrice,
+      preview,
     };
   });
 
   const calculateTentsPrice = tentBreakdown.reduce((acc, breakdown) => {
-    const additionalAdultsCharge = breakdown.aditionalPeople * breakdown.aditionalPeoplePrice;
-    return acc + (breakdown.nights * (breakdown.basePricePerNight + additionalAdultsCharge + breakdown.kidsPricePerNight));
+    return acc + (breakdown.nights * breakdown.nightlyPrice);
   }, 0);
 
   const calculateProductsPrice = products.reduce((acc, { product, quantity }) => {
@@ -399,8 +438,24 @@ export const parseImagesInReserves = (reserves: ReserveDto[]) => {
       if (tent?.tentDB && typeof tent.tentDB.images === 'string') {
         tent.tentDB.images = JSON.parse(tent.tentDB.images.replace(/\\\\/g, '\\\\') || '[]');
       }
+
+      if (tent?.tentDB) {
+        try {
+          const { preview, selectedKids } = computeTentNightly(tent.tentDB, {
+            kids: tent.kids,
+            aditionalPeople: tent.aditionalPeople,
+          });
+          tent.preview = preview;
+          tent.aditionalPeople = preview.effectiveExtraAdults;
+          tent.kids = selectedKids;
+          tent.kidsPrice = preview.kidsBundlePrice;
+          tent.price = preview.nightly;
+        } catch (error) {
+          // Ignore pricing errors when enriching historic reserves
+        }
+      }
     });
-    
+
     reserve?.products?.forEach((product) => {
       if (product?.productDB && typeof product.productDB.images === 'string') {
         product.productDB.images = JSON.parse(product.productDB.images.replace(/\\\\/g, '\\\\') || '[]');
