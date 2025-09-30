@@ -33,7 +33,7 @@ const server = http.createServer(app);
 app.use(i18nextMiddleware.handle(i18next));
 
 app.use(cors({
-  origin: [process.env.ADMIN_HOSTNAME || 'http://localhost:5173', process.env.CLIENT_HOSTNAME_2 || 'http://localhost:5174', process.env.CLIENT_HOSTNAME || 'http://localhost:5173'], // Replace with your client’s origin
+  origin: [process.env.ADMIN_HOSTNAME || 'http://localhost:5173',process.env.ADMIN_HOSTNAME_2 || 'http://localhost:5172', process.env.CLIENT_HOSTNAME_2 || 'http://localhost:5174', process.env.CLIENT_HOSTNAME || 'http://localhost:5173'], // Replace with your client’s origin
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Include additional methods
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept-Language'],
 }));
