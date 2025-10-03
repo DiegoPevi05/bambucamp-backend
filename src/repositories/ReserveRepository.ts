@@ -1,7 +1,7 @@
-import { PrismaClient, Reserve, ReserveTent, ReserveProduct, ReserveExperience, Tent, ReserveStatus,   } from "@prisma/client";
-import { ReserveDto, ReserveFilters, PaginatedReserve, ReserveTentDto, ReserveExperienceDto, ReserveProductDto, ReserveOptions, ReservePromotionDto, createReserveProductDto, createReserveExperienceDto } from "../dto/reserve";
+import { PrismaClient, Reserve, ReserveTent, ReserveProduct, ReserveExperience, Tent, ReserveStatus, } from "@prisma/client";
+import { ReserveDto, ReserveFilters, PaginatedReserve, ReserveTentDto, ReserveExperienceDto, ReserveProductDto, ReserveOptions, createReserveProductDto, createReserveExperienceDto } from "../dto/reserve";
 import * as utils from "../lib/utils";
-import {NotFoundError} from "../middleware/errors";
+import { NotFoundError } from "../middleware/errors";
 
 interface Pagination {
   page: number;
@@ -98,7 +98,7 @@ export const getCalendarDates = async (page: number): Promise<{ date: Date, labe
     });
 
     const reservedTentIds = reservedTents.map(reserveTent => reserveTent.idTent);
-    
+
     // Check if all active tents are reserved on this date
     const allReserved = activeTentIds.every(tentId => reservedTentIds.includes(tentId));
     const available = !allReserved;
@@ -113,7 +113,7 @@ export const getCalendarDates = async (page: number): Promise<{ date: Date, labe
   return datesInMonth;
 };
 
-export const getMyReservesByMonth = async (page: number, userId?: number): Promise<{ reserves: { id:number, external_id:string, dateFrom:Date, dateTo:Date }[] }> => {
+export const getMyReservesByMonth = async (page: number, userId?: number): Promise<{ reserves: { id: number, external_id: string, dateFrom: Date, dateTo: Date }[] }> => {
   const currentDate = new Date();
 
   // Calculate the target month and year based on the page
@@ -146,19 +146,19 @@ export const getMyReservesByMonth = async (page: number, userId?: number): Promi
       },
       dateFrom: true,
       dateTo: true,
-      reserveId:true
+      reserveId: true
     },
   });
 
   const formattedReserves = reserveTents.map(reserveTent => ({
     id: reserveTent.reserveId,
-    external_id:reserveTent.reserve.external_id,
+    external_id: reserveTent.reserve.external_id,
     dateFrom: reserveTent.dateFrom,
     dateTo: reserveTent.dateTo,
   }));
 
   return {
-    reserves:formattedReserves,
+    reserves: formattedReserves,
   };
 };
 
@@ -190,7 +190,6 @@ export const getMyReserves = async (pagination: Pagination, userId?: number): Pr
       tents: true,
       products: true,
       experiences: true,
-      promotions:true,
     },
   });
 
@@ -199,7 +198,6 @@ export const getMyReserves = async (pagination: Pagination, userId?: number): Pr
       const tentIds = reserve.tents.map((t) => t.idTent);
       const productIds = reserve.products.map((p) => p.idProduct);
       const experienceIds = reserve.experiences.map((e) => e.idExperience);
-      const promotionIds = reserve.promotions.map((e) => e.idPromotion);
 
       const tentsDB = await prisma.tent.findMany({
         where: {
@@ -219,33 +217,19 @@ export const getMyReserves = async (pagination: Pagination, userId?: number): Pr
         },
       });
 
-      const promotionsDB = await prisma.promotion.findMany({
-        where: {
-
-          id: { in: promotionIds },
-        },
-      });
-
       return {
         ...reserve,
         tents: reserve.tents.map((tent) => ({
           ...tent,
           tentDB: tentsDB.find((dbTent) => dbTent.id === tent.idTent),
-          promotionId: tent.promotionId ?? undefined,  // Handle null -> undefined conversion
         })),
         products: reserve.products.map((product) => ({
           ...product,
           productDB: productsDB.find((dbProduct) => dbProduct.id === product.idProduct),
-          promotionId: product.promotionId ?? undefined,  // Handle null -> undefined conversion
         })),
         experiences: reserve.experiences.map((experience) => ({
           ...experience,
           experienceDB: experiencesDB.find((dbExperience) => dbExperience.id === experience.idExperience),
-          promotionId: experience.promotionId ?? undefined,  // Handle null -> undefined conversion
-        })),
-        promotions: reserve.promotions.map((promotion) => ({
-          ...promotion,
-          promotionDB: promotionsDB.find((dbPromotion) => dbPromotion.id === promotion.idPromotion),
         })),
       };
     })
@@ -260,15 +244,15 @@ export const getMyReserves = async (pagination: Pagination, userId?: number): Pr
   };
 };
 
-export const getAllReserveOptions = async():Promise<ReserveOptions> => {
+export const getAllReserveOptions = async (): Promise<ReserveOptions> => {
 
-  const tents =  await prisma.tent.findMany({
+  const tents = await prisma.tent.findMany({
     where: {
       status: 'ACTIVE'
     }
   });
 
-  const products =  await prisma.product.findMany({
+  const products = await prisma.product.findMany({
     where: {
       status: 'ACTIVE'
     },
@@ -277,7 +261,7 @@ export const getAllReserveOptions = async():Promise<ReserveOptions> => {
     },
   });
 
-  const experiences =  await prisma.experience.findMany({
+  const experiences = await prisma.experience.findMany({
     where: {
       status: 'ACTIVE'
     },
@@ -285,16 +269,10 @@ export const getAllReserveOptions = async():Promise<ReserveOptions> => {
       category: true, // Include the category object
     },
   });
-
-  const promotions = await prisma.promotion.findMany({
-    where:{
-      status:'ACTIVE'
-    },
-  })
 
   const discounts = await prisma.discountCode.findMany({
-    where:{
-      status:'ACTIVE'
+    where: {
+      status: 'ACTIVE'
     },
   })
 
@@ -302,49 +280,26 @@ export const getAllReserveOptions = async():Promise<ReserveOptions> => {
     tents,
     products,
     experiences,
-    promotions,
     discounts
   }
 
 }
 
-export const getReserveDtoById = async(reserveId:number):Promise<ReserveDto|null> => {
+export const getReserveDtoById = async (reserveId: number): Promise<ReserveDto | null> => {
   // Retrieve all Reserve records matching the IDs
   const reserve = await prisma.reserve.findUnique({
     where: {
-      id: reserveId ,
+      id: reserveId,
     },
     include: {
-      tents: {
-        where: {
-          OR: [
-            { promotionId: null },     // Fetch tents with null promotionId
-            { promotionId: undefined }, // Fetch tents with undefined promotionId (though undefined is often unnecessary in Prisma)
-          ],
-        },
-      },
-      products: {
-        where: {
-          OR: [
-            { promotionId: null },     // Fetch products with null promotionId
-            { promotionId: undefined }, // Fetch products with undefined promotionId
-          ],
-        },
-      },
-      experiences: {
-        where: {
-          OR: [
-            { promotionId: null },     // Fetch experiences with null promotionId
-            { promotionId: undefined }, // Fetch experiences with undefined promotionId
-          ],
-        },
-      },
-      promotions: true,
-      user:true,
+      tents: true,
+      products: true,
+      experiences: true,
+      user: true,
     }
   });
 
-  if(!reserve) return null;
+  if (!reserve) return null;
   // Map over the reserves to ensure the data types match your DTO structure
   const enrichedReserve = ({
     ...reserve,
@@ -352,18 +307,12 @@ export const getReserveDtoById = async(reserveId:number):Promise<ReserveDto|null
     user_email: reserve.user.email,
     tents: reserve.tents.map((tent) => ({
       ...tent,
-      promotionId: tent.promotionId ?? undefined,  // Convert null to undefined for compatibility
     })),
     products: reserve.products.map((product) => ({
       ...product,
-      promotionId: product.promotionId ?? undefined,  // Convert null to undefined
     })),
     experiences: reserve.experiences.map((experience) => ({
       ...experience,
-      promotionId: experience.promotionId ?? undefined,  // Convert null to undefined
-    })),
-    promotions: reserve.promotions.map((promotion) => ({
-      ...promotion,
     })),
   });
 
@@ -372,14 +321,14 @@ export const getReserveDtoById = async(reserveId:number):Promise<ReserveDto|null
 }
 
 
-export const getAllReserves = async ( filters: ReserveFilters, pagination: Pagination): Promise<PaginatedReserve> => {
+export const getAllReserves = async (filters: ReserveFilters, pagination: Pagination): Promise<PaginatedReserve> => {
   const { dateFrom, dateTo, payment_status } = filters;
   const { page, pageSize } = pagination;
 
   const skip = (page - 1) * pageSize;
   const take = pageSize;
 
- // Find ReserveTent records within the date range
+  // Find ReserveTent records within the date range
   const reservedTents = await prisma.reserveTent.findMany({
     where: {
       ...(dateFrom && { dateFrom: { lte: dateTo } }), // Ensure dateFrom is within the range
@@ -401,7 +350,7 @@ export const getAllReserves = async ( filters: ReserveFilters, pagination: Pagin
   });
 
   // Extract reserve IDs to filter the Reserve records
-  const reserveIds = [...new Set(reservedTents.map(tent => tent.reserveId))]; 
+  const reserveIds = [...new Set(reservedTents.map(tent => tent.reserveId))];
 
   const totalCount = reserveIds.length;
 
@@ -411,32 +360,10 @@ export const getAllReserves = async ( filters: ReserveFilters, pagination: Pagin
       id: { in: reserveIds },
     },
     include: {
-      tents: {
-        where: {
-          OR: [
-            { promotionId: null },     // Fetch tents with null promotionId
-            { promotionId: undefined }, // Fetch tents with undefined promotionId (though undefined is often unnecessary in Prisma)
-          ],
-        },
-      },
-      products: {
-        where: {
-          OR: [
-            { promotionId: null },     // Fetch products with null promotionId
-            { promotionId: undefined }, // Fetch products with undefined promotionId
-          ],
-        },
-      },
-      experiences: {
-        where: {
-          OR: [
-            { promotionId: null },     // Fetch experiences with null promotionId
-            { promotionId: undefined }, // Fetch experiences with undefined promotionId
-          ],
-        },
-      },
-      promotions: true,
-      user:true,
+      tents: true,
+      products: true,
+      experiences: true,
+      user: true,
     },
     orderBy: {
       createdAt: 'desc',
@@ -450,18 +377,12 @@ export const getAllReserves = async ( filters: ReserveFilters, pagination: Pagin
     user_email: reserve.user.email,
     tents: reserve.tents.map((tent) => ({
       ...tent,
-      promotionId: tent.promotionId ?? undefined,  // Convert null to undefined for compatibility
     })),
     products: reserve.products.map((product) => ({
       ...product,
-      promotionId: product.promotionId ?? undefined,  // Convert null to undefined
     })),
     experiences: reserve.experiences.map((experience) => ({
       ...experience,
-      promotionId: experience.promotionId ?? undefined,  // Convert null to undefined
-    })),
-    promotions: reserve.promotions.map((promotion) => ({
-      ...promotion,
     })),
   }));
 
@@ -487,7 +408,7 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
     throw new NotFoundError('error.noUserFoundInDB');
   }
 
-  const confirmed =  data.reserve_status != ReserveStatus.NOT_CONFIRMED
+  const confirmed = data.reserve_status != ReserveStatus.NOT_CONFIRMED
   // Prepare the data for Prisma
   const reserveData = {
     userId: data.userId,  // Ensure this is a valid number
@@ -503,7 +424,7 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
     canceled_status: data.canceled_status,
     payment_status: data.payment_status,
     reserve_status: data.reserve_status,
-    eta:data.eta,
+    eta: data.eta,
     tents: {
       create: data.tents.map(tent => ({
         idTent: tent.idTent,
@@ -512,12 +433,11 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
         nights: tent.nights,
         dateFrom: tent.dateFrom,
         dateTo: tent.dateTo,
-        aditionalPeople: tent.aditionalPeople,
-        aditionalPeoplePrice:tent.aditionalPeoplePrice,
+        additional_people_price: tent.additional_people,
+        aditional_people_price: tent.additional_people_price,
         kids: tent.kids,
-        kidsPrice: tent.kidsPrice,
+        kids_price: tent.kids_price,
         confirmed: confirmed,
-        promotionId: tent.promotionId ?? undefined,  // Handle optional promotionId
       }))
     },
     products: {
@@ -527,7 +447,6 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
         price: product.price,
         quantity: product.quantity,
         confirmed: confirmed,
-        promotionId: product.promotionId ?? undefined,  // Handle optional promotionId
       }))
     },
     experiences: {
@@ -538,21 +457,10 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
         quantity: experience.quantity,
         day: experience.day,
         confirmed: confirmed,
-        promotionId: experience.promotionId ?? undefined,  // Handle optional promotionId
       }))
     },
-    promotions: {
-      create: data.promotions.map(promotion => ({
-        idPromotion: promotion.idPromotion,
-        name: promotion.name,
-        price: promotion.price,
-        quantity: promotion.quantity,
-        confirmed: confirmed,
-      }))
-    }
   };
 
-  const previewByIndex = data.tents.map(tent => tent.preview);
 
   // Create the reserve in the database
   const createdReserve = await prisma.reserve.create({
@@ -575,7 +483,6 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
       tents: true,
       products: true,
       experiences: true,
-      promotions: true,
     },
   });
 
@@ -583,23 +490,10 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
   if (reserve) {
     const enrichedReserve: ReserveDto = {
       ...reserve,
-      id:createdReserve.id,
-      tents: reserve.tents.map((tent, index) => ({
-        ...tent,
-        promotionId: tent.promotionId ?? undefined,  // Handle null values
-        preview: previewByIndex[index],
-      })),
-      products: reserve.products.map(product => ({
-        ...product,
-        promotionId: product.promotionId ?? undefined,  // Handle null values
-      })),
-      experiences: reserve.experiences.map(experience => ({
-        ...experience,
-        promotionId: experience.promotionId ?? undefined,  // Handle null values
-      })),
-      promotions: reserve.promotions.map(promotion => ({
-        ...promotion,
-      }))
+      id: createdReserve.id,
+      tents: reserve.tents,
+      products: reserve.products,
+      experiences: reserve.experiences,
     };
 
     return enrichedReserve;
@@ -629,20 +523,20 @@ export const AddProductReserve = async (data: createReserveProductDto[]): Promis
   return createdProducts;
 };
 
-export const updateProductReserve = async(id:number, confirmed:boolean):Promise<ReserveProduct> => {
+export const updateProductReserve = async (id: number, confirmed: boolean): Promise<ReserveProduct> => {
   return await prisma.reserveProduct.update({
     where: { id },
-    data:{ confirmed }
+    data: { confirmed }
   });
 }
 
-export const deleteProductReserve = async(id:number):Promise<ReserveProduct> => {
+export const deleteProductReserve = async (id: number): Promise<ReserveProduct> => {
   return await prisma.reserveProduct.delete({
     where: { id }
   });
 }
 
-export const AddExperienceReserve = async(data: createReserveExperienceDto[]): Promise<ReserveExperience[]> => {
+export const AddExperienceReserve = async (data: createReserveExperienceDto[]): Promise<ReserveExperience[]> => {
   const createdExperiences: ReserveExperience[] = [];
 
   for (const experienceData of data) {
@@ -663,14 +557,14 @@ export const AddExperienceReserve = async(data: createReserveExperienceDto[]): P
   return createdExperiences;
 };
 
-export const updateExperienceReserve = async(id:number, confirmed:boolean):Promise<ReserveExperience> => {
+export const updateExperienceReserve = async (id: number, confirmed: boolean): Promise<ReserveExperience> => {
   return await prisma.reserveExperience.update({
     where: { id },
-    data:{ confirmed }
+    data: { confirmed }
   });
 }
 
-export const deleteExperienceReserve = async(id:number):Promise<ReserveExperience> => {
+export const deleteExperienceReserve = async (id: number): Promise<ReserveExperience> => {
   return await prisma.reserveExperience.delete({
     where: { id }
   });
@@ -713,7 +607,6 @@ export const upsertReserveDetails = async (
   tents: ReserveTentDto[],
   products: ReserveProductDto[],
   experiences: ReserveExperienceDto[],
-  promotions:ReservePromotionDto[]
 ) => {
   // Delete existing tents associated with the reserve
   await prisma.reserveTent.deleteMany({
@@ -730,25 +623,20 @@ export const upsertReserveDetails = async (
     where: { reserveId: idReserve },
   });
 
-  await prisma.reservePromotion.deleteMany({
-    where: { reserveId: idReserve },
-  });
-
   // Create new tents
   await prisma.reserveTent.createMany({
     data: tents.map((tent) => ({
       idTent: tent.idTent,
       dateFrom: tent.dateFrom,
-      dateTo:tent.dateTo,
+      dateTo: tent.dateTo,
       name: tent.name,
       price: tent.price,
       nights: tent.nights,
-      aditionalPeople:tent.aditionalPeople,
-      aditionalPeoplePrice:tent.aditionalPeoplePrice,
+      additional_people: tent.additional_people,
+      aditional_people_price: tent.additional_people_price,
       kids: tent.kids,
-      kidsPrice: tent.kidsPrice,
+      kids_price: tent.kids_price,
       reserveId: idReserve, // Establish the relationship
-      promotionId: tent.promotionId ?? undefined,  // Handle optional promotionId
     })),
   });
 
@@ -760,7 +648,6 @@ export const upsertReserveDetails = async (
       price: product.price,
       quantity: product.quantity,
       reserveId: idReserve, // Establish the relationship
-      promotionId: product.promotionId ?? undefined,  // Handle optional promotionId
     })),
   });
 
@@ -771,19 +658,7 @@ export const upsertReserveDetails = async (
       name: experience.name,
       price: experience.price,
       quantity: experience.quantity,
-      day:experience.day,
-      reserveId: idReserve, // Establish the relationship
-      promotionId: experience.promotionId ?? undefined,  // Handle optional promotionId
-    })),
-  });
-
-  // Create new experiences
-  await prisma.reservePromotion.createMany({
-    data: promotions.map((promotion) => ({
-      idPromotion: promotion.idPromotion,
-      name: promotion.name,
-      price: promotion.price,
-      quantity: promotion.quantity,
+      day: experience.day,
       reserveId: idReserve, // Establish the relationship
     })),
   });
@@ -795,12 +670,11 @@ export const upsertReserveDetails = async (
       tents: true,
       products: true,
       experiences: true,
-      promotions:true,
     },
   });
 };
 
-export const updateReserve = async (id:number, data: Reserve): Promise<Reserve> => {
+export const updateReserve = async (id: number, data: Reserve): Promise<Reserve> => {
   return await prisma.reserve.update({
     where: { id },
     data
@@ -815,7 +689,7 @@ export const deleteReserve = async (id: number): Promise<Reserve> => {
 
 
 export const confirmReserve = async (reserveId: number): Promise<void> => {
-  // Update all related tents, products, experiences, promotions to confirmed
+
   await prisma.reserve.update({
     where: { id: reserveId },
     data: {
@@ -829,9 +703,6 @@ export const confirmReserve = async (reserveId: number): Promise<void> => {
       experiences: {
         updateMany: { data: { confirmed: true }, where: { reserveId } }
       },
-      promotions: {
-        updateMany: { data: { confirmed: true }, where: { reserveId } }
-      }
     }
   });
 };
@@ -887,29 +758,13 @@ export const confirmExperience = async (reserveExperienceId: number): Promise<vo
   });
 };
 
-export const confirmPromotion = async (reservePromotionId: number): Promise<void> => {
-  // Ensure the promotion belongs to the provided reserveId before updating
-  const promotion = await prisma.reservePromotion.findFirst({
-    where: { id: reservePromotionId }
-  });
-
-  if (!promotion) {
-    throw new NotFoundError('error.noPromotionFoundInDB');
-  }
-
-  // Update the promotion to confirmed
-  await prisma.reservePromotion.update({
-    where: { id: reservePromotionId },
-    data: { confirmed: true }
-  });
-};
 
 interface SalesFilters {
-  step: "W"|"M"|"Y";
-  type:"A"|"P";
+  step: "W" | "M" | "Y";
+  type: "A" | "P";
 }
 
-export const getNetSalesStatistics = async (filters: SalesFilters, language:string): Promise<{ date: string; amount: number }[]> => {
+export const getNetSalesStatistics = async (filters: SalesFilters, language: string): Promise<{ date: string; amount: number }[]> => {
   const { step, type } = filters;
   const today = new Date();
   let startDate: Date | undefined;
@@ -959,7 +814,7 @@ export const getNetSalesStatistics = async (filters: SalesFilters, language:stri
           net_import: true, // Ensure external_id is selected
         },
       },
-      reserveId:true,
+      reserveId: true,
       dateFrom: true,
       dateTo: true,
     },
@@ -970,7 +825,7 @@ export const getNetSalesStatistics = async (filters: SalesFilters, language:stri
 
   reservedTentIds.forEach(({ reserveId, dateFrom, reserve }) => {
     if (
-      !reserveMap[reserveId] || 
+      !reserveMap[reserveId] ||
       reserveMap[reserveId].dateFrom > dateFrom
     ) {
       reserveMap[reserveId] = {
@@ -1026,7 +881,7 @@ export const getNetSalesStatistics = async (filters: SalesFilters, language:stri
     // Group by week for the last 5 weeks
     let currentWeekStart = new Date(today);
     currentWeekStart.setDate(today.getDate() - today.getDay()); // Start of current week (Sunday)
-    
+
     const weekIntervals = [];
     for (let i = 0; i < 5; i++) {
       const weekEnd = new Date(currentWeekStart); // End of the current week
@@ -1048,12 +903,12 @@ export const getNetSalesStatistics = async (filters: SalesFilters, language:stri
       const dateLabel = `${start.toISOString().slice(0, 10)}`;
 
       if (type === "A") {
-            accumulatedAmount += weeklyAmount;
-            salesData.push({ date: dateLabel, amount: accumulatedAmount });
-          } else {
-            salesData.push({ date: dateLabel, amount: weeklyAmount });
-          }
+        accumulatedAmount += weeklyAmount;
+        salesData.push({ date: dateLabel, amount: accumulatedAmount });
+      } else {
+        salesData.push({ date: dateLabel, amount: weeklyAmount });
       }
+    }
   } else if (step === "Y") {
     // Group by month for the last 12 months
     const monthIntervals = [];
@@ -1092,7 +947,7 @@ export const getNetSalesStatistics = async (filters: SalesFilters, language:stri
 };
 
 
-export const getReserveQuantityStatistics = async (filters: SalesFilters, language:string): Promise<{ date: string; quantity: number }[]> => {
+export const getReserveQuantityStatistics = async (filters: SalesFilters, language: string): Promise<{ date: string; quantity: number }[]> => {
   const { step, type } = filters;
   const today = new Date();
   let startDate: Date | undefined;

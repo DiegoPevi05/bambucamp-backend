@@ -1,19 +1,18 @@
-import {ComplaintForm, ContactForm, FaqDto, PaginatedFaqs, PaginatedReviews, PublicFaqDto, PublicReviewDto, ReviewDto} from '../dto/web';
+import { ComplaintForm, ContactForm, FaqDto, PaginatedFaqs, PaginatedReviews, PublicFaqDto, PublicReviewDto, ReviewDto } from '../dto/web';
 import * as webRepository from '../repositories/WebRepository';
-import * as tentService  from '../services/tentService';
-import * as promotionService from '../services/promotionService';
+import * as tentService from '../services/tentService';
 import { webContent } from '../dto/web';
-import {Review} from '@prisma/client';
+import { Review } from '@prisma/client';
 import { sendComplaintFormAdmin, sendComplaintFormConfirmation, sendContactFormAdmin, sendContactFormConfirmation } from '../config/email/mail';
 
-export const contactForm = async(props:ContactForm, language:string) => {
+export const contactForm = async (props: ContactForm, language: string) => {
   const { email, name, message, saveinfo } = props;
 
-  await sendContactFormConfirmation({email, name }, language);
-  await sendContactFormAdmin({email, name, message }, language);
+  await sendContactFormConfirmation({ email, name }, language);
+  await sendContactFormAdmin({ email, name, message }, language);
 }
 
-export const complaintForm = async(props:ComplaintForm, language:string) => {
+export const complaintForm = async (props: ComplaintForm, language: string) => {
   const { email, name, phone, documentId, claimType, description, reservationCode } = props;
 
   await sendComplaintFormConfirmation({ email, name }, language);
@@ -21,10 +20,9 @@ export const complaintForm = async(props:ComplaintForm, language:string) => {
 }
 
 export const getWebContent = async () => {
-  const webContent:webContent = {
+  const webContent: webContent = {
     tents: await tentService.getAllPublicTents(),
-    promotions:await promotionService.getAllPublicPromotions(),
-    faqs:await getAllPublicFaqs(),
+    faqs: await getAllPublicFaqs(),
     reviews: await getAllPublicReviews()
   }
   return webContent;
@@ -34,18 +32,18 @@ export const getWebContent = async () => {
 export const getAllPublicReviews = async () => {
   const reviews = await webRepository.getAllPublicReviews();
 
-  const ReviewsPublic:PublicReviewDto[]  = [] 
+  const ReviewsPublic: PublicReviewDto[] = []
 
-  reviews.forEach((review:Review) => {
-    let reviewPublic:PublicReviewDto = {
-      id:review.id,
+  reviews.forEach((review: Review) => {
+    let reviewPublic: PublicReviewDto = {
+      id: review.id,
       name: review.name,
-      title:review.title,
-      review:review.review,
-      stars:review.stars,
-      day:review.day,
-      href:review.href,
-      profile_image_url:review.profile_image_url
+      title: review.title,
+      review: review.review,
+      stars: review.stars,
+      day: review.day,
+      href: review.href,
+      profile_image_url: review.profile_image_url
     }
     ReviewsPublic.push(reviewPublic);
   });
@@ -59,14 +57,14 @@ interface Pagination {
   pageSize: number;
 }
 
-export const getAllReviews = async (pagination:Pagination):Promise<PaginatedReviews> => {
+export const getAllReviews = async (pagination: Pagination): Promise<PaginatedReviews> => {
   return await webRepository.getAllReviews(pagination);
 };
 
 export const createReview = async (data: ReviewDto) => {
 
-  data.stars        = Number(data.stars);
-  data.day          = new Date(data.day);
+  data.stars = Number(data.stars);
+  data.day = new Date(data.day);
 
   return await webRepository.createReview(data);
 };
@@ -78,13 +76,13 @@ export const deleteReview = async (id: number) => {
 export const getAllPublicFaqs = async () => {
   const faqs = await webRepository.getAllPublicFaqs();
 
-  const FaqsPublic:PublicFaqDto[]  = [] 
+  const FaqsPublic: PublicFaqDto[] = []
 
   faqs.forEach((faq) => {
-    let reviewPublic:PublicFaqDto = {
-      id:faq.id,
-      question:faq.question,
-      answer:faq.answer
+    let reviewPublic: PublicFaqDto = {
+      id: faq.id,
+      question: faq.question,
+      answer: faq.answer
     }
     FaqsPublic.push(reviewPublic);
   });
@@ -92,7 +90,7 @@ export const getAllPublicFaqs = async () => {
   return FaqsPublic;
 };
 
-export const getAllFaqs = async (pagination:Pagination):Promise<PaginatedFaqs> => {
+export const getAllFaqs = async (pagination: Pagination): Promise<PaginatedFaqs> => {
   return await webRepository.getAllFaqs(pagination);
 };
 

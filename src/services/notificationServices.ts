@@ -11,23 +11,23 @@ interface Pagination {
 export const getAllNotificationsUser = async (t: any, filters: notifcationFilters, pagination: Pagination): Promise<PaginatedNotifications> => {
   const filtersUser = {
     ...filters,
-    target:[NotificationTarget.USER],
+    target: [NotificationTarget.USER],
   }
-  return await notificationRepository.getAllNotifications(t ,filtersUser, pagination);
+  return await notificationRepository.getAllNotifications(t, filtersUser, pagination);
 };
 
 
 export const getAllNotifications = async (t: any, filters: notifcationFilters, pagination: Pagination): Promise<PaginatedNotifications> => {
-  return await notificationRepository.getAllNotifications(t ,filters, pagination);
+  return await notificationRepository.getAllNotifications(t, filters, pagination);
 };
 
-export const notificationIsRead = async(notificationId:number) => {
+export const notificationIsRead = async (notificationId: number) => {
   await notificationRepository.notificationIsRead(notificationId);
 
 }
 
-export const  notifyProductCreation = async (req: Request, product: any): Promise<void> => {
-  if(!req.user) return;
+export const notifyProductCreation = async (req: Request, product: any): Promise<void> => {
+  if (!req.user) return;
 
   const notificationData: NotificationDto = {
     title: 'message.NotificationProductCreated',
@@ -36,7 +36,7 @@ export const  notifyProductCreation = async (req: Request, product: any): Promis
     type: NotificationType.SUCCESS,
     target: NotificationTarget.SUPERVISOR,
     userId: req.user.id,
-    userName:req.user.firstName,
+    userName: req.user.firstName,
     relatedEntityId: product.id,
     relatedEntityType: 'PRODUCT',
     relatedEntityName: product.name,
@@ -49,7 +49,7 @@ export const  notifyProductCreation = async (req: Request, product: any): Promis
 
 export const notifyProductUpdate = async (req: Request, product: any): Promise<void> => {
 
-  if(!req.user) return;
+  if (!req.user) return;
 
   const notificationData: NotificationDto = {
     title: 'message.NotificationProductUpdated',
@@ -58,7 +58,7 @@ export const notifyProductUpdate = async (req: Request, product: any): Promise<v
     type: NotificationType.INFORMATION,
     target: NotificationTarget.SUPERVISOR,
     userId: req.user.id,
-    userName:req.user.firstName,
+    userName: req.user.firstName,
     relatedEntityId: product.id,
     relatedEntityType: 'PRODUCT',
     relatedEntityName: product.name,
@@ -69,30 +69,30 @@ export const notifyProductUpdate = async (req: Request, product: any): Promise<v
   await notificationRepository.createNotification(notificationData);
 }
 
-export const  notifyProductDeletion = async(req: Request, productId: number): Promise<void> =>  {
+export const notifyProductDeletion = async (req: Request, productId: number): Promise<void> => {
 
-    if(!req.user) return;
+  if (!req.user) return;
 
-    const notificationData: NotificationDto = {
-      title: 'message.NotificationProductDeleted',
-      preview: 'message.NotificationProductDeletedPreview',
-      description: 'message.NotificationProductDeletedDescription',
-      type: NotificationType.ERROR,
-      target: NotificationTarget.SUPERVISOR,
-      userId: req.user.id,
-      userName:req.user.firstName,
-      relatedEntityId: productId,
-      relatedEntityType: 'PRODUCT',
-      relatedEntityName: "",
-      date: new Date(),
-      isRead: false
-    };
+  const notificationData: NotificationDto = {
+    title: 'message.NotificationProductDeleted',
+    preview: 'message.NotificationProductDeletedPreview',
+    description: 'message.NotificationProductDeletedDescription',
+    type: NotificationType.ERROR,
+    target: NotificationTarget.SUPERVISOR,
+    userId: req.user.id,
+    userName: req.user.firstName,
+    relatedEntityId: productId,
+    relatedEntityType: 'PRODUCT',
+    relatedEntityName: "",
+    date: new Date(),
+    isRead: false
+  };
 
-    await notificationRepository.createNotification(notificationData);
+  await notificationRepository.createNotification(notificationData);
 }
 
-export const  notifyExperienceCreation = async (req: Request, experience: any): Promise<void> => {
-  if(!req.user) return;
+export const notifyExperienceCreation = async (req: Request, experience: any): Promise<void> => {
+  if (!req.user) return;
 
   const notificationData: NotificationDto = {
     title: 'message.NotificationExperienceCreated',
@@ -101,7 +101,7 @@ export const  notifyExperienceCreation = async (req: Request, experience: any): 
     type: NotificationType.SUCCESS,
     target: NotificationTarget.SUPERVISOR,
     userId: req.user.id,
-    userName:req.user.firstName,
+    userName: req.user.firstName,
     relatedEntityId: experience.id,
     relatedEntityType: 'EXPERIENCE',
     relatedEntityName: experience.name,
@@ -114,7 +114,7 @@ export const  notifyExperienceCreation = async (req: Request, experience: any): 
 
 export const notifyExperienceUpdate = async (req: Request, experience: any): Promise<void> => {
 
-  if(!req.user) return;
+  if (!req.user) return;
 
   const notificationData: NotificationDto = {
     title: 'message.NotificationExperienceUpdated',
@@ -123,7 +123,7 @@ export const notifyExperienceUpdate = async (req: Request, experience: any): Pro
     type: NotificationType.INFORMATION,
     target: NotificationTarget.SUPERVISOR,
     userId: req.user.id,
-    userName:req.user.firstName,
+    userName: req.user.firstName,
     relatedEntityId: experience.id,
     relatedEntityType: 'EXPERIENCE',
     relatedEntityName: experience.name,
@@ -134,30 +134,30 @@ export const notifyExperienceUpdate = async (req: Request, experience: any): Pro
   await notificationRepository.createNotification(notificationData);
 }
 
-export const  notifyExperienceDeletion = async(req: Request, experienceId: number): Promise<void> =>  {
+export const notifyExperienceDeletion = async (req: Request, experienceId: number): Promise<void> => {
 
-    if(!req.user) return;
+  if (!req.user) return;
 
-    const notificationData: NotificationDto = {
-      title: 'message.NotificationExperienceDeleted',
-      preview: 'message.NotificationExperienceDeletedPreview',
-      description: 'message.NotificationExperienceDeletedDescription',
-      type: NotificationType.ERROR,
-      target: NotificationTarget.SUPERVISOR,
-      userId: req.user.id,
-      userName:req.user.firstName,
-      relatedEntityId: experienceId,
-      relatedEntityType: 'EXPERIENCE',
-      relatedEntityName: "",
-      date: new Date(),
-      isRead: false
-    };
+  const notificationData: NotificationDto = {
+    title: 'message.NotificationExperienceDeleted',
+    preview: 'message.NotificationExperienceDeletedPreview',
+    description: 'message.NotificationExperienceDeletedDescription',
+    type: NotificationType.ERROR,
+    target: NotificationTarget.SUPERVISOR,
+    userId: req.user.id,
+    userName: req.user.firstName,
+    relatedEntityId: experienceId,
+    relatedEntityType: 'EXPERIENCE',
+    relatedEntityName: "",
+    date: new Date(),
+    isRead: false
+  };
 
-    await notificationRepository.createNotification(notificationData);
+  await notificationRepository.createNotification(notificationData);
 }
 
-export const  notifyDiscountCodeCreation = async (req: Request, discountCode: any): Promise<void> => {
-  if(!req.user) return;
+export const notifyDiscountCodeCreation = async (req: Request, discountCode: any): Promise<void> => {
+  if (!req.user) return;
 
   const notificationData: NotificationDto = {
     title: 'message.NotificationDiscountCodeCreated',
@@ -166,7 +166,7 @@ export const  notifyDiscountCodeCreation = async (req: Request, discountCode: an
     type: NotificationType.SUCCESS,
     target: NotificationTarget.SUPERVISOR,
     userId: req.user.id,
-    userName:req.user.firstName,
+    userName: req.user.firstName,
     relatedEntityId: discountCode.id,
     relatedEntityType: 'DISCOUNT_CODE',
     relatedEntityName: discountCode.name,
@@ -179,7 +179,7 @@ export const  notifyDiscountCodeCreation = async (req: Request, discountCode: an
 
 export const notifyDiscountCodeUpdate = async (req: Request, discountCode: any): Promise<void> => {
 
-  if(!req.user) return;
+  if (!req.user) return;
 
   const notificationData: NotificationDto = {
     title: 'message.NotificationDiscountCodeUpdated',
@@ -188,7 +188,7 @@ export const notifyDiscountCodeUpdate = async (req: Request, discountCode: any):
     type: NotificationType.INFORMATION,
     target: NotificationTarget.SUPERVISOR,
     userId: req.user.id,
-    userName:req.user.firstName,
+    userName: req.user.firstName,
     relatedEntityId: discountCode.id,
     relatedEntityType: 'DISCOUNT_CODE',
     relatedEntityName: discountCode.name,
@@ -199,30 +199,30 @@ export const notifyDiscountCodeUpdate = async (req: Request, discountCode: any):
   await notificationRepository.createNotification(notificationData);
 }
 
-export const  notifyDiscountCodeDeletion = async(req: Request, discountCodeId: number): Promise<void> =>  {
+export const notifyDiscountCodeDeletion = async (req: Request, discountCodeId: number): Promise<void> => {
 
-    if(!req.user) return;
+  if (!req.user) return;
 
-    const notificationData: NotificationDto = {
-      title: 'message.NotificationDiscountCodeDeleted',
-      preview: 'message.NotificationDiscountCodeDeletedPreview',
-      description: 'message.NotificationDiscountCodeDeletedDescription',
-      type: NotificationType.ERROR,
-      target: NotificationTarget.SUPERVISOR,
-      userId: req.user.id,
-      userName:req.user.firstName,
-      relatedEntityId: discountCodeId,
-      relatedEntityType: 'DISCOUNT_CODE',
-      relatedEntityName: "",
-      date: new Date(),
-      isRead: false
-    };
+  const notificationData: NotificationDto = {
+    title: 'message.NotificationDiscountCodeDeleted',
+    preview: 'message.NotificationDiscountCodeDeletedPreview',
+    description: 'message.NotificationDiscountCodeDeletedDescription',
+    type: NotificationType.ERROR,
+    target: NotificationTarget.SUPERVISOR,
+    userId: req.user.id,
+    userName: req.user.firstName,
+    relatedEntityId: discountCodeId,
+    relatedEntityType: 'DISCOUNT_CODE',
+    relatedEntityName: "",
+    date: new Date(),
+    isRead: false
+  };
 
-    await notificationRepository.createNotification(notificationData);
+  await notificationRepository.createNotification(notificationData);
 }
 
-export const  notifyTentCreation = async (req: Request, tent: any): Promise<void> => {
-  if(!req.user) return;
+export const notifyTentCreation = async (req: Request, tent: any): Promise<void> => {
+  if (!req.user) return;
 
   const notificationData: NotificationDto = {
     title: 'message.NotificationTentCreated',
@@ -231,7 +231,7 @@ export const  notifyTentCreation = async (req: Request, tent: any): Promise<void
     type: NotificationType.SUCCESS,
     target: NotificationTarget.SUPERVISOR,
     userId: req.user.id,
-    userName:req.user.firstName,
+    userName: req.user.firstName,
     relatedEntityId: tent.id,
     relatedEntityType: 'TENT',
     relatedEntityName: tent.name,
@@ -244,7 +244,7 @@ export const  notifyTentCreation = async (req: Request, tent: any): Promise<void
 
 export const notifyTentUpdate = async (req: Request, tent: any): Promise<void> => {
 
-  if(!req.user) return;
+  if (!req.user) return;
 
   const notificationData: NotificationDto = {
     title: 'message.NotificationTentUpdated',
@@ -253,7 +253,7 @@ export const notifyTentUpdate = async (req: Request, tent: any): Promise<void> =
     type: NotificationType.INFORMATION,
     target: NotificationTarget.SUPERVISOR,
     userId: req.user.id,
-    userName:req.user.firstName,
+    userName: req.user.firstName,
     relatedEntityId: tent.id,
     relatedEntityType: 'TENT',
     relatedEntityName: tent.name,
@@ -264,42 +264,21 @@ export const notifyTentUpdate = async (req: Request, tent: any): Promise<void> =
   await notificationRepository.createNotification(notificationData);
 }
 
-export const  notifyTentDeletion = async(req: Request, tentId: number): Promise<void> =>  {
+export const notifyTentDeletion = async (req: Request, tentId: number): Promise<void> => {
 
-    if(!req.user) return;
-
-    const notificationData: NotificationDto = {
-      title: 'message.NotificationTentDeleted',
-      preview: 'message.NotificationTentDeletedPreview',
-      description: 'message.NotificationTentDeletedDescription',
-      type: NotificationType.ERROR,
-      target: NotificationTarget.SUPERVISOR,
-      userId: req.user.id,
-      userName:req.user.firstName,
-      relatedEntityId: tentId,
-      relatedEntityType: 'TENT',
-      relatedEntityName: "",
-      date: new Date(),
-      isRead: false
-    };
-
-    await notificationRepository.createNotification(notificationData);
-}
-
-export const  notifyPromotionCreation = async (req: Request, promotion: any): Promise<void> => {
-  if(!req.user) return;
+  if (!req.user) return;
 
   const notificationData: NotificationDto = {
-    title: 'message.NotificationPromotionCreated',
-    preview: 'message.NotificationPromotionCreatedPreview',
-    description: 'message.NotificationPromotionCreatedDescription',
-    type: NotificationType.SUCCESS,
+    title: 'message.NotificationTentDeleted',
+    preview: 'message.NotificationTentDeletedPreview',
+    description: 'message.NotificationTentDeletedDescription',
+    type: NotificationType.ERROR,
     target: NotificationTarget.SUPERVISOR,
     userId: req.user.id,
-    userName:req.user.firstName,
-    relatedEntityId: promotion.id,
-    relatedEntityType: 'PROMOTION',
-    relatedEntityName: promotion.name,
+    userName: req.user.firstName,
+    relatedEntityId: tentId,
+    relatedEntityType: 'TENT',
+    relatedEntityName: "",
     date: new Date(),
     isRead: false
   };
@@ -307,52 +286,8 @@ export const  notifyPromotionCreation = async (req: Request, promotion: any): Pr
   await notificationRepository.createNotification(notificationData);
 }
 
-export const notifyPromotionUpdate = async (req: Request, promotion: any): Promise<void> => {
-
-  if(!req.user) return;
-
-  const notificationData: NotificationDto = {
-    title: 'message.NotificationPromotionUpdated',
-    preview: 'message.NotificationPromotionUpdatedPreview',
-    description: 'message.NotificationPromotionUpdatedDescription',
-    type: NotificationType.INFORMATION,
-    target: NotificationTarget.SUPERVISOR,
-    userId: req.user.id,
-    userName:req.user.firstName,
-    relatedEntityId: promotion.id,
-    relatedEntityType: 'PROMOTION',
-    relatedEntityName: promotion.name,
-    date: new Date(),
-    isRead: false
-  };
-
-  await notificationRepository.createNotification(notificationData);
-}
-
-export const  notifyPromotionDeletion = async(req: Request, promotionId: number): Promise<void> =>  {
-
-    if(!req.user) return;
-
-    const notificationData: NotificationDto = {
-      title: 'message.NotificationPromotionDeleted',
-      preview: 'message.NotificationPromotionDeletedPreview',
-      description: 'message.NotificationPromotionDeletedDescription',
-      type: NotificationType.ERROR,
-      target: NotificationTarget.SUPERVISOR,
-      userId: req.user.id,
-      userName:req.user.firstName,
-      relatedEntityId: promotionId,
-      relatedEntityType: 'PROMOTION',
-      relatedEntityName: "",
-      date: new Date(),
-      isRead: false
-    };
-
-    await notificationRepository.createNotification(notificationData);
-}
-
-export const  notifyReserveCreation = async (req: Request, reserve: any): Promise<void> => {
-  if(!req.user) return;
+export const notifyReserveCreation = async (req: Request, reserve: any): Promise<void> => {
+  if (!req.user) return;
 
   const notificationData: NotificationDto = {
     title: 'message.NotificationReserveCreated',
@@ -361,7 +296,7 @@ export const  notifyReserveCreation = async (req: Request, reserve: any): Promis
     type: NotificationType.SUCCESS,
     target: NotificationTarget.SUPERVISOR,
     userId: req.user.id,
-    userName:req.user.firstName,
+    userName: req.user.firstName,
     relatedEntityId: reserve.id,
     relatedEntityType: 'RESERVE',
     relatedEntityName: reserve.name,
@@ -374,7 +309,7 @@ export const  notifyReserveCreation = async (req: Request, reserve: any): Promis
 
 export const notifyReserveUpdate = async (req: Request, reserve: any): Promise<void> => {
 
-  if(!req.user) return;
+  if (!req.user) return;
 
   const notificationData: NotificationDto = {
     title: 'message.NotificationReserveUpdated',
@@ -383,7 +318,7 @@ export const notifyReserveUpdate = async (req: Request, reserve: any): Promise<v
     type: NotificationType.INFORMATION,
     target: NotificationTarget.SUPERVISOR,
     userId: req.user.id,
-    userName:req.user.firstName,
+    userName: req.user.firstName,
     relatedEntityId: reserve.id,
     relatedEntityType: 'RESERVE',
     relatedEntityName: reserve.name,
@@ -394,31 +329,31 @@ export const notifyReserveUpdate = async (req: Request, reserve: any): Promise<v
   await notificationRepository.createNotification(notificationData);
 }
 
-export const  notifyReserveDeletion = async(req: Request, reserveId: number): Promise<void> =>  {
+export const notifyReserveDeletion = async (req: Request, reserveId: number): Promise<void> => {
 
-    if(!req.user) return;
+  if (!req.user) return;
 
-    const notificationData: NotificationDto = {
-      title: 'message.NotificationReserveDeleted',
-      preview: 'message.NotificationReserveDeletedPreview',
-      description: 'message.NotificationReserveDeletedDescription',
-      type: NotificationType.ERROR,
-      target: NotificationTarget.SUPERVISOR,
-      userId: req.user.id,
-      userName:req.user.firstName,
-      relatedEntityId: reserveId,
-      relatedEntityType: 'RESERVE',
-      relatedEntityName: "",
-      date: new Date(),
-      isRead: false
-    };
+  const notificationData: NotificationDto = {
+    title: 'message.NotificationReserveDeleted',
+    preview: 'message.NotificationReserveDeletedPreview',
+    description: 'message.NotificationReserveDeletedDescription',
+    type: NotificationType.ERROR,
+    target: NotificationTarget.SUPERVISOR,
+    userId: req.user.id,
+    userName: req.user.firstName,
+    relatedEntityId: reserveId,
+    relatedEntityType: 'RESERVE',
+    relatedEntityName: "",
+    date: new Date(),
+    isRead: false
+  };
 
-    await notificationRepository.createNotification(notificationData);
+  await notificationRepository.createNotification(notificationData);
 }
 
 
-export const  notifyReserveUserCreationUser = async (req: Request, reserveId:number, userId: number, userName:string, reserveDate:Date  ): Promise<void> => {
-  if(!req.user) return;
+export const notifyReserveUserCreationUser = async (req: Request, reserveId: number, userId: number, userName: string, reserveDate: Date): Promise<void> => {
+  if (!req.user) return;
 
   const notificationData: NotificationDto = {
     title: 'message.NotificationReserveUserCreated',
@@ -427,7 +362,7 @@ export const  notifyReserveUserCreationUser = async (req: Request, reserveId:num
     type: NotificationType.SUCCESS,
     target: NotificationTarget.USER,
     userId: userId,
-    userName:userName,
+    userName: userName,
     relatedEntityId: reserveId,
     relatedEntityType: 'RESERVE_USER',
     relatedEntityName: reserveDate.toISOString(),
@@ -438,9 +373,9 @@ export const  notifyReserveUserCreationUser = async (req: Request, reserveId:num
   await notificationRepository.createNotification(notificationData);
 }
 
-export const notifyReserveUserUpdate = async (req: Request, reserveId:number, userId: number, userName:string, reserveDate:Date): Promise<void> => {
+export const notifyReserveUserUpdate = async (req: Request, reserveId: number, userId: number, userName: string, reserveDate: Date): Promise<void> => {
 
-  if(!req.user) return;
+  if (!req.user) return;
 
   const notificationData: NotificationDto = {
     title: 'message.NotificationReserveUserUpdated',
@@ -449,7 +384,7 @@ export const notifyReserveUserUpdate = async (req: Request, reserveId:number, us
     type: NotificationType.INFORMATION,
     target: NotificationTarget.USER,
     userId: userId,
-    userName:userName,
+    userName: userName,
     relatedEntityId: reserveId,
     relatedEntityType: 'RESERVE_USER',
     relatedEntityName: reserveDate.toISOString(),

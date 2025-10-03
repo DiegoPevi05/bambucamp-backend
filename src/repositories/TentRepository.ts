@@ -1,6 +1,6 @@
-import { PrismaClient, Tent   } from "@prisma/client";
+import { PrismaClient, Tent } from "@prisma/client";
 import { TentDto, TentFilters, PaginatedTents } from "../dto/tent";
-import {BadRequestError} from "../middleware/errors";
+import { BadRequestError } from "../middleware/errors";
 
 const prisma = new PrismaClient();
 
@@ -24,7 +24,7 @@ export const getAllTents = async (filters: TentFilters, pagination: Pagination):
 
   const { title, status } = filters;
   const { page, pageSize } = pagination;
-  
+
   const skip = (page - 1) * pageSize;
   const take = pageSize;
 
@@ -82,7 +82,7 @@ export const createTent = async (data: TentDto): Promise<Tent> => {
   });
 };
 
-export const updateTent = async (id:number, data: TentDto): Promise<Tent> => {
+export const updateTent = async (id: number, data: TentDto): Promise<Tent> => {
   return await prisma.tent.update({
     where: { id },
     data

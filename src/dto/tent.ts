@@ -1,29 +1,29 @@
 export interface TentDto {
-  header:string;
+  header: string;
   title: string;
   description: string;
-  services:string;
+  services: string;
   qtypeople: number;
   qtykids: number;
   images: string;
   price: number;
   status: string;
-  aditional_people_price:number;
-  max_aditional_people:number;
-  max_kids:number;
-  kids_bundle_price:number;
+  additional_people_price: number;
+  max_additional_people: number;
+  max_kids: number;
+  kids_bundle_price: number;
   custom_price?: string;
-  existing_images?:string;
+  existing_images?: string;
 }
 
-export interface PublicTent extends Omit<TentDto,'custom_price'>  {
-  id:number;
+export interface PublicTent extends Omit<TentDto, 'custom_price'> {
+  id: number;
   custom_price?: number;
 }
 
 export interface TentFilters {
   title?: string;
-  status?:string;
+  status?: string;
 };
 
 export interface PaginatedTents {

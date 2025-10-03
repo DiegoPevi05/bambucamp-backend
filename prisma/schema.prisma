@@ -39,23 +39,23 @@ model User {
 }
 
 model Tent {
-  id              Int             @id @default(autoincrement())
-  header          String          @db.Text
-  title           String          @db.Text
-  description     String          @db.Text
-  services        String          @db.Text 
-  qtypeople       Int             @default(1)
-  qtykids         Int             @default(0)
-  images          String          @db.Text
-  price           Float           @default(0)
-  status          String          @default("ACTIVE") @db.Text
-  custom_price    String          @default("[]") @db.Text
-  aditional_people_price Float    @default(0)
-  max_aditional_people Int        @default(0)
-  max_kids        Int             @default(1)
-  kids_bundle_price Float         @default(0)
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt @default(now())
+  id                       Int             @id @default(autoincrement())
+  header                   String          @db.Text
+  title                    String          @db.Text
+  description              String          @db.Text
+  services                 String          @db.Text 
+  qtypeople                Int             @default(1)
+  qtykids                  Int             @default(0)
+  images                   String          @db.Text
+  price                    Float           @default(0)
+  status                   String          @default("ACTIVE") @db.Text
+  custom_price             String          @default("[]") @db.Text
+  additional_people_price  Float    @default(0)
+  max_additional_people    Int        @default(0)
+  max_kids                 Int             @default(1)
+  kids_bundle_price        Float         @default(0)
+  createdAt                DateTime        @default(now())
+  updatedAt                DateTime        @updatedAt @default(now())
 }
 
 model Product {
@@ -119,63 +119,6 @@ model DiscountCode {
   updatedAt       DateTime        @updatedAt @default(now())
 }
 
-
-model Promotion {
-  id              Int             @id @default(autoincrement())
-  title           String
-  description     String          @db.Text
-  images          String          @db.Text
-  expiredDate     DateTime        @default(now())
-  status          String          @default("ACTIVE") @db.Text
-  qtypeople       Int             @default(1)
-  qtykids         Int             @default(0)
-  tents           optTentPromotion[]  
-  products        optProductPromotion[] 
-  experiences     optExperiencePromotion[]  
-  netImport       Float
-  discount        Int
-  grossImport     Float
-  stock           Int             @default(1)
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt @default(now())
-}
-
-model optTentPromotion {
-  id              Int             @id @default(autoincrement())
-  idTent          Int
-  name            String          
-  price           Float           @default(0)
-  nights          Int             @default(1)
-  promotionId     Int
-  promotion       Promotion       @relation(fields: [promotionId], references: [id], onDelete: Cascade)
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt @default(now())
-}
-
-model optProductPromotion {
-  id              Int             @id @default(autoincrement())
-  idProduct       Int
-  name            String          
-  price           Float           @default(0)
-  quantity        Int             @default(1)
-  promotionId     Int
-  promotion       Promotion       @relation(fields: [promotionId], references: [id], onDelete: Cascade)
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt @default(now())
-}
-
-model optExperiencePromotion {
-  id              Int             @id @default(autoincrement())
-  idExperience    Int
-  name            String          
-  price           Float           @default(0)
-  quantity        Int             @default(1)
-  promotionId     Int
-  promotion       Promotion       @relation(fields: [promotionId], references: [id], onDelete: Cascade)
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt @default(now())
-}
-
 enum ReserveStatus {
   NOT_CONFIRMED
   CONFIRMED
@@ -195,7 +138,6 @@ model Reserve {
   tents                 ReserveTent[]   
   products              ReserveProduct[] 
   experiences           ReserveExperience[]
-  promotions            ReservePromotion[]
   eta                   DateTime?         
   dateSale              DateTime          @default(now())
   price_is_calculated   Boolean           @default(false)
@@ -213,23 +155,22 @@ model Reserve {
 }
 
 model ReserveTent {
-  id              Int       @id @default(autoincrement())
-  reserveId       Int
-  idTent          Int
-  name            String    @db.Text
-  price           Float     @default(0)
-  nights          Int       @default(1)
-  dateFrom        DateTime        
-  dateTo          DateTime        
-  aditionalPeople Int       @default(0)
-  aditionalPeoplePrice Float @default(0)
-  kids            Int       @default(0)
-  kidsPrice       Float     @default(0)
-  reserve         Reserve   @relation(fields: [reserveId], references: [id], onDelete: Cascade)
-  confirmed       Boolean   @default(false)
-  promotionId     Int?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt @default(now())
+  id                      Int       @id @default(autoincrement())
+  reserveId               Int
+  idTent                  Int
+  name                    String    @db.Text
+  price                   Float     @default(0)
+  nights                  Int       @default(1)
+  dateFrom                 DateTime        
+  dateTo                  DateTime        
+  additional_people       Int       @default(0)
+  additional_people_price Float @default(0)
+  kids                    Int       @default(0)
+  kidsPrice               Float     @default(0)
+  reserve                 Reserve   @relation(fields: [reserveId], references: [id], onDelete: Cascade)
+  confirmed               Boolean   @default(false)
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt @default(now())
 }
 
 model ReserveProduct {
@@ -241,7 +182,6 @@ model ReserveProduct {
   quantity        Int       @default(1)
   reserve         Reserve   @relation(fields: [reserveId], references: [id], onDelete: Cascade)
   confirmed       Boolean   @default(false)
-  promotionId     Int?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt @default(now())
 }
@@ -256,23 +196,10 @@ model ReserveExperience {
   day             DateTime  @default(now())
   reserve         Reserve   @relation(fields: [reserveId], references: [id], onDelete: Cascade)
   confirmed       Boolean   @default(false)
-  promotionId     Int?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt @default(now())
 }
 
-model ReservePromotion {
-  id              Int       @id @default(autoincrement())
-  reserveId       Int
-  idPromotion     Int
-  name            String    @db.Text
-  price           Float     @default(0)
-  quantity        Int       @default(1)
-  reserve         Reserve   @relation(fields: [reserveId], references: [id], onDelete: Cascade)
-  confirmed       Boolean   @default(false)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt @default(now())
-}
 
 enum NotificationType {
   SUCCESS

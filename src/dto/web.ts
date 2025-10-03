@@ -1,18 +1,17 @@
-import {PromotionPublicDto} from "./promotion";
-import {PublicTent} from "./tent";
+import { PublicTent } from "./tent";
 
 export interface ReviewDto {
-  name:string;
-  title:string;
-  review:string;
-  stars:number;
-  day:Date;
-  href:string|null;
-  profile_image_url:string|null;
+  name: string;
+  title: string;
+  review: string;
+  stars: number;
+  day: Date;
+  href: string | null;
+  profile_image_url: string | null;
 }
 
-export interface PublicReviewDto extends ReviewDto  {
-  id:number;
+export interface PublicReviewDto extends ReviewDto {
+  id: number;
 }
 
 export interface PaginatedReviews {
@@ -22,13 +21,13 @@ export interface PaginatedReviews {
 };
 
 export interface FaqDto {
-  question:string;
-  answer:string;
+  question: string;
+  answer: string;
 }
 
 
-export interface PublicFaqDto extends FaqDto  {
-  id:number;
+export interface PublicFaqDto extends FaqDto {
+  id: number;
 }
 
 export interface PaginatedFaqs {
@@ -39,25 +38,24 @@ export interface PaginatedFaqs {
 
 
 export interface webContent {
-  tents:PublicTent[];
-  promotions:PromotionPublicDto[];
-  reviews:PublicReviewDto[];
-  faqs:PublicFaqDto[];
+  tents: PublicTent[];
+  reviews: PublicReviewDto[];
+  faqs: PublicFaqDto[];
 }
 
 export interface ContactForm {
-  name:string;
-  email:string;
-  message:string;
-  saveinfo:boolean;
+  name: string;
+  email: string;
+  message: string;
+  saveinfo: boolean;
 }
 
 export interface ComplaintForm {
-  name:string;
-  email:string;
-  phone:string;
-  documentId:string;
-  claimType:string;
-  description:string;
-  reservationCode?:string;
+  name: string;
+  email: string;
+  phone: string;
+  documentId: string;
+  claimType: string;
+  description: string;
+  reservationCode?: string;
 }
