@@ -264,14 +264,13 @@ export const generateReservationTemplate = (title: string, greeting_message_1: s
   let tentsHtml = '';
 
   reserve.tents.forEach(tent => {
-    const preview = tent.preview;
-    const nightlyBase = preview?.nightlyBase ?? (preview ? preview.nightly : tent.price);
-    const nightlyTotal = preview?.nightly ?? tent.price;
-    const effectiveExtraAdults = preview?.effectiveExtraAdults ?? tent.aditionalPeople ?? 0;
-    const extraAdultPrice = tent.aditionalPeoplePrice ?? 0;
+    const nightlyBase = tent.price;
+    const nightlyTotal = tent.price;
+    const effectiveExtraAdults = tent.additional_people ?? 0;
+    const extraAdultPrice = tent.additional_people_price ?? 0;
     const kidsCount = tent.kids ?? 0;
-    const kidsBundlePrice = preview?.kidsBundlePrice ?? tent.kidsPrice ?? 0;
-    const kidsBundleApplies = (preview?.kidsBundleApplies ?? false) && kidsBundlePrice > 0;
+    const kidsBundlePrice = tent.kids_price ?? 0;
+    const kidsBundleApplies = tent.kids_price > 0;
     const perWord = language == "es" ? "por" : "per";
     const nightWord = language == "es" ? "noche" : "night";
     const baseNightlyLabel = language == "es" ? "Tarifa base por noche" : "Base nightly rate";

@@ -212,7 +212,7 @@ export const createReserve = async (data: ReserveFormDto, language: string): Pro
     return {
       tent: foundTent,
       nights: Number(tent.nights ?? 0),
-      aditionalPeople: tent.additional_people,
+      additional_people: tent.additional_people,
       kids: tent.kids,
     };
   });
@@ -376,7 +376,7 @@ export const updateReserve = async (id: number, data: ReserveFormDto) => {
     return {
       tent: foundTent,
       nights: Number(tent.nights ?? 0),
-      aditional_people: Number(tent.additional_people ?? 0),
+      additional_people: Number(tent.additional_people ?? 0),
       kids: Number(tent.kids ?? 0),
     };
   });
