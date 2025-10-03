@@ -13,14 +13,6 @@ export enum ReserveEntityType {
   PROMOTION = 'PROMOTION',
 }
 
-export interface TentNightlyPreview {
-  nightly: number;
-  nightlyBase: number;
-  kidsBundleApplies: boolean;
-  kidsBundlePrice: number;
-  effectiveExtraAdults: number;
-}
-
 export interface ReserveTentDto {
   id?:number;
   idTent:number;
@@ -30,13 +22,12 @@ export interface ReserveTentDto {
   dateFrom:Date;
   dateTo:Date;
   confirmed:boolean;
-  aditionalPeople:number;
-  aditionalPeoplePrice:number;
+  additional_people:number;
+  additional_people_price:number;
   kids:number;
-  kidsPrice:number;
+  kids_price:number;
   promotionId?:number;
   tentDB?:Tent;
-  preview?: TentNightlyPreview;
 }
 
 export interface ReserveProductDto {
@@ -129,7 +120,6 @@ export interface ReserveFormDto {
   user_phone_number?:string;
   user_document_type?:string;
   user_document_id?:string;
-  user_nationality?:string;
   eta?:Date;
   external_id:string;
   tents: ReserveTentDto[];
