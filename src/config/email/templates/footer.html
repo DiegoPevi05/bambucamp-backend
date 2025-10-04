@@ -1,113 +1,125 @@
-<table cellpadding="0" cellspacing="0" align="center">
-	<tbody>
-		<tr>
-			<td align="center" style="background-color: #ffffff;">
-				<table cellpadding="0" cellspacing="0" class="footer-body">
-					<tbody>
-						<tr>
-							<td class="footer-structure">
-								<table cellpadding="0" cellspacing="0" class="footer-structure-left">
-									<tbody>
-										<tr>
-											<td class="footer-container-frame">
-												<table cellpadding="0" cellspacing="0" width="100%">
-													<tbody>
-														<tr>
-															<td class="footer-block-image"><a target="_blank" href="{{homepage}}"><img
-																		src="{{logo_link}}" alt="Logo" class="footer-block-image-img" title="Logo"></a></td>
-														</tr>
-														<tr>
-															<td class="footer-block-text">
-																<p><a href="{{home_link}}" target="_blank">{{home_label}}</a>
-																</p>
-																<p><a href="{{about_link}}" target="_blank">{{about_label}}</a></p>
-																<p><a href="{{activities_link}}" target="_blank">{{activities_label}}</a></p>
-																<p><a href="{{contact_us_link}}" target="_blank">{{contact_us_label}}</a><br></p>
-															</td>
-														</tr>
-														<tr>
-															<td align="center">
-																<table cellpadding="0" cellspacing="0">
-																	<tbody>
-																		<tr>
-																			<td class="footer-block-social-icon"><a target="_blank" href="{{facebook}}"><img
-																						title="Facebook"
-																						src="https://icon.signature.email/social/facebook-circle-small-4267b2-FFFFFF.png"
-																						alt="Fb" class="footer-block-social-icon-img"></a></td>
-																			<td class="footer-block-social-icon"><a target="_blank" href="{{instagram}}"><img
-																						title="Instagram"
-																						src="https://icon.signature.email/social/instagram-circle-small-fe0076-FFFFFF.png"
-																						alt="Inst" class="footer-block-social-icon-img"></a></td>
-																		</tr>
-																	</tbody>
-																</table>
-															</td>
-														</tr>
-													</tbody>
-												</table>
-											</td>
-										</tr>
-									</tbody>
-								</table>
-								<!--[if mso]></td><td width="20"></td><td width="270" valign="top"><![endif]-->
-								<table cellpadding="0" cellspacing="0" class="footer-structure-right">
-									<tbody>
-										<tr>
-											<td class="footer-container-frame">
-												<table cellpadding="0" cellspacing="0" width="100%">
-													<tbody>
-														<tr>
-															<td align="center" class="footer-block-image"><a target="_blank" href="{{homepage}}"><img
-																		class="footer-block-image-big" src="{{tent_link}}" alt="bambucamp_glamping"
-																		title="bambucamp_glamping"></a></td>
-														</tr>
-													</tbody>
-												</table>
-											</td>
-										</tr>
-									</tbody>
-								</table>
-								<!--[if mso]></td></tr></table><![endif]-->
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</td>
-		</tr>
-	</tbody>
-</table>
-<table cellpadding="0" cellspacing="0" align="center">
-	<tbody>
-		<tr>
-			<td class="footer-foot-wrapper">
-				<table class="footer-foot-body" cellpadding="0" cellspacing="0">
-					<tbody>
-						<tr>
-							<td class="footer-foot-structure">
-								<table cellpadding="0" cellspacing="0" width="100%">
-									<tbody>
-										<tr>
-											<td class="footer-foot-container-frame">
-												<table cellpadding="0" cellspacing="0" width="100%">
-													<tbody>
-														<tr>
-															<td class="footer-foot-block-text">
-																<p>{{politics_label_1}}<br><a class="footer-foot-block-text-link" target="_blank"
-																		href="{{politics_link}}">{{politics_label_2}}</a></p>
-																<p class="footer-foot-block-text-link">© {{currentYear}} {{footer_caption}}
-																</p>
-															</td>
-											</td>
-										</tr>
-									</tbody>
-								</table>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</td>
-		</tr>
-	</tbody>
+<!-- ===== Footer: background image + gradient (bottom-aligned, rounded, Outlook-proof) ===== -->
+<table role="presentation" cellpadding="0" cellspacing="0" width="100%" align="center">
+  <tr>
+    <td align="center" style="background-color:#ffffff;">
+      <table role="presentation" cellpadding="0" cellspacing="0" width="600" style="width:600px;max-width:100%;">
+        <tr>
+          <td style="padding:0;">
+            <!-- Modern clients: rounded corners via div -->
+            <div style="border-radius:12px; overflow:hidden;">
+              <!--[if gte mso 9]>
+              <!-- Outlook: draw a rounded group with background image + overlay gradient PNG -->
+              <v:group xmlns:v="urn:schemas-microsoft-com:vml" style="width:600px;height:220px;" coordorigin="0,0" coordsize="600,220">
+                <!-- Background image -->
+                <v:roundrect arcsize="6%" stroke="false" fill="t" style="position:absolute;left:0;top:0;width:600px;height:220px;">
+                  <v:fill type="frame" src="{{tent_link}}" color="#000000"/>
+                </v:roundrect>
+                <!-- Overlay gradient PNG (black->transparent, bottom-to-top) -->
+                <v:roundrect arcsize="6%" stroke="false" fill="t" style="position:absolute;left:0;top:0;width:600px;height:220px;">
+                  <v:fill type="frame" src="{{gradient_overlay_png}}" color="#000000"/>
+                </v:roundrect>
+                <!-- Textbox layer for HTML content -->
+                <v:roundrect arcsize="6%" stroke="false" fillcolor="none" style="position:absolute;left:0;top:0;width:600px;height:220px;">
+                  <v:textbox inset="0,0,0,0">
+              <![endif]-->
+
+              <!-- Modern clients: CSS background image + CSS gradient -->
+              <table role="presentation" cellpadding="0" cellspacing="0" width="600" style="width:600px;max-width:100%;">
+                <tr>
+                  <td
+                    background="{{tent_link}}"
+                    style="
+                      background:
+                        linear-gradient(to top, rgba(0,0,0,0.90) 0%, rgba(0,0,0,0.60) 30%, rgba(0,0,0,0) 55%),
+                        url('{{tent_link}}') center center / cover no-repeat;
+                      width:600px; max-width:100%;
+                      height:220px;
+                      background-repeat:no-repeat; background-position:center; background-size:cover;
+                      border-radius:12px;
+                    "
+                  >
+                    <!-- Content area (bottom aligned) -->
+                    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="height:220px;">
+                      <tr>
+                        <!-- Spacer to keep the center of the image visible -->
+                        <td style="height:150px; line-height:150px; font-size:0;">&nbsp;</td>
+                      </tr>
+                      <tr>
+                        <td align="center" style="padding:10px 20px 16px 20px;">
+                          <!-- Links row (spaced, centered) -->
+                          <table role="presentation" cellpadding="0" cellspacing="0" align="center">
+                            <tr>
+                              <td style="padding:0 26px; font:15px/22px Arial, sans-serif;">
+                                <a href="{{home_link}}" target="_blank" style="color:#ffffff; text-decoration:underline;">{{home_label}}</a>
+                              </td>
+                              <td style="padding:0 26px; font:15px/22px Arial, sans-serif;">
+                                <a href="{{about_link}}" target="_blank" style="color:#ffffff; text-decoration:underline;">{{about_label}}</a>
+                              </td>
+                              <td style="padding:0 26px; font:15px/22px Arial, sans-serif;">
+                                <a href="{{activities_link}}" target="_blank" style="color:#ffffff; text-decoration:underline;">{{activities_label}}</a>
+                              </td>
+                              <td style="padding:0 26px; font:15px/22px Arial, sans-serif;">
+                                <a href="{{contact_us_link}}" target="_blank" style="color:#ffffff; text-decoration:underline;">{{contact_us_label}}</a>
+                              </td>
+                            </tr>
+                          </table>
+
+                          <div style="line-height:14px; height:14px; font-size:0;">&nbsp;</div>
+
+                          <!-- Socials centered -->
+                          <table role="presentation" cellpadding="0" cellspacing="0" align="center">
+                            <tr>
+                              <td style="padding:0 10px;">
+                                <a target="_blank" href="{{facebook}}">
+                                  <img src="https://icon.signature.email/social/facebook-circle-small-4267b2-FFFFFF.png"
+                                       alt="Facebook" width="24" border="0" style="display:block;border:0;outline:0;height:auto;">
+                                </a>
+                              </td>
+                              <td style="padding:0 10px;">
+                                <a target="_blank" href="{{instagram}}">
+                                  <img src="https://icon.signature.email/social/instagram-circle-small-fe0076-FFFFFF.png"
+                                       alt="Instagram" width="24" border="0" style="display:block;border:0;outline:0;height:auto;">
+                                </a>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!--[if gte mso 9]></v:textbox></v:roundrect></v:group><![endif]-->
+            </div>
+          </td>
+        </tr>
+
+        <!-- thin separator -->
+        <tr>
+          <td style="height:1px; line-height:1px; background:#e5e5e5; font-size:0;">&nbsp;</td>
+        </tr>
+
+        <!-- Legal / policy -->
+        <tr>
+          <td align="center" style="padding:14px 20px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td align="center" style="font:12px/18px Arial, sans-serif; color:#666666;">
+                  <p style="margin:0 0 6px 0;">
+                    {{politics_label_1}}
+                    <a href="{{politics_link}}" target="_blank" style="color:#666666; text-decoration:underline;">{{politics_label_2}}</a>
+                  </p>
+                  <p style="margin:0;">© {{currentYear}} {{footer_caption}}</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
 </table>
 </td>
 </tr>

@@ -35,16 +35,16 @@ export const generateTemplate = (language: string): TemplateData => {
   const data_email = {
     homepage: escapeHtmlAttr(CLIENT_HOSTNAME),
     logo_link: escapeHtmlAttr(`${CLIENT_HOSTNAME}/backend-public/logo.png`),
-    tent_link: escapeHtmlAttr(`${CLIENT_HOSTNAME}/backend-public/tent.jpeg`),
+    tent_link: escapeHtmlAttr(`${CLIENT_HOSTNAME}/backend-public/tent.jpg`),
 
     reservation_label: language === "es" ? "RESERVAR" : "RESERVATION",
     reservation_link: escapeHtmlAttr(`${CLIENT_HOSTNAME}/booking`),
 
     glampings_label: language === "es" ? "GLAMPINGS" : "GLAMPINGS",
-    glampings_link: escapeHtmlAttr(`${CLIENT_HOSTNAME}/booking`),
+    glampings_link: escapeHtmlAttr(`${CLIENT_HOSTNAME}/about`),
 
     extras_label: language === "es" ? "EXPERIENCIAS" : "EXPERIENCES",
-    extras_link: escapeHtmlAttr(`${CLIENT_HOSTNAME}/booking`),
+    extras_link: escapeHtmlAttr(`${CLIENT_HOSTNAME}/services/amor`),
 
     about_header_label: language === "es" ? "NOSOTROS" : "ABOUT",
     about_header_link: escapeHtmlAttr(`${CLIENT_HOSTNAME}/about`),
@@ -214,29 +214,137 @@ export const generateResetPasswordTemplate = (name: string, code: string, langua
   return emailTemplate;
 }
 
-export const generateNewReservationTemplateUser = (firstName: string, reserve: ReserveDto, language: string): string => {
+export const generateNewReservationTemplateUser = (
+  firstName: string,
+  reserve: ReserveDto,
+  language: string
+): string => {
   const { header, footer } = generateTemplate(language);
 
+  // --- Constantes / podrían venir de .env o de generateTemplate si prefieres ---
+  const RESERVAS_EMAIL = "reservas@bambucamp.com";
+  const WHATSAPP_URL = "https://wa.link/ioswo5";
+  const QR_NAME = "CRIALCA S.A.C";
+  const BBVA_ACCOUNT = "0011-0341-0200476632";
+  const BBVA_CCI = "011-341-000200476632-51";
+  const BBVA_OWNER = "CRIALCA S.A.C - RUC 20602767532";
+
+  //const QR_LINK = escapeHtmlAttr(`${CLIENT_HOSTNAME}/backend-public/tent.jpeg`);
+  const QR_LINK = escapeHtmlAttr(`${CLIENT_HOSTNAME}/backend-public/logo.png`);
+
+  // --- Textos ES/EN ---
+  const i18n = (language === "es")
+    ? {
+      title: "Gracias por realizar tu reserva",
+      greeting_message: `Hola ${firstName}, tu reserva se encuentra en proceso. Sigue los pasos para confirmar tu reserva.`,
+      deposit_title: "Depósito del 50%",
+      deposit_instructions:
+        `Realiza un depósito del 50% del total por cualquiera de los métodos abajo. Luego, envía tu comprobante a ${RESERVAS_EMAIL} indicando tu nombre, apellido y el correo con el que realizaste la reserva. Si prefieres, también puedes enviarlo por WhatsApp.`,
+      payment_methods_title: "Métodos de pago",
+      payment_methods_intro: "Puedes pagar por QR (Plin) o por transferencia bancaria.",
+      qr_title: "Plin (QR)",
+      qr_badge: "QR seguro",
+      payment_qr_alt: "Código QR de pago",
+      qr_note: "Escanea el código con tu app bancaria o Plin.",
+      account_holder_label: "Titular",
+      bank_title: "Transferencia bancaria",
+      bank_badge: "BBVA",
+      bank_account_label: "Cuenta",
+      bank_cci_label: "CCI",
+      bank_holder_label: "Titular",
+      send_receipt_note_prefix: "Envía el comprobante a",
+      send_receipt_or: "o por",
+      reserve_label: "RESERVA",
+      subtotal_label: "SubTotal",
+      discount_label: "Descuento",
+      total_label: "Total"
+    }
+    : {
+      title: "Thanks for your reservation",
+      greeting_message: `Hi ${firstName}, your reservation is in process. Please follow the steps below to confirm it.`,
+      deposit_title: "50% Deposit",
+      deposit_instructions:
+        `Make a 50% deposit using any of the methods below. Then email your receipt to ${RESERVAS_EMAIL} including your first name, last name, and the email you used to book. You may also send it via WhatsApp.`,
+      payment_methods_title: "Payment methods",
+      payment_methods_intro: "You can pay using QR (Plin) or bank transfer.",
+      qr_title: "Plin (QR)",
+      qr_badge: "Secure QR",
+      payment_qr_alt: "Payment QR code",
+      qr_note: "Scan this code with your banking app or Plin.",
+      account_holder_label: "Account holder",
+      bank_title: "Bank transfer",
+      bank_badge: "BBVA",
+      bank_account_label: "Account",
+      bank_cci_label: "CCI (interbank code)",
+      bank_holder_label: "Account holder",
+      send_receipt_note_prefix: "Send the receipt to",
+      send_receipt_or: "or via",
+      reserve_label: "RESERVE",
+      subtotal_label: "SubTotal",
+      discount_label: "Discount",
+      total_label: "Total"
+    };
+
+  // --- Cargar template ---
   const templatePath = path.join(__dirname, `templates/new-reserve.html`);
   let emailTemplate = fs.readFileSync(templatePath, 'utf8');
-  emailTemplate = emailTemplate.replace('{{title}}', language == "es" ? "Gracias por realizar tu reserva" : "Thanks for your reservation");
-  emailTemplate = emailTemplate.replace('{{greeting_message}}', language == "es" ? `Hola ${firstName}, tu reserva se encuentra en proceso, sigue los siguientes pasos para confirmar tu reserva.` : `Hi ${firstName}, your reservation is in process, folow the indications to confirm your reservation.`);
-  emailTemplate = emailTemplate.replace('{{indications_header}}', language == "es" ? "Por favor, realiza el pago del 50% en cualquiera de las siguientes cuentas, una vez realizado el pago enviar el comprobante de pago mediante whatsapp a +51 120-000-000: " : "Please make a 50% payment to one of the following accounts, once the payment is made send the payment receipt through whatsapp to +51 120-000-000: ");
-  emailTemplate = emailTemplate.replace('{{indication_1}}', "BBVA 1-00-0000-00000-0 o BCP 1-00-000-0000-00000.");
-  emailTemplate = emailTemplate.replace('{{indication_2}}', language == "es" ? "Yape +51 120-200-400" : "Plin +51 120-200-200");
 
-  emailTemplate = emailTemplate.replace('{{subtotal_label}}', language == "es" ? "SubTotal" : "SubTotal");
-  emailTemplate = emailTemplate.replace('{{discount_label}}', language == "es" ? "Descuento" : "Discount");
-  emailTemplate = emailTemplate.replace('{{total_label}}', language == "es" ? "Total" : "Total");
+  // --- Armar mapa de placeholders (un solo pase) ---
+  const data = {
+    // Header/Footer
+    header_email: header,
+    footer_email: footer,
 
-  emailTemplate = emailTemplate.replace('{{reserve_label}}', language == "es" ? "RESERVA" : "RESERVE");
-  emailTemplate = emailTemplate.replace('{{idReserve}}', reserve.external_id);
-  emailTemplate = emailTemplate.replace('{{grossImport}}', utils.formatPrice(reserve.gross_import));
-  emailTemplate = emailTemplate.replace('{{discounted}}', reserve.discount.toString() + "%");
-  emailTemplate = emailTemplate.replace('{{netImport}}', utils.formatPrice(reserve.net_import));
+    // Título e intro
+    title: i18n.title,
+    greeting_message: i18n.greeting_message,
 
-  // Inject header and footer into content
-  emailTemplate = emailTemplate.replace('{{header_email}}', header).replace('{{footer_email}}', footer);
+    // Bloque depósito
+    deposit_title: i18n.deposit_title,
+    deposit_instructions: i18n.deposit_instructions,
+
+    // Métodos de pago
+    payment_methods_title: i18n.payment_methods_title,
+    payment_methods_intro: i18n.payment_methods_intro,
+
+    // QR
+    qr_title: i18n.qr_title,
+    qr_badge: i18n.qr_badge,
+    payment_qr_alt: i18n.payment_qr_alt,
+    qr_note: i18n.qr_note,
+    account_holder_label: i18n.account_holder_label,
+    qr_name_value: QR_NAME,
+    qr_link: QR_LINK, // <- asegúrate de que generateTemplate o tu .env lo setee
+
+    // Banco
+    bank_title: i18n.bank_title,
+    bank_badge: i18n.bank_badge,
+    bank_account_label: i18n.bank_account_label,
+    bank_cci_label: i18n.bank_cci_label,
+    bank_holder_label: i18n.bank_holder_label,
+    bbva_account: BBVA_ACCOUNT,
+    bbva_cci: BBVA_CCI,
+    bbva_owner: BBVA_OWNER,
+
+    // Nota de envío de comprobante
+    send_receipt_note_prefix: i18n.send_receipt_note_prefix,
+    send_receipt_or: i18n.send_receipt_or,
+    reservas_email: RESERVAS_EMAIL,
+    whatsapp_url: WHATSAPP_URL,
+
+    // Totales
+    reserve_label: i18n.reserve_label,
+    idReserve: reserve.external_id,
+    grossImport: utils.formatPrice(reserve.gross_import),
+    discounted: `${reserve.discount}%`,
+    netImport: utils.formatPrice(reserve.net_import),
+    subtotal_label: i18n.subtotal_label,
+    discount_label: i18n.discount_label,
+    total_label: i18n.total_label
+  };
+
+  // Reemplazar todo en un solo pase (tu helper)
+  emailTemplate = replaceAllPlaceholders(emailTemplate, data);
 
   return emailTemplate;
 };

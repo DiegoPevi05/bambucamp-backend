@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import * as authService from '../services/authService';
 import { SignInRequest, SignInResponse } from '../dto/user';
 import { body, query, validationResult } from 'express-validator';
-import {CustomError} from '../middleware/errors';
+import { CustomError } from '../middleware/errors';
 
 
 export const signUp = [
@@ -13,7 +13,6 @@ export const signUp = [
   body('email').isEmail().withMessage("validation.emailInvalid"),
   body('document_id').notEmpty().withMessage("validation.documentIdInvalid"),
   body('document_type').notEmpty().withMessage("validation.documentTypeInvalid"),
-  body('nationality').notEmpty().withMessage("validation.nationalityRequired"),
   body('password')
     .isLength({ min: 8 }).withMessage("validation.passwordLength")
     .matches(/[a-zA-Z]/).withMessage('validation.passwordLetter')
@@ -36,7 +35,7 @@ export const signUp = [
 
       const language = req.language || 'en';
       await authService.signUp(req.body, language);
-      res.status(201).json({ message:req.t("message.emailVerificationSent") });
+      res.status(201).json({ message: req.t("message.emailVerificationSent") });
     } catch (error) {
 
       if (error instanceof CustomError) {
@@ -46,7 +45,7 @@ export const signUp = [
       }
     }
   }
-] 
+]
 
 export const verifyAccount = [
 
@@ -108,7 +107,7 @@ export const forgotPassword = [
 ];
 
 export const verifyPasswordResetCode = [
-  
+
   body('email').isEmail().withMessage("validation.emailInvalid"),
   body('code').notEmpty().withMessage("validation.codeRequired"),
 

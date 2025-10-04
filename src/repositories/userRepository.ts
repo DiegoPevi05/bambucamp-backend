@@ -1,5 +1,5 @@
 import { PrismaClient, User } from '@prisma/client';
-import {  UserFilters, PaginatedUsers, UserDto,UserFormDto } from '../dto/user';
+import { UserFilters, PaginatedUsers, UserDto, UserFormDto } from '../dto/user';
 
 const prisma = new PrismaClient();
 
@@ -11,7 +11,7 @@ interface Pagination {
 export const getAllUsers = async (filters: UserFilters, pagination: Pagination): Promise<PaginatedUsers> => {
   const { firstName, lastName, email, role } = filters;
   const { page, pageSize } = pagination;
-  
+
   const skip = (page - 1) * pageSize;
   const take = pageSize;
 
@@ -50,9 +50,8 @@ export const getAllUsers = async (filters: UserFilters, pagination: Pagination):
       lastLogin: true,
       lastPasswordChanged: true,
       emailVerified: true,
-      document_id:true,
-      document_type:true,
-      nationality:true,
+      document_id: true,
+      document_type: true,
       createdAt: true,
       updatedAt: true
     }
@@ -93,16 +92,16 @@ export const createUser = async (data: UserDto): Promise<User> => {
   });
 };
 
-export const createClientUser = async(data:UserFormDto):Promise<User> => {
+export const createClientUser = async (data: UserFormDto): Promise<User> => {
   return await prisma.user.create({
     data
   })
 }
 
 
-export const updateUser = async(userId:Number,data:UserDto):Promise<User> => {
+export const updateUser = async (userId: Number, data: UserDto): Promise<User> => {
   return await prisma.user.update({
-    where:{ id : Number(userId) },
+    where: { id: Number(userId) },
     data: data
   });
 }
@@ -110,9 +109,9 @@ export const updateUser = async(userId:Number,data:UserDto):Promise<User> => {
 export const updateVerificationToken = async (email: string, token: string): Promise<User> => {
   return await prisma.user.update({
     where: { email },
-    data: { 
-      emailVerificationCode:token, 
-      emailVerificationCodeExpiry: new Date(Date.now() + 3600000) 
+    data: {
+      emailVerificationCode: token,
+      emailVerificationCodeExpiry: new Date(Date.now() + 3600000)
     }
   });
 };
@@ -120,23 +119,23 @@ export const updateVerificationToken = async (email: string, token: string): Pro
 export const updatePasswordResetToken = async (email: string, token: string): Promise<User> => {
   return await prisma.user.update({
     where: { email },
-    data: { 
+    data: {
       passwordResetCode: token,
       passwordResetCodeExpiry: new Date(Date.now() + 3600000)
     }
   });
 }
 
-export const updatePassword = async (email: string, hashedPassword:string, token:string): Promise<User> => {
+export const updatePassword = async (email: string, hashedPassword: string, token: string): Promise<User> => {
   return await prisma.user.update({
-    where: { email:email, passwordResetCode:token  },
+    where: { email: email, passwordResetCode: token },
     data: { password: hashedPassword }
   });
 };
 
-export const updatePasswordWithoutToken = async (email: string, hashedPassword:string): Promise<User> => {
+export const updatePasswordWithoutToken = async (email: string, hashedPassword: string): Promise<User> => {
   return await prisma.user.update({
-    where: { email:email  },
+    where: { email: email },
     data: { password: hashedPassword }
   });
 };
@@ -145,8 +144,8 @@ export const updatePasswordWithoutToken = async (email: string, hashedPassword:s
 export const updateEmailVerified = async (email: string): Promise<User> => {
   return await prisma.user.update({
     where: { email },
-    data: { 
-      emailVerified: true 
+    data: {
+      emailVerified: true
     }
   });
 };
@@ -154,8 +153,8 @@ export const updateEmailVerified = async (email: string): Promise<User> => {
 export const disableUser = async (id: number): Promise<User> => {
   return await prisma.user.update({
     where: { id },
-    data: { 
-      isDisabled: true 
+    data: {
+      isDisabled: true
     }
   });
 };
@@ -163,8 +162,8 @@ export const disableUser = async (id: number): Promise<User> => {
 export const enableUser = async (id: number): Promise<User> => {
   return await prisma.user.update({
     where: { id },
-    data: { 
-      isDisabled: false 
+    data: {
+      isDisabled: false
     }
   });
 };

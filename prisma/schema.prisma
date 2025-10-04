@@ -23,7 +23,6 @@ model User {
   phoneNumber                 String
   document_type               String   @default("DNI")
   document_id                 String   @default("null")
-  nationality                 String   @default("null")
   isDisabled                  Boolean  @default(false)
   lastLogin                   DateTime?
   lastPasswordChanged         DateTime?

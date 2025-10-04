@@ -189,22 +189,7 @@ export const createReserve = async (data: ReserveFormDto, language: string): Pro
 
   const tentsDbMap = new Map(tentsDb.map(tent => [tent.id, tent]));
 
-  reserveDto.tents = reserveDto.tents.map(tent => {
-
-    const foundTent = tentsDbMap.get(tent.idTent);
-    if (!foundTent) {
-      throw new NotFoundError("error.noAllTentsFound");
-    }
-
-    const { nightly, kids_price, additional_people_price } = utils.computeTentNightly(foundTent, { kids: tent.kids, additional_people: tent.additional_people })
-
-    tent.price = nightly;
-    tent.additional_people_price = additional_people_price;
-    tent.kids_price = kids_price;
-    return tent;
-  });
-
-  const tentsWithQuantities = reserveDto.tents.map(tent => {
+  const tentsWithQuantities = data.tents.map(tent => {
     const foundTent = tentsDbMap.get(tent.idTent);
     if (!foundTent) {
       throw new NotFoundError("error.noAllTentsFound");
@@ -351,21 +336,6 @@ export const updateReserve = async (id: number, data: ReserveFormDto) => {
   }
 
   const tentsDbMap = new Map(tentsDb.map(tent => [tent.id, tent]));
-
-  reserve_tents = reserve_tents.map(tent => {
-
-    const foundTent = tentsDbMap.get(tent.idTent);
-    if (!foundTent) {
-      throw new NotFoundError("error.noAllTentsFound");
-    }
-
-    const { nightly, kids_price, additional_people_price } = utils.computeTentNightly(foundTent, { kids: tent.kids, additional_people: tent.additional_people })
-
-    tent.price = nightly;
-    tent.additional_people_price = additional_people_price;
-    tent.kids_price = kids_price;
-    return tent;
-  });
 
   const tentsWithQuantities = data.tents.map(tent => {
     const foundTent = tentsDbMap.get(tent.idTent);

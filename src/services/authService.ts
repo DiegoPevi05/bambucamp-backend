@@ -3,43 +3,43 @@ import jwt from 'jsonwebtoken';
 import * as userRepository from '../repositories/userRepository';
 import * as reserveRepository from '../repositories/ReserveRepository';
 import * as utils from '../lib/utils';
-import { UserDto} from '../dto/user';
+import { UserDto } from '../dto/user';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../config/email/mail';
 import { randomUUID } from 'crypto';
-import {BadRequestError, NotFoundError} from '../middleware/errors';
-import {ReserveFormDto} from '../dto/reserve';
-import {Role, User} from '@prisma/client';
-import { sendConfirmationReservationEmail} from '../config/email/mail';
+import { BadRequestError, NotFoundError } from '../middleware/errors';
+import { ReserveFormDto } from '../dto/reserve';
+import { Role, User } from '@prisma/client';
+import { sendConfirmationReservationEmail } from '../config/email/mail';
 
 
 const JWT_SECRET = process.env.JWT_SECRET || 'default_secret';
 
 /*************************SIGN UP FUNCTION************************************/
-export const signUp = async (data: UserDto, language:string) => {
+export const signUp = async (data: UserDto, language: string) => {
 
   const userExistant = await userRepository.getUserByEmail(data.email.toLowerCase());
 
-  if(userExistant){
+  if (userExistant) {
     throw new BadRequestError('error.userAlreadyExist');
   }
 
   const hashedPassword = await bcrypt.hash(data.password, 10);
 
-  const user =  await userRepository.createUser({ ...data, email: data.email.toLowerCase(),  password: hashedPassword });
+  const user = await userRepository.createUser({ ...data, email: data.email.toLowerCase(), password: hashedPassword });
 
   const token = randomUUID().slice(0, 6);
 
-  await userRepository.updateVerificationToken(user.email,token)
+  await userRepository.updateVerificationToken(user.email, token)
 
-  await sendVerificationEmail({email:data.email, firstName:data.firstName}, token, language);
+  await sendVerificationEmail({ email: data.email, firstName: data.firstName }, token, language);
 
 };
 
 /*************************VERIFY EMAIL FUNCTION************************************/
-export const verifyEmail = async(email:string,token:string) => {
+export const verifyEmail = async (email: string, token: string) => {
   const user = await userRepository.getUserByEmail(email.toLowerCase());
 
-  if(!user){
+  if (!user) {
     throw new NotFoundError('error.noUserFoundInDB')
   }
 
@@ -47,17 +47,17 @@ export const verifyEmail = async(email:string,token:string) => {
     throw new BadRequestError('error.emailAlreadyVerified');
   }
 
-  if(user.emailVerificationCodeExpiry){
+  if (user.emailVerificationCodeExpiry) {
     const now = new Date();
     const expiryDate = user.emailVerificationCodeExpiry;
 
-    if(expiryDate.getTime() <= now.getTime()){
+    if (expiryDate.getTime() <= now.getTime()) {
       throw new BadRequestError("error.verificationCodeIsAlreadyExpired")
     }
   }
 
-  if(user.emailVerificationCode != token){
-     throw new BadRequestError('error.codeInvalid')
+  if (user.emailVerificationCode != token) {
+    throw new BadRequestError('error.codeInvalid')
   }
 
   await userRepository.updateEmailVerified(user.email);
@@ -65,7 +65,7 @@ export const verifyEmail = async(email:string,token:string) => {
   return;
 }
 /*************************RESET PASSWORD FUNCTION************************************/
-export const resetPassword = async (email: string, language:string) => {
+export const resetPassword = async (email: string, language: string) => {
   const user = await userRepository.getUserByEmail(email.toLowerCase());
   if (!user) {
     throw new NotFoundError('error.noUserFoundInDB');
@@ -76,7 +76,7 @@ export const resetPassword = async (email: string, language:string) => {
     throw new BadRequestError('error.emailNotVerified');
   };
 
-  if(user.passwordResetCodeExpiry != undefined && user.passwordResetCodeExpiry != null && user.passwordResetCodeExpiry > new Date() ){
+  if (user.passwordResetCodeExpiry != undefined && user.passwordResetCodeExpiry != null && user.passwordResetCodeExpiry > new Date()) {
     throw new BadRequestError('error.resetCodeSent');
   }
 
@@ -97,24 +97,24 @@ export const verifyPasswordResetCode = async (email: string, token: string) => {
     throw new NotFoundError('error.noUserFoundInDB');
   }
 
-  if(user.passwordResetCodeExpiry){
+  if (user.passwordResetCodeExpiry) {
     const now = new Date();
     const expiryDate = user.passwordResetCodeExpiry;
 
-    if(expiryDate.getTime() <= now.getTime()){
+    if (expiryDate.getTime() <= now.getTime()) {
       throw new BadRequestError("error.verificationCodeIsAlreadyExpired")
     }
   }
 
-  if(user.passwordResetCode != token){
-     throw new BadRequestError("error.codeInvalid")
+  if (user.passwordResetCode != token) {
+    throw new BadRequestError("error.codeInvalid")
   }
 
   return;
 };
 
 /*************************UPDATE PASSWORD FUNCTION************************************/
-export const updatePassword = async (email: string, password: string, token:string) => {
+export const updatePassword = async (email: string, password: string, token: string) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   await userRepository.updatePassword(email.toLowerCase(), hashedPassword, token);
   return;
@@ -142,72 +142,70 @@ export const signIn = async (email: string, password: string) => {
 
   const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '1h' });
 
-  return { 
-    token, 
-    user: { 
-      id: user.id, 
-      firstName: user.firstName, 
+  return {
+    token,
+    user: {
+      id: user.id,
+      firstName: user.firstName,
       lastName: user.lastName,
       phoneNumber: user.phoneNumber,
       email: user.email,
       role: user.role,
-      nationality: user.nationality,
       document_id: user.document_id,
-      document_type:user.document_type
-    } 
+      document_type: user.document_type
+    }
   };
 };
 
 /*************************CREATE RESERVE USER FUNCTION************************************/
 
-export const createReserveUser = async(data: ReserveFormDto):Promise<User> => {
+export const createReserveUser = async (data: ReserveFormDto): Promise<User> => {
 
   const userExistant = await userRepository.getUserByEmail(data.user_email ? data.user_email.toLowerCase() : "");
-  if(!userExistant){
+  if (!userExistant) {
 
     return await userRepository.createClientUser(
-      { 
-        role: Role.CLIENT, 
-        document_type:data.user_document_type ?? "",
-        document_id:data.user_document_id ?? "",
-        nationality: data.user_nationality ?? "",
-        firstName: data.user_firstname ?? "" ,
-        lastName:data.user_lastname ?? "",
+      {
+        role: Role.CLIENT,
+        document_type: data.user_document_type ?? "",
+        document_id: data.user_document_id ?? "",
+        firstName: data.user_firstname ?? "",
+        lastName: data.user_lastname ?? "",
         phoneNumber: data.user_phone_number ?? "",
-        email: data.user_email ?? "",  
+        email: data.user_email ?? "",
         password: randomUUID().slice(0, 6),
-        isDisabled:false,
-        emailVerified:false
+        isDisabled: false,
+        emailVerified: false
       }
     );
   }
-  
+
   return userExistant;
 }
 
 /*************************VERIFY USER AND NOTIFY USER ************************************/
-export const confirmReservation = async(reserveId:number, language:string) => {
+export const confirmReservation = async (reserveId: number, language: string) => {
 
-    const reserve = await reserveRepository.getReserveDtoById(reserveId);
+  const reserve = await reserveRepository.getReserveDtoById(reserveId);
 
-    if (!reserve) {
-      throw new NotFoundError('error.noReservefoundInDB');
-    }
+  if (!reserve) {
+    throw new NotFoundError('error.noReservefoundInDB');
+  }
 
-    const user = await userRepository.getUserById(reserve.userId);
+  const user = await userRepository.getUserById(reserve.userId);
 
-    if(!user){
-      throw new NotFoundError('error.noUserFoundInDB')
-    }
+  if (!user) {
+    throw new NotFoundError('error.noUserFoundInDB')
+  }
 
-    const password  = utils.generateRandomPassword();
-    const hashedPassword = await bcrypt.hash(password,10);
+  const password = utils.generateRandomPassword();
+  const hashedPassword = await bcrypt.hash(password, 10);
 
-    if (!user.emailVerified) {
-      await userRepository.updateEmailVerified(user.email);
-      await userRepository.updatePasswordWithoutToken(user.email.toLowerCase(), hashedPassword);
-    }
+  if (!user.emailVerified) {
+    await userRepository.updateEmailVerified(user.email);
+    await userRepository.updatePasswordWithoutToken(user.email.toLowerCase(), hashedPassword);
+  }
 
-    await sendConfirmationReservationEmail({ email:user.email, firstName:user.firstName, password}, reserve, language)
+  await sendConfirmationReservationEmail({ email: user.email, firstName: user.firstName, password }, reserve, language)
 }
 

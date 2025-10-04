@@ -94,7 +94,6 @@ export interface ReserveFormDto {
   user_phone_number?: string;
   user_document_type?: string;
   user_document_id?: string;
-  user_nationality?: string;
   eta?: Date;
   external_id: string;
   tents: ReserveTentDto[];

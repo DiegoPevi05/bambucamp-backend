@@ -1,187 +1,187 @@
 import { Request, Response } from 'express';
 import * as reserveService from '../services/reserveService';
 import { body, query, param, validationResult } from 'express-validator';
-import {CustomError} from '../middleware/errors';
-import {PaymentStatus} from '@prisma/client';
-import {formatStrToDate} from '../lib/utils';
-import {ReserveEntityType} from '../dto/reserve';
+import { CustomError } from '../middleware/errors';
+import { PaymentStatus } from '@prisma/client';
+import { formatStrToDate } from '../lib/utils';
+import { ReserveEntityType } from '../dto/reserve';
 
 export const getCalendarDates = async (req: Request, res: Response) => {
-    try {
-      const { page = '0' } = req.query;
+  try {
+    const { page = '0' } = req.query;
 
-      const pageParsed = parseInt(page as string, 10);
+    const pageParsed = parseInt(page as string, 10);
 
-      const PaginatedReserves = await reserveService.getCalendarDates(pageParsed);
+    const PaginatedReserves = await reserveService.getCalendarDates(pageParsed);
 
-      res.json(PaginatedReserves);
+    res.json(PaginatedReserves);
 
-    } catch (error) {
-      if (error instanceof CustomError) {
-        res.status(error.statusCode).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: req.t('error.failedToFetchReserves') });
-      }
+  } catch (error) {
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: req.t('error.failedToFetchReserves') });
     }
+  }
 }
 
 export const getAllPublicTentsForReservation = [
-    query('dateFrom').notEmpty().withMessage('validation.dateFromRequired'),
-    query('dateTo').notEmpty().withMessage('validation.dateToRequired'),
-    async (req: Request, res: Response) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-          const localizedErrors = errors.array().map((error) => ({
-            ...error,
-            msg: req.t(error.msg)
-          }));
+  query('dateFrom').notEmpty().withMessage('validation.dateFromRequired'),
+  query('dateTo').notEmpty().withMessage('validation.dateToRequired'),
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
 
-          return res.status(400).json({ error: localizedErrors });
-        }
-      try {
-
-        const { dateFrom, dateTo } = req.query;
-
-        const tents = await reserveService.searchAvailableTents(dateFrom as string, dateTo as string);
-        res.json(tents);
-      } catch (error) {
-        if (error instanceof CustomError) {
-          res.status(error.statusCode).json({ error: req.t(error.message) });
-        } else {
-          res.status(500).json({ error: req.t("error.failedToFetchTents") });
-        }
-      }
+      return res.status(400).json({ error: localizedErrors });
     }
-] 
-
-export const getAdminTentsForReservation = [
-    query('dateFrom').notEmpty().withMessage('validation.dateFromRequired'),
-    query('dateTo').notEmpty().withMessage('validation.dateToRequired'),
-    async (req: Request, res: Response) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-          const localizedErrors = errors.array().map((error) => ({
-            ...error,
-            msg: req.t(error.msg)
-          }));
-
-          return res.status(400).json({ error: localizedErrors });
-        }
-      try {
-
-        const { dateFrom, dateTo } = req.query;
-
-        const tents = await reserveService.searchAdminAvailableTents(dateFrom as string, dateTo as string);
-        res.json(tents);
-      } catch (error) {
-        if (error instanceof CustomError) {
-          res.status(error.statusCode).json({ error: req.t(error.message) });
-        } else {
-          res.status(500).json({ error: req.t("error.failedToFetchTents") });
-        }
-      }
-    }
-] 
-
-export const getAllMyReservesCalendarUser = async (req: Request, res: Response) => {
     try {
-      const { page = '0' } = req.query;
 
-      if (!req.user) {
-        return res.status(401).json({ error: req.t('error.unauthorized') });
-      };
+      const { dateFrom, dateTo } = req.query;
 
-      const pageParsed = parseInt(page as string, 10);
-
-      const PaginatedReserves = await reserveService.getAllMyReservesCalendarUser(pageParsed, req.user.id);
-
-      res.json(PaginatedReserves);
-
+      const tents = await reserveService.searchAvailableTents(dateFrom as string, dateTo as string);
+      res.json(tents);
     } catch (error) {
       if (error instanceof CustomError) {
-        res.status(error.statusCode).json({ error: error.message });
+        res.status(error.statusCode).json({ error: req.t(error.message) });
       } else {
-        res.status(500).json({ error: req.t('error.failedToFetchReserves') });
+        res.status(500).json({ error: req.t("error.failedToFetchTents") });
       }
     }
+  }
+]
+
+export const getAdminTentsForReservation = [
+  query('dateFrom').notEmpty().withMessage('validation.dateFromRequired'),
+  query('dateTo').notEmpty().withMessage('validation.dateToRequired'),
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const localizedErrors = errors.array().map((error) => ({
+        ...error,
+        msg: req.t(error.msg)
+      }));
+
+      return res.status(400).json({ error: localizedErrors });
+    }
+    try {
+
+      const { dateFrom, dateTo } = req.query;
+
+      const tents = await reserveService.searchAdminAvailableTents(dateFrom as string, dateTo as string);
+      res.json(tents);
+    } catch (error) {
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({ error: req.t(error.message) });
+      } else {
+        res.status(500).json({ error: req.t("error.failedToFetchTents") });
+      }
+    }
+  }
+]
+
+export const getAllMyReservesCalendarUser = async (req: Request, res: Response) => {
+  try {
+    const { page = '0' } = req.query;
+
+    if (!req.user) {
+      return res.status(401).json({ error: req.t('error.unauthorized') });
+    };
+
+    const pageParsed = parseInt(page as string, 10);
+
+    const PaginatedReserves = await reserveService.getAllMyReservesCalendarUser(pageParsed, req.user.id);
+
+    res.json(PaginatedReserves);
+
+  } catch (error) {
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: req.t('error.failedToFetchReserves') });
+    }
+  }
 }
 
 export const getAllMyReservesCalendar = async (req: Request, res: Response) => {
-    try {
-      const { page = '0' } = req.query;
+  try {
+    const { page = '0' } = req.query;
 
-      if (!req.user) {
-        return res.status(401).json({ error: req.t('error.unauthorized') });
-      };
+    if (!req.user) {
+      return res.status(401).json({ error: req.t('error.unauthorized') });
+    };
 
-      const pageParsed = parseInt(page as string, 10);
+    const pageParsed = parseInt(page as string, 10);
 
-      const PaginatedReserves = await reserveService.getAllMyReservesCalendar(pageParsed);
+    const PaginatedReserves = await reserveService.getAllMyReservesCalendar(pageParsed);
 
-      res.json(PaginatedReserves);
+    res.json(PaginatedReserves);
 
-    } catch (error) {
-      if (error instanceof CustomError) {
-        res.status(error.statusCode).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: req.t('error.failedToFetchReserves') });
-      }
+  } catch (error) {
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: req.t('error.failedToFetchReserves') });
     }
+  }
 }
 
 
 export const getAllMyReservesUser = async (req: Request, res: Response) => {
-    try {
-      const { page = '1', pageSize = '10' } = req.query;
+  try {
+    const { page = '1', pageSize = '10' } = req.query;
 
-      if (!req.user) {
-        return res.status(401).json({ error: req.t('error.unauthorized') });
-      };
+    if (!req.user) {
+      return res.status(401).json({ error: req.t('error.unauthorized') });
+    };
 
-      const pagination = {
-        page: parseInt(page as string, 10),
-        pageSize: parseInt(pageSize as string, 10),
-      };
+    const pagination = {
+      page: parseInt(page as string, 10),
+      pageSize: parseInt(pageSize as string, 10),
+    };
 
-      const PaginatedReserves = await reserveService.getAllMyReservesUser(pagination, req.user.id);
+    const PaginatedReserves = await reserveService.getAllMyReservesUser(pagination, req.user.id);
 
-      res.json(PaginatedReserves);
+    res.json(PaginatedReserves);
 
-    } catch (error) {
-      console.log(error)
-      if (error instanceof CustomError) {
-        res.status(error.statusCode).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: req.t('error.failedToFetchReserves') });
-      }
+  } catch (error) {
+    console.log(error)
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: req.t('error.failedToFetchReserves') });
     }
+  }
 }
 
 
 export const getAllMyReservesAdmin = async (req: Request, res: Response) => {
-    try {
-      const { page = '1', pageSize = '10' } = req.query;
+  try {
+    const { page = '1', pageSize = '10' } = req.query;
 
-      const pagination = {
-        page: parseInt(page as string, 10),
-        pageSize: parseInt(pageSize as string, 10),
-      };
+    const pagination = {
+      page: parseInt(page as string, 10),
+      pageSize: parseInt(pageSize as string, 10),
+    };
 
-      const PaginatedReserves = await reserveService.getAllMyReserves(pagination);
+    const PaginatedReserves = await reserveService.getAllMyReserves(pagination);
 
-      res.json(PaginatedReserves);
+    res.json(PaginatedReserves);
 
-    } catch (error) {
-      console.log(error);
-      if (error instanceof CustomError) {
-        res.status(error.statusCode).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: req.t('error.failedToFetchReserves') });
-      }
+  } catch (error) {
+    console.log(error);
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: req.t('error.failedToFetchReserves') });
     }
+  }
 }
 
-export const getAllReserveOptions = async( req:Request, res:Response ) => {
+export const getAllReserveOptions = async (req: Request, res: Response) => {
   try {
     const reserveOptions = await reserveService.getAllReseveOptions();
     res.json(reserveOptions);
@@ -202,7 +202,7 @@ export const getAllReserves = async (req: Request, res: Response) => {
     const filters = {
       dateFrom: formatStrToDate(dateFrom as string) as Date | undefined,
       dateTo: formatStrToDate(dateTo as string) as Date | undefined,
-      payment_status:payment_status as PaymentStatus | undefined
+      payment_status: payment_status as PaymentStatus | undefined
     };
 
     const pagination = {
@@ -225,7 +225,7 @@ export const getAllReserves = async (req: Request, res: Response) => {
 };
 
 
-export const downloadReserveBill =  [
+export const downloadReserveBill = [
   param('id').notEmpty().withMessage("validation.idRequired"),
   async (req: Request, res: Response) => {
 
@@ -241,7 +241,7 @@ export const downloadReserveBill =  [
 
     try {
       // Generate PDF as a byte array
-      const pdfBuffer = await reserveService.downloadReserveBill(Number(req.params.id),req.user, req.t);
+      const pdfBuffer = await reserveService.downloadReserveBill(Number(req.params.id), req.user, req.t);
 
       // Set response headers and send PDF as a byte array
       res.set({
@@ -266,13 +266,11 @@ export const createReserveByUser = [
   body('tents').isArray().withMessage('validation.tentsMustBeArray'),
   body('products').isArray().withMessage('validation.productsMustBeArray'),
   body('experiences').isArray().withMessage('validation.experiencesMustBeArray'),
-  body('promotions').isArray().withMessage('validation.promotionsMustBeArray'),
   body('user_firstname').notEmpty().withMessage('validation.nameRequired'),
   body('user_lastname').notEmpty().withMessage('validation.lastNameRequired'),
   body('user_phone_number').notEmpty().withMessage('validation.phoneNumberRequired'),
   body('user_document_type').notEmpty().withMessage('validation.documentTypeRequired'),
   body('user_document_id').notEmpty().withMessage('validation.documentIdRequired'),
-  body('user_nationality').notEmpty().withMessage('validation.nationalityRequired'),
   body('user_email').isEmail().withMessage('validation.emailInvalid'),
   body('eta').notEmpty().withMessage('validation.etaRequired'),
 
@@ -308,13 +306,11 @@ export const createReserve = [
   body('tents').isArray().withMessage('validation.tentsMustBeArray'),
   body('products').isArray().withMessage('validation.productsMustBeArray'),
   body('experiences').isArray().withMessage('validation.experiencesMustBeArray'),
-  body('promotions').isArray().withMessage('validation.promotionsMustBeArray'),
   body('user_firstname').notEmpty().withMessage('validation.nameRequired'),
   body('user_lastname').notEmpty().withMessage('validation.lastNameRequired'),
   body('user_phone_number').notEmpty().withMessage('validation.phoneNumberRequired'),
   body('user_document_type').notEmpty().withMessage('validation.documentTypeRequired'),
   body('user_document_id').notEmpty().withMessage('validation.documentIdRequired'),
-  body('user_nationality').notEmpty().withMessage('validation.nationalityRequired'),
   body('user_email').isEmail().withMessage('validation.emailInvalid'),
 
   async (req: Request, res: Response) => {
@@ -332,7 +328,7 @@ export const createReserve = [
     try {
 
       const language = req.language || 'en';
-      await reserveService.createReserve(req.body,language);
+      await reserveService.createReserve(req.body, language);
       res.status(201).json({ message: req.t('message.reserveCreated') });
     } catch (error) {
       if (error instanceof CustomError) {
@@ -349,7 +345,6 @@ export const updateReserve = [
   body('tents').isArray().withMessage('validation.tentsMustBeArray'),
   body('products').isArray().withMessage('validation.productsMustBeArray'),
   body('experiences').isArray().withMessage('validation.experiencesMustBeArray'),
-  body('promotions').isArray().withMessage('validation.promotionsMustBeArray'),
 
   async (req: Request, res: Response) => {
 
@@ -406,10 +401,10 @@ export const createProductReserveByUser = [
     }
 
     try {
-      if(req.user){
-        await reserveService.AddProductReserveByUser(req.user.id,req.body.products);
+      if (req.user) {
+        await reserveService.AddProductReserveByUser(req.user.id, req.body.products);
         res.status(201).json({ message: req.t('message.productReserveCreated') });
-      } 
+      }
     } catch (error) {
       if (error instanceof CustomError) {
         res.status(error.statusCode).json({ error: req.t(error.message) });
@@ -438,7 +433,7 @@ export const createProductReserve = [
     }
 
     try {
-      await reserveService.AddProductReserve(null,req.body.products);
+      await reserveService.AddProductReserve(null, req.body.products);
       res.status(201).json({ message: req.t('message.productReserveCreated') });
     } catch (error) {
       if (error instanceof CustomError) {
@@ -496,10 +491,10 @@ export const createExperienceReserveByUser = [
     }
 
     try {
-      if(req.user){
-        await reserveService.AddExperienceReserveByUser(req.user.id,req.body.experiences);
+      if (req.user) {
+        await reserveService.AddExperienceReserveByUser(req.user.id, req.body.experiences);
         res.status(201).json({ message: req.t('message.experienceReserveCreated') });
-      } 
+      }
     } catch (error) {
       console.log(error);
       if (error instanceof CustomError) {
@@ -529,7 +524,7 @@ export const createExperienceReserve = [
     }
 
     try {
-      await reserveService.AddExperienceReserve(null,req.body.experiences);
+      await reserveService.AddExperienceReserve(null, req.body.experiences);
       res.status(201).json({ message: req.t('message.experienceReserveCreated') });
     } catch (error) {
       if (error instanceof CustomError) {
@@ -591,9 +586,9 @@ export const confirmEntity = [
 
       const language = req.language || 'en';
       // Call the confirmEntity function
-      await reserveService.confirmEntity(entityType, reserveId,language, entityId);
+      await reserveService.confirmEntity(entityType, reserveId, language, entityId);
 
-      res.status(201).json({ message: req.t((entityType == ReserveEntityType.RESERVE ? 'message.reserveConfirmed' : 'message.entityConfirmed' ), { entityType }) });
+      res.status(201).json({ message: req.t((entityType == ReserveEntityType.RESERVE ? 'message.reserveConfirmed' : 'message.entityConfirmed'), { entityType }) });
     } catch (error) {
       if (error instanceof CustomError) {
         res.status(error.statusCode).json({ error: req.t(error.message) });
