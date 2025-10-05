@@ -25,7 +25,7 @@ export const TentsData = [
     additional_people_price: 100.0,
     max_additional_people: 1,
     max_kids: 2,
-    kids_bundle_price: 150.0,
+    kids_bundle_price: 100.0,
   },
   {
     header: 'Bambu Gold',
@@ -53,7 +53,7 @@ export const TentsData = [
     additional_people_price: 100.0,
     max_additional_people: 1,
     max_kids: 2,
-    kids_bundle_price: 150.0,
+    kids_bundle_price: 100.0,
   },
 
   // ===== SUITES =====
@@ -82,8 +82,8 @@ export const TentsData = [
     price: 390.0,
     additional_people_price: 100.0,
     max_additional_people: 1,
-    max_kids: 1,
-    kids_bundle_price: 150.0,
+    max_kids: 2,
+    kids_bundle_price: 100.0,
   },
   {
     header: 'Bambu Suite',
@@ -110,8 +110,8 @@ export const TentsData = [
     price: 390.0,
     additional_people_price: 100.0,
     max_additional_people: 1,
-    max_kids: 1,
-    kids_bundle_price: 150.0,
+    max_kids: 2,
+    kids_bundle_price: 100.0,
   },
   {
     header: 'Bambu Suite',
@@ -139,7 +139,7 @@ export const TentsData = [
     additional_people_price: 100.0,
     max_additional_people: 1,
     max_kids: 2,
-    kids_bundle_price: 150.0,
+    kids_bundle_price: 100.0,
   },
   {
     header: 'Bambu Suite',
@@ -167,7 +167,7 @@ export const TentsData = [
     additional_people_price: 100.0,
     max_additional_people: 1,
     max_kids: 2,
-    kids_bundle_price: 150.0,
+    kids_bundle_price: 100.0,
   },
   {
     header: 'Bambu Suite',
@@ -195,6 +195,6 @@ export const TentsData = [
     additional_people_price: 100.0,
     max_additional_people: 1,
     max_kids: 2,
-    kids_bundle_price: 150.0,
+    kids_bundle_price: 100.0,
   },
 ];
