@@ -9,6 +9,7 @@ import * as tentRepository from '../repositories/TentRepository';
 import * as productRepository from '../repositories/ProductRepository';
 import * as experienceRepository from '../repositories/ExperienceRepository';
 import { BadRequestError, NotFoundError } from '../middleware/errors';
+import { processImage, NORMAL_VARIANT_DIR, SMALL_VARIANT_DIR } from './image';
 
 // Define a custom type for the Multer file
 type MulterFile = Express.Multer.File;
@@ -25,14 +26,29 @@ export const serializeImagesTodb = (files: { [fieldname: string]: MulterFile[] }
 
 export const deleteImages = (imagePaths: string[]) => {
   imagePaths.forEach(imagePath => {
-    const fullPath = path.join(__dirname, '../../', imagePath);
+    const normalized = imagePath.replace(/\\/g, '/');
+    const fullPath = path.join(__dirname, '../../', normalized);
+
     fs.unlink(fullPath, (err) => {
-      if (err) {
-        console.error(`Failed to delete image: ${imagePath}`, err);
-      } else {
-        console.log(`Successfully deleted image: ${imagePath}`);
+      if (err && err.code !== 'ENOENT') {
+        console.error(`Failed to delete image: ${normalized}`, err);
+      } else if (!err) {
+        console.log(`Successfully deleted image: ${normalized}`);
       }
     });
+
+    if (normalized.includes(`/${NORMAL_VARIANT_DIR}/`)) {
+      const smallVariantPath = normalized.replace(`/${NORMAL_VARIANT_DIR}/`, `/${SMALL_VARIANT_DIR}/`);
+      const smallFullPath = path.join(__dirname, '../../', smallVariantPath);
+
+      fs.unlink(smallFullPath, (err) => {
+        if (err && err.code !== 'ENOENT') {
+          console.error(`Failed to delete small image: ${smallVariantPath}`, err);
+        } else if (!err) {
+          console.log(`Successfully deleted small image: ${smallVariantPath}`);
+        }
+      });
+    }
   });
 };
 
@@ -57,11 +73,20 @@ export const moveImagesToSubFolder = async (tentId: number, subfolderName: strin
     fs.mkdirSync(subFolderPath, { recursive: true });
   }
 
+  const generateSmall = subfolderName === 'tents';
+
   for (const image of images) {
-    const oldPath = path.join(__dirname, '../../', image);
-    const newPath = path.join(subFolderPath, path.basename(image));
-    await fs.promises.rename(oldPath, newPath);
-    newPaths.push(newPath.replace(path.join(__dirname, '../../'), ''));
+    const normalized = image.replace(/\\/g, '/');
+    const oldPath = path.join(__dirname, '../../', normalized);
+    const fileBaseName = path.parse(normalized).name;
+
+    const { normalPath } = await processImage(oldPath, subFolderPath, {
+      generateSmall,
+      outputFileName: fileBaseName,
+    });
+
+    const relativePath = normalPath.replace(path.join(__dirname, '../../'), '').replace(/\\/g, '/');
+    newPaths.push(relativePath);
   }
 
   return newPaths;
