@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { ReserveDto } from '../../dto/reserve';
 import * as utils from '../../lib/utils';
+import { getImageUrl, ImageVariant } from '../../lib/image';
 
 // Load SMTP configuration from environment variables
 const CLIENT_HOSTNAME = process.env.CLIENT_HOSTNAME || 'http://localhost:5174';
@@ -20,10 +21,12 @@ const replaceAllPlaceholders = (tpl: string, data: Record<string, string>) => {
   return tpl.replace(re, (_, key) => data[key]);
 };
 
-const formatImagePath = (image: string): string => {
-  image = image.replace(/\\/g, '/'); // Assign the result of replace to image
-  image = image.replace("public", `${CLIENT_HOSTNAME}/backend-public`); // Same here
-  return image;
+const formatImagePath = (image: string, variant: ImageVariant = 'normal'): string => {
+  if (!image) {
+    return image;
+  }
+
+  return getImageUrl(image, { size: variant, basePath: `${CLIENT_HOSTNAME}/backend-public` });
 };
 
 type TemplateData = {
@@ -414,7 +417,7 @@ export const generateReservationTemplate = (title: string, greeting_message_1: s
                                     <td align="center" class="email-reserve-block-image"
                                       ><a target="_blank"
                                         href="${CLIENT_HOSTNAME}"><img class="email-reserve-block-image-img"
-                                          src=${`${formatImagePath(tent.tentDB?.images[0] ?? "none")}`}
+                                          src=${`${formatImagePath(tent.tentDB?.images[0] ?? '', 'small')}`}
                                           alt=${"image-reserve-" + tent.idTent}"image-reserve" ></a></td>
                                   </tr>
                                 </tbody>

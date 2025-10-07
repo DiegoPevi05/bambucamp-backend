@@ -7,6 +7,7 @@ import bcrypt from 'bcryptjs';
 import { TentsData } from './data/tents';
 import { ProductsCategoriesData, ProductsData } from './data/products';
 import { ExperiencesCategoriesData, ExperiencesData } from './data/experiences';
+import { processImage } from '../../src/lib/image';
 
 const getImageFiles = (folderPath: string) => {
   // Define common image file extensions
@@ -38,21 +39,19 @@ const moveImagesToSubFolder = async (ObjectId: number, category: string, subfold
   // Get the list of image names from the source folder
   const imageNames = getImageFiles(path.join(__dirname, `./files/${category}/${subfolderName}`));
 
+  const shouldGenerateSmall = category === 'tents';
+
   for (const image of imageNames) {
     const oldPath = path.join(__dirname, `./files/${category}/${subfolderName}/`, image);
-    const ext = path.extname(image); // Get the original extension
+    const uniqueSuffix = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
 
-    // Create a new name using the current timestamp and the original extension
-    //const newImageName = `${Date.now()}${ext}`;
-    const uniqueSuffix = `${Date.now()}-${Math.floor(Math.random() * 10000)}`; // Add randomness
-    const newImageName = `${uniqueSuffix}${ext}`;
-    const newPath = path.join(subFolderPath, newImageName);
+    const { normalPath } = await processImage(oldPath, subFolderPath, {
+      generateSmall: shouldGenerateSmall,
+      outputFileName: uniqueSuffix,
+      removeSource: false,
+    });
 
-    // Copy the file to the new location with the new name
-    await fs.promises.copyFile(oldPath, newPath);
-
-    // Push the new path relative to the public/images directory
-    newPaths.push(newPath.replace(path.join(__dirname, '../../'), ''));
+    newPaths.push(normalPath.replace(path.join(__dirname, '../../'), '').replace(/\\/g, '/'));
   }
 
   return newPaths;
