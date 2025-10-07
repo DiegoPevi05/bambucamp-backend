@@ -4,8 +4,8 @@ import sharp from 'sharp';
 
 export type ImageVariant = 'normal' | 'small';
 
-export const NORMAL_VARIANT_DIR = '600px';
-export const SMALL_VARIANT_DIR = '150px';
+export const NORMAL_VARIANT_DIR = '900px';
+export const SMALL_VARIANT_DIR = '250px';
 
 interface ProcessImageOptions {
   generateSmall?: boolean;
@@ -36,8 +36,8 @@ export const processImage = async (
     generateSmall = false,
     removeSource = true,
     outputFileName,
-    normalWidth = 600,
-    smallWidth = 150,
+    normalWidth = 900,
+    smallWidth = 250,
   } = options;
 
   const filename = getOutputFileName(sourcePath, outputFileName);
@@ -52,7 +52,7 @@ export const processImage = async (
   await sourceImage
     .clone()
     .resize({ width: normalWidth, height: normalWidth, fit: 'inside', withoutEnlargement: true })
-    .webp({ quality: 85 })
+    .webp({ quality: 100 })
     .toFile(normalFullPath);
 
   let smallFullPath: string | undefined;

@@ -232,8 +232,7 @@ export const generateNewReservationTemplateUser = (
   const BBVA_CCI = "011-341-000200476632-51";
   const BBVA_OWNER = "CRIALCA S.A.C - RUC 20602767532";
 
-  //const QR_LINK = escapeHtmlAttr(`${CLIENT_HOSTNAME}/backend-public/tent.jpeg`);
-  const QR_LINK = escapeHtmlAttr(`${CLIENT_HOSTNAME}/backend-public/logo.png`);
+  const QR_LINK = escapeHtmlAttr(`${CLIENT_HOSTNAME}/backend-public/qr_bambucamp.png`);
 
   // --- Textos ES/EN ---
   const i18n = (language === "es")
