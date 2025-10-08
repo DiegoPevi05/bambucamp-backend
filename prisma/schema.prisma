@@ -163,9 +163,9 @@ model ReserveTent {
   dateFrom                 DateTime        
   dateTo                  DateTime        
   additional_people       Int       @default(0)
-  additional_people_price Float @default(0)
+  additional_people_price Float     @default(0)
   kids                    Int       @default(0)
-  kids_price               Float     @default(0)
+  kids_price               Float    @default(0)
   reserve                 Reserve   @relation(fields: [reserveId], references: [id], onDelete: Cascade)
   confirmed               Boolean   @default(false)
   createdAt               DateTime  @default(now())

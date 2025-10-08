@@ -120,6 +120,13 @@
 	},
 	"message": {
 		"entityConfirmed": "{{entityType}} ha sido confirmado exitosamente.",
+    "reserveCreatedByUser":"Reserva creada exitosamente",
+		"productReserveCreated": "Producto agregado a la reserva",
+		"productReserveDeleted": "Producto eliminado de la reserva",
+		"experienceReserveCreated": "Experiencia agreagada a la reserva",
+		"experienceReserveDeleted": "Experiencia eliminada de la reserva",
+		"productReserveStatusUpdated": "Producto confirmado en la reserva",
+		"experienceReserveStatusUpdated": "Experiencia confirmada en la reserva",
 		"reserveCreated": "Reserva creada",
 		"reserveUpdated": "Reserva actualizada",
 		"reserveDeleted": "Reserva eliminada",

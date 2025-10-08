@@ -161,7 +161,7 @@ export const computeTentNightly = (
     | 'qtypeople'
   >,
   selection: { kids?: number; additional_people?: number }
-): { nightly: number, kids_price: number, additional_people_price: number } => {
+): { nightly: number,nightlyBase:number , kids_price: number, additional_people_price: number } => {
 
   const nightlyBase = calculatePrice(tent.price, tent.custom_price);
 
@@ -191,18 +191,19 @@ export const computeTentNightly = (
   const hasKids = selectedKids > tent.qtykids;
   const effectiveExtraAdults = hasKids ? 0 : rawExtraAdults;
 
+
   if (tent.qtypeople + effectiveExtraAdults > (tent.qtypeople + tent.max_additional_people)) {
     throw new BadRequestError('error.maxAdultsExceeded');
   }
 
-  const kidsBundleEligible = tent.kids_bundle_price > 0 && tent.max_kids > 0;
-  const kidsBundleApplies = kidsBundleEligible && selectedKids >= tent.qtykids && effectiveExtraAdults === 0;
+  const kidsBundleApplies = tent.kids_bundle_price && selectedKids > tent.qtykids && effectiveExtraAdults === 0;
   const kidsBundlePrice = kidsBundleApplies ? tent.kids_bundle_price : 0;
 
   const nightly = nightlyBase + (effectiveExtraAdults * tent.additional_people_price) + kidsBundlePrice;
 
   return {
     nightly,
+    nightlyBase,
     kids_price: kidsBundlePrice,
     additional_people_price: (effectiveExtraAdults > 0 ? tent.additional_people_price : 0),
   };
@@ -304,7 +305,7 @@ export const getTents = async (tents: ReserveTentDto[]): Promise<Tent[]> => {
   return tentsDb;
 }
 
-export const normalizeTimesInTents = (tents: ReserveTentDto[]): ReserveTentDto[] => {
+export const normalizeTimesInTents = (tents: ReserveTentDto[]): void => {
 
   tents.forEach((tent) => {
 
@@ -319,10 +320,10 @@ export const normalizeTimesInTents = (tents: ReserveTentDto[]): ReserveTentDto[]
     tent.dateTo = checkOutTime;
   })
 
-  return tents;
+  return;
 }
 
-export const normalizeTimesInExperience = (experiences: ReserveExperienceDto[]): ReserveExperienceDto[] => {
+export const normalizeTimesInExperience = (experiences: ReserveExperienceDto[]): void => {
 
   experiences.forEach((experience) => {
     if (!experience.day) throw new BadRequestError("error.noDateFromInReserveRequest")
@@ -332,7 +333,7 @@ export const normalizeTimesInExperience = (experiences: ReserveExperienceDto[]):
 
   })
 
-  return experiences;
+  return;
 
 }
 
@@ -415,17 +416,6 @@ export const parseImagesInReserves = (reserves: ReserveDto[]) => {
     reserve?.tents?.forEach((tent) => {
       if (tent?.tentDB && typeof tent.tentDB.images === 'string') {
         tent.tentDB.images = JSON.parse(tent.tentDB.images.replace(/\\\\/g, '\\\\') || '[]');
-      }
-
-      if (tent?.tentDB) {
-        try {
-          const { nightly, kids_price, additional_people_price } = computeTentNightly(tent.tentDB, { kids: tent.kids, additional_people: tent.additional_people })
-          tent.additional_people = additional_people_price;
-          tent.kids_price = kids_price;
-          tent.price = nightly;
-        } catch (error) {
-          // Ignore pricing errors when enriching historic reserves
-        }
       }
     });
 

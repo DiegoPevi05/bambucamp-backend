@@ -121,6 +121,7 @@
 	"message": {
 		"entityConfirmed": "{{entityType}} has been successfully confirmed.",
 		"reviewDeleted": "Review deleted",
+    "reserveCreatedByUser":"Reserve created successfully",
 		"productReserveCreated": "Product Added to the reserve",
 		"productReserveDeleted": "Product Remove from the reserve",
 		"experienceReserveCreated": "Experience Added to the reserve",

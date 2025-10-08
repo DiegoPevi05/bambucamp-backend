@@ -130,72 +130,65 @@ export const createReserveByUser = async (data: ReserveFormDto, language: string
 
 
 export const createReserve = async (data: ReserveFormDto, language: string): Promise<ReserveDto | null> => {
+  const user = await authService.createReserveUser(data);
 
-  let reserveDto: ReserveDto = {
-    userId: 0,
-    eta: new Date(),
+  const reserveDto: ReserveDto = {
+    userId: user.id,
+    eta: data.eta ? new Date(data.eta) : new Date(),
     external_id: "",
     dateSale: new Date(),
     tents: [],
     experiences: [],
     products: [],
-    price_is_calculated: true,
-    discount_code_id: 0,
-    discount_code_name: "",
-    net_import: 0,
-    discount: 0,
-    gross_import: 0,
-    canceled_reason: "",
-    canceled_status: false,
-    payment_status: PaymentStatus.UNPAID,
-    reserve_status: ReserveStatus.CONFIRMED,
+    price_is_calculated: data.price_is_calculated ?? true,
+    discount_code_id: Number(data.discount_code_id ?? 0),
+    discount_code_name: data.discount_code_name ?? "",
+    net_import: Number(data.net_import ?? 0),
+    discount: Number(data.discount ?? 0),
+    gross_import: Number(data.gross_import ?? 0),
+    canceled_reason: data.canceled_reason ?? "",
+    canceled_status: data.canceled_status ?? false,
+    payment_status: data.payment_status ?? PaymentStatus.UNPAID,
+    reserve_status: data.reserve_status ?? ReserveStatus.CONFIRMED,
   };
 
+  const [tentsDb, productsDb, experiencesDb] = await Promise.all([
+    utils.getTents(data.tents),
+    utils.getProducts(data.products),
+    utils.getExperiences(data.experiences),
+  ]);
 
-  let user = await authService.createReserveUser(data);
+  const tentsAvailable = await utils.checkAvailability(data.tents);
+  if (!tentsAvailable) throw new BadRequestError("error.noTentsAvailable");
 
-  reserveDto.userId = user.id;
+  utils.normalizeTimesInTents(data.tents);
 
-
-
-  reserveDto.tents = utils.normalizeTimesInTents(data.tents);
-  reserveDto.experiences = utils.normalizeTimesInExperience(data.experiences);
-  reserveDto.products = data.products;
-
-  if (data.eta) reserveDto.eta = new Date(data.eta);
-  if (data.reserve_status) reserveDto.reserve_status = data.reserve_status;
-  if (data.payment_status) reserveDto.payment_status = data.payment_status;
-  if (data.canceled_reason) reserveDto.canceled_reason = data.canceled_reason;
-  if (data.canceled_status) reserveDto.canceled_status = data.canceled_status;
-  if (data.price_is_calculated) reserveDto.price_is_calculated = data.price_is_calculated;
-  if (data.discount_code_id) reserveDto.discount_code_id = Number(data.discount_code_id);
-  if (data.discount_code_name) reserveDto.discount_code_name = data.discount_code_name;
-  if (data.gross_import) reserveDto.gross_import = Number(data.gross_import);
-  if (data.discount) reserveDto.discount = Number(data.discount);
-  if (data.net_import) reserveDto.net_import = Number(data.net_import);
-
-  const tentsDb = await utils.getTents(data.tents);
-
-  const productsDb = await utils.getProducts(data.products);
-
-  const experiencesDb = await utils.getExperiences(data.experiences);
-
-  // Check Availability
-  const TentsAreAvialble = await utils.checkAvailability(data.tents);
-
-  if (!TentsAreAvialble) {
-    throw new BadRequestError("error.noTentsAvailable");
-  }
-
-  const tentsDbMap = new Map(tentsDb.map(tent => [tent.id, tent]));
-
+  const tentsDbMap = new Map(tentsDb.map(t => [t.id, t]));
   const tentsWithQuantities = data.tents.map(tent => {
-    const foundTent = tentsDbMap.get(tent.idTent);
-    if (!foundTent) {
-      throw new NotFoundError("error.noAllTentsFound");
-    }
+    const tentDB = tentsDbMap.get(tent.idTent);
+    if (!tentDB) throw new NotFoundError("error.noAllTentsFound");
+
+    const { nightlyBase, kids_price, additional_people_price } = utils.computeTentNightly(
+      tentDB,
+      { kids: tent.kids, additional_people: tent.additional_people }
+    );
+
+    reserveDto.tents.push({
+      idTent: tentDB.id,
+      name: tentDB.title,
+      price: nightlyBase,
+      nights: tent.nights,
+      dateFrom: tent.dateFrom,
+      dateTo: tent.dateTo,
+      additional_people: tent.additional_people,
+      additional_people_price,
+      kids: tent.kids,
+      kids_price,
+      confirmed: false,
+    });
+
     return {
-      tent: foundTent,
+      tent: tentDB,
       nights: Number(tent.nights ?? 0),
       additional_people: tent.additional_people,
       kids: tent.kids,
@@ -203,175 +196,180 @@ export const createReserve = async (data: ReserveFormDto, language: string): Pro
   });
 
   const productsWithQuantities = data.products.map(product => {
-    const foundProduct = productsDb.find(p => p.id === product.idProduct);
-    if (!foundProduct) {
-      throw new NotFoundError("error.noAllProductsFound");
-    }
+    const productDB = productsDb.find(p => p.id === product.idProduct);
+    if (!productDB) throw new NotFoundError("error.noAllProductsFound");
+
+    reserveDto.products.push({
+      idProduct: productDB.id,
+      name: productDB.name,
+      price: utils.calculatePrice(productDB.price, productDB.custom_price),
+      quantity: product.quantity,
+      confirmed: false,
+    });
+
     return {
-      product: foundProduct,
-      quantity: product.quantity
+      product: productDB,
+      quantity: product.quantity,
     };
   });
+
+  utils.normalizeTimesInExperience(data.experiences);
 
   const experiencesWithQuantities = data.experiences.map(experience => {
-    const foundExperience = experiencesDb.find(e => e.id === experience.idExperience);
-    if (!foundExperience) {
-      throw new NotFoundError("error.noAllExperiencesFound");
-    }
+    const experienceDB = experiencesDb.find(e => e.id === experience.idExperience);
+    if (!experienceDB) throw new NotFoundError("error.noAllExperiencesFound");
+
+    reserveDto.experiences.push({
+      idExperience: experienceDB.id,
+      name: experienceDB.name,
+      price: utils.calculatePrice(experienceDB.price, experienceDB.custom_price),
+      quantity: experience.quantity,
+      day: experience.day,
+      confirmed: false,
+    });
+
     return {
-      experience: foundExperience,
-      quantity: experience.quantity
+      experience: experienceDB,
+      quantity: experience.quantity,
     };
   });
 
-  const priceComputation = utils.calculateReservePrice(
+  const computedPrice = utils.calculateReservePrice(
     tentsWithQuantities,
     productsWithQuantities,
-    experiencesWithQuantities,
+    experiencesWithQuantities
   );
 
-  if (data.price_is_calculated) {
-
-    reserveDto.gross_import = priceComputation.total;
-
-    const { netImport, discount, discount_name } = await utils.applyDiscount(reserveDto.gross_import, data.discount_code_id);
-    reserveDto.discount_code_id = data.discount_code_id;
-    reserveDto.discount_code_name = discount_name != null ? discount_name : "";
-    reserveDto.discount = discount;
+  if (reserveDto.price_is_calculated) {
+    reserveDto.gross_import = computedPrice.total;
+    const { netImport, discount, discount_name } = await utils.applyDiscount(
+      reserveDto.gross_import,
+      data.discount_code_id
+    );
     reserveDto.net_import = netImport;
-
+    reserveDto.discount = discount;
+    reserveDto.discount_code_name = discount_name ?? "";
   } else {
-    const { netImport, discount, discount_name } = await utils.applyDiscount(data.gross_import, data.discount_code_id, data.discount);
-    reserveDto.discount_code_id = data.discount_code_id;
+    const { netImport, discount, discount_name } = await utils.applyDiscount(
+      data.gross_import,
+      data.discount_code_id,
+      data.discount
+    );
     reserveDto.gross_import = data.gross_import;
-    reserveDto.discount_code_name = discount_name != null ? discount_name : "";
-    reserveDto.discount = discount;
     reserveDto.net_import = netImport;
-
+    reserveDto.discount = discount;
+    reserveDto.discount_code_name = discount_name ?? "";
   }
 
   const reserve = await reserveRepository.createReserve(reserveDto);
 
-  if (reserveDto.reserve_status == ReserveStatus.CONFIRMED && reserve && reserve.id) {
+  if (reserveDto.reserve_status === ReserveStatus.CONFIRMED && reserve?.id) {
     await authService.confirmReservation(reserve.id, language);
-
   }
 
   return reserve;
 };
 
 export const updateReserve = async (id: number, data: ReserveFormDto) => {
-
-  const reserve = await reserveRepository.getReserveById(id);
-
-  if (!reserve) {
-    throw new NotFoundError('error.noReservefoundInDB');
-  }
+  const existingReserve = await reserveRepository.getReserveById(id);
+  if (!existingReserve) throw new NotFoundError('error.noReservefoundInDB');
 
   const user = await userRepository.getUserById(data.userId);
+  if (!user) throw new NotFoundError('error.noUserFoundInDB');
 
-  if (!user) {
-    throw new NotFoundError('error.noUserFoundInDB');
-  }
+  existingReserve.userId = user.id;
+  if (data.eta) existingReserve.eta = new Date(data.eta);
+  if (data.reserve_status) existingReserve.reserve_status = data.reserve_status;
+  if (data.payment_status) existingReserve.payment_status = data.payment_status;
+  if (data.discount_code_id) existingReserve.discount_code_id = data.discount_code_id;
+  if (data.discount_code_name) existingReserve.discount_code_name = data.discount_code_name;
+  if (data.price_is_calculated != null) existingReserve.price_is_calculated = data.price_is_calculated;
+  if (data.gross_import) existingReserve.gross_import = Number(data.gross_import);
+  if (data.discount) existingReserve.discount = Number(data.discount);
+  if (data.net_import) existingReserve.net_import = Number(data.net_import);
 
-  if (reserve.userId != user.id) {
-    reserve.userId = user.id;
-  }
+  // Normalize times
+  utils.normalizeTimesInTents(data.tents);
+  utils.normalizeTimesInExperience(data.experiences);
 
-  if (data.eta && reserve.eta != data.eta) {
-    reserve.eta = new Date(data.eta);
-  }
+  const [tentsDb, productsDb, experiencesDb] = await Promise.all([
+    utils.getTents(data.tents),
+    utils.getProducts(data.products),
+    utils.getExperiences(data.experiences),
+  ]);
 
-  if (data.reserve_status && reserve.reserve_status != data.reserve_status) {
-    reserve.reserve_status = data.reserve_status;
-  }
+  const tentsAvailable = await utils.checkAvailability(data.tents);
+  if (!tentsAvailable) throw new BadRequestError("error.noTentsAvailable");
 
-  if (data.payment_status && reserve.payment_status != data.payment_status) {
-    reserve.payment_status = data.payment_status;
-  }
+  const tentsDbMap = new Map(tentsDb.map(t => [t.id, t]));
 
-  if (data.discount_code_id && reserve.discount_code_id != Number(data.discount_code_id)) {
-    reserve.discount_code_id = Number(data.discount_code_id);
-  }
-
-  if (data.discount_code_name && reserve.discount_code_name != data.discount_code_name) {
-    reserve.discount_code_name = data.discount_code_name;
-  }
-
-  if (data.price_is_calculated && reserve.price_is_calculated != data.price_is_calculated) {
-    reserve.price_is_calculated = data.price_is_calculated;
-  }
-
-  if (data.gross_import && reserve.gross_import != Number(data.gross_import)) {
-    reserve.gross_import = Number(data.gross_import);
-  }
-
-  if (data.discount && reserve.discount != Number(data.discount)) {
-    reserve.discount = Number(data.discount);
-  }
-
-  if (data.net_import && reserve.net_import != Number(data.net_import)) {
-    reserve.net_import = Number(data.net_import);
-  }
-
-  let reserve_tents: ReserveTentDto[] = [];
-  let reserve_products: ReserveProductDto[] = [];
-  let reserve_experiences: ReserveExperienceDto[] = [];
-
-  reserve_tents = utils.normalizeTimesInTents(data.tents);
-  reserve_experiences = utils.normalizeTimesInExperience(data.experiences);
-  reserve_products = data.products;
-
-  const tentsDb = await utils.getTents(data.tents);
-
-  const productsDb = await utils.getProducts(data.products);
-
-  const experiencesDb = await utils.getExperiences(data.experiences);
-
-  // Check Availability
-  const TentsAreAvialble = await utils.checkAvailability(data.tents);
-
-  if (!TentsAreAvialble) {
-    throw new BadRequestError("error.noTentsAvailable");
-  }
-
-  const tentsDbMap = new Map(tentsDb.map(tent => [tent.id, tent]));
-
-  const tentsWithQuantities = data.tents.map(tent => {
-    const foundTent = tentsDbMap.get(tent.idTent);
-    if (!foundTent) {
-      throw new NotFoundError("error.noAllTentsFound");
-    }
+  const reserve_tents: ReserveTentDto[] = data.tents.map(t => {
+    const tentDB = tentsDbMap.get(t.idTent)!;
+    const { nightlyBase, kids_price, additional_people_price } = utils.computeTentNightly(tentDB, {
+      kids: t.kids,
+      additional_people: t.additional_people,
+    });
 
     return {
-      tent: foundTent,
-      nights: Number(tent.nights ?? 0),
-      additional_people: Number(tent.additional_people ?? 0),
-      kids: Number(tent.kids ?? 0),
+      id: t.id,
+      idTent: t.idTent,
+      name: tentDB.title,
+      price: nightlyBase,
+      nights: t.nights,
+      dateFrom: t.dateFrom,
+      dateTo: t.dateTo,
+      additional_people: t.additional_people,
+      additional_people_price,
+      kids: t.kids,
+      kids_price,
+      confirmed: false,
     };
   });
 
-  const productsWithQuantities = data.products.map(product => {
-    const foundProduct = productsDb.find(p => p.id === product.idProduct);
-    if (!foundProduct) {
-      throw new NotFoundError("error.noAllProductsFound");
-    }
+  const reserve_products: ReserveProductDto[] = data.products.map(p => {
+    const productDB = productsDb.find(prod => prod.id === p.idProduct)!;
     return {
-      product: foundProduct,
-      quantity: product.quantity
+      id: p.id,
+      idProduct: p.idProduct,
+      name: productDB.name,
+      price: utils.calculatePrice(productDB.price, productDB.custom_price),
+      quantity: p.quantity,
+      confirmed: false,
     };
   });
 
-  const experiencesWithQuantities = data.experiences.map(experience => {
-    const foundExperience = experiencesDb.find(e => e.id === experience.idExperience);
-    if (!foundExperience) {
-      throw new NotFoundError("error.noAllExperiencesFound");
-    }
+  const reserve_experiences: ReserveExperienceDto[] = data.experiences.map(e => {
+    const experienceDB = experiencesDb.find(exp => exp.id === e.idExperience)!;
     return {
-      experience: foundExperience,
-      quantity: experience.quantity
+      id: e.id,
+      idExperience: e.idExperience,
+      name: experienceDB.name,
+      price: utils.calculatePrice(experienceDB.price, experienceDB.custom_price),
+      quantity: e.quantity,
+      day: e.day,
+      confirmed: false,
     };
   });
+
+  const tentsWithQuantities = data.tents.map(t => {
+    const tentDB = tentsDbMap.get(t.idTent)!;
+    return {
+      tent: tentDB,
+      nights: t.nights,
+      additional_people: t.additional_people,
+      kids: t.kids,
+    };
+  });
+
+  const productsWithQuantities = data.products.map(p => ({
+    product: productsDb.find(prod => prod.id === p.idProduct)!,
+    quantity: p.quantity,
+  }));
+
+  const experiencesWithQuantities = data.experiences.map(e => ({
+    experience: experiencesDb.find(exp => exp.id === e.idExperience)!,
+    quantity: e.quantity,
+  }));
 
   const priceComputation = utils.calculateReservePrice(
     tentsWithQuantities,
@@ -380,32 +378,36 @@ export const updateReserve = async (id: number, data: ReserveFormDto) => {
   );
 
   if (data.price_is_calculated) {
-    reserve.gross_import = priceComputation.total;
+    existingReserve.gross_import = priceComputation.total;
 
-    const { netImport, discount, discount_name } = await utils.applyDiscount(reserve.gross_import, reserve.discount_code_id);
-    reserve.discount_code_id = reserve.discount_code_id;
-    reserve.discount_code_name = discount_name != null ? discount_name : "";
-    reserve.discount = discount;
-    reserve.net_import = netImport;
+    const { netImport, discount, discount_name } = await utils.applyDiscount(
+      existingReserve.gross_import,
+      existingReserve.discount_code_id
+    );
 
+    existingReserve.discount = discount;
+    existingReserve.discount_code_name = discount_name ?? "";
+    existingReserve.net_import = netImport;
   } else {
-    const { netImport, discount, discount_name } = await utils.applyDiscount(reserve.gross_import, reserve.discount_code_id, reserve.discount);
-    reserve.discount_code_id = reserve.discount_code_id;
-    reserve.gross_import = reserve.gross_import;
-    reserve.discount_code_name = discount_name != null ? discount_name : "";
-    reserve.discount = discount;
-    reserve.net_import = netImport;
+    const { netImport, discount, discount_name } = await utils.applyDiscount(
+      existingReserve.gross_import,
+      existingReserve.discount_code_id,
+      existingReserve.discount
+    );
 
+    existingReserve.discount = discount;
+    existingReserve.discount_code_name = discount_name ?? "";
+    existingReserve.net_import = netImport;
   }
 
   await reserveRepository.upsertReserveDetails(
-    reserve.id,
+    existingReserve.id,
     reserve_tents,
     reserve_products,
-    reserve_experiences,
+    reserve_experiences
   );
 
-  return await reserveRepository.updateReserve(id, reserve);
+  return await reserveRepository.updateReserve(id, existingReserve);
 };
 
 export const deleteReserve = async (id: number) => {

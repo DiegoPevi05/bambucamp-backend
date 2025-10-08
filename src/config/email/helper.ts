@@ -375,7 +375,7 @@ export const generateReservationTemplate = (title: string, greeting_message_1: s
 
   reserve.tents.forEach(tent => {
     const nightlyBase = tent.price;
-    const nightlyTotal = tent.price;
+    const nightlyTotal =  tent.price + tent.kids_price + tent.additional_people_price;
     const effectiveExtraAdults = tent.additional_people ?? 0;
     const extraAdultPrice = tent.additional_people_price ?? 0;
     const kidsCount = tent.kids ?? 0;
