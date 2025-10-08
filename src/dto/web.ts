@@ -1,4 +1,5 @@
 import { PublicTent } from "./tent";
+import { PublicExperience } from "./experience";
 
 export interface ReviewDto {
   name: string;
@@ -39,6 +40,7 @@ export interface PaginatedFaqs {
 
 export interface webContent {
   tents: PublicTent[];
+  bundles:PublicExperience[];
   reviews: PublicReviewDto[];
   faqs: PublicFaqDto[];
 }

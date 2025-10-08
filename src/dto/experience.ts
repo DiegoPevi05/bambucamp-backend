@@ -20,7 +20,7 @@ export interface PublicExperience extends Omit<ExperienceDto,'custom_price'|'sto
   category: { id: number; name:string, createdAt:Date, updatedAt:Date };
 }
 
-export interface ExperiencePublicDto extends ExperienceDto  {
+export interface ExperiencePublicDto extends  ExperienceDto  {
   id:number;
   category: { id: number; name:string, createdAt:Date, updatedAt:Date };
 }

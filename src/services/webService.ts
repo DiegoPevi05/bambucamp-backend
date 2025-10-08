@@ -1,6 +1,8 @@
 import { ComplaintForm, ContactForm, FaqDto, PaginatedFaqs, PaginatedReviews, PublicFaqDto, PublicReviewDto, ReviewDto } from '../dto/web';
 import * as webRepository from '../repositories/WebRepository';
 import * as tentService from '../services/tentService';
+import * as experienceService from '../services/experienceService';
+
 import { webContent } from '../dto/web';
 import { Review } from '@prisma/client';
 import { sendComplaintFormAdmin, sendComplaintFormConfirmation, sendContactFormAdmin, sendContactFormConfirmation } from '../config/email/mail';
@@ -21,6 +23,7 @@ export const complaintForm = async (props: ComplaintForm, language: string) => {
 
 export const getWebContent = async () => {
   const webContent: webContent = {
+    bundles: await experienceService.getAllPublicBundles(),
     tents: await tentService.getAllPublicTents(),
     faqs: await getAllPublicFaqs(),
     reviews: await getAllPublicReviews()

@@ -4,3 +4,11 @@ node_modules
 
 # Ignore the entire public/images directory and its contents
 public/images/
+
+# --- Windows MOTW / ADS leftovers (from WSDL downloads) ---
+# If your tooling creates *files* with colon in the name (common in WSL/ext4)
+*:Zone.Identifier
+*:Zone.Identifier:*
+# If they appear as plain files without colon
+Zone.Identifier
+*.Zone.Identifier

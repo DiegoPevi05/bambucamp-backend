@@ -10,6 +10,9 @@ export const ExperiencesCategoriesData = [
   },
   {
     "name": "BAMBU TRASLADO"
+  },
+  {
+    "name": "BAMBU PAQUETES"
   }
 ]
 
@@ -316,6 +319,102 @@ export const ExperiencesData: { header: string, name: string, description: strin
       "Asegurarse de coordinar con anticipación",
       "Tener efectivo para pagar el servicio",
       "Llevar una lista de lugares para visitar en Lunahuaná"
+    ])
+  },
+  {
+    "header": "Bambu Sorprende",
+    "name": "Paquete Glamping 2 días - 1 noche para 2 personas",
+    "description": "Incluye Glamping Suite, desayuno, picnic, fogata, 1 sesión de sauna y carbón.",
+    "price": 570.0,
+    "duration": 2,
+    "images": "paquete_1",
+    "limit_age": 18,
+    "qtypeople": 2,
+    "categoryId": "BAMBU PAQUETES",
+    "suggestions": JSON.stringify([
+      "Traer ropa cómoda para picnic y fogata",
+      "Confirmar disponibilidad de sauna con anticipación",
+      "Ideal para escapada relajante en pareja"
+    ])
+  },
+  {
+    "header": "Bambu Parrillero",
+    "name": "Paquete Glamping Parrillero 2 días - 1 noche para 2 personas",
+    "description": "Incluye Glamping Suite, 4 porciones de carne a elección, guarniciones, paquete de chorizo, 2 copas de vino, mensaje, carbón, condimentos, estacionamiento y piscina.",
+    "price": 580.0,
+    "duration": 2,
+    "images": "paquete_2",
+    "limit_age": 18,
+    "qtypeople": 2,
+    "categoryId": "BAMBU PAQUETES",
+    "suggestions": JSON.stringify([
+      "Perfecto para amantes de la parrilla",
+      "Consultar disponibilidad de carnes",
+      "Traer traje de baño para la piscina"
+    ])
+  },
+  {
+    "header": "Bambu Enamórate",
+    "name": "Paquete Romántico 2 días - 1 noche para 2 personas",
+    "description": "Incluye Glamping Suite, decoración romántica, vino, caja de chocolates, velada romántica con cena y postres, desayuno especial con jugos, bebida caliente, ensaladas de fruta y decoración personalizada.",
+    "price": 780.0,
+    "duration": 2,
+    "images": "paquete_3",
+    "limit_age": 18,
+    "qtypeople": 2,
+    "categoryId": "BAMBU PAQUETES",
+    "suggestions": JSON.stringify([
+      "Paquete ideal para aniversarios o pedidas",
+      "Avisar con anticipación para decoración personalizada",
+      "Incluye detalles románticos sorpresa"
+    ])
+  },
+  {
+    "header": "Bambu Cumpleañero",
+    "name": "Paquete de Cumpleaños 2 días - 1 noche para 2 personas",
+    "description": "Incluye Glamping Suite, cóctel de bienvenida, decoración especial, desayuno, almuerzo, picnic, fogata, juegos de mesa, wifi y detalle especial de cumpleaños.",
+    "price": 780.0,
+    "duration": 2,
+    "images": "paquete_4",
+    "limit_age": 18,
+    "qtypeople": 2,
+    "categoryId": "BAMBU PAQUETES",
+    "suggestions": JSON.stringify([
+      "Paquete ideal para celebrar cumpleaños",
+      "Incluye decoración y detalle especial",
+      "Consultar por opciones adicionales de torta"
+    ])
+  },
+  {
+    "header": "Bambu Aventura",
+    "name": "Paquete de Aventura 2 días - 1 noche para 2 personas",
+    "description": "Incluye Glamping Suite, desayuno, canotaje, cuatrimoto doble y city tour.",
+    "price": 660.0,
+    "duration": 2,
+    "images": "paquete_5",
+    "limit_age": 18,
+    "qtypeople": 2,
+    "categoryId": "BAMBU PAQUETES",
+    "suggestions": JSON.stringify([
+      "Llevar ropa deportiva y de baño",
+      "Recomendado para quienes buscan adrenalina",
+      "Confirmar horarios de actividades de aventura"
+      ])
+  },
+  {
+    "header": "Bambu Relajo",
+    "name": "Paquete Relax 2 días - 1 noche para 2 personas",
+    "description": "Incluye Glamping Suite, bebidas de bienvenida, cata de vino, desayuno, almuerzo, cena, juegos de mesa, wifi, piscina y estacionamiento.",
+    "price": 530.0,
+    "duration": 2,
+    "images": "paquete_6",
+    "limit_age": 18,
+    "qtypeople": 2,
+    "categoryId": "BAMBU PAQUETES",
+    "suggestions": JSON.stringify([
+      "Perfecto para desconectar y descansar",
+      "Disfrutar de la piscina y las catas de vino",
+      "Paquete con enfoque en relajación y buena comida"
     ])
   }
 ]

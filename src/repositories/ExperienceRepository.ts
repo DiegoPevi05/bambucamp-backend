@@ -9,6 +9,18 @@ interface Pagination {
   pageSize: number;
 }
 
+export const getAllPublicBundles = async () => {
+  return prisma.experience.findMany({
+    where: {
+      status: "ACTIVE",
+      category: {
+        name: { equals: "BAMBU PAQUETES", mode: "insensitive" },
+      },
+    },
+    include: { category: true },
+  });
+};
+
 export const getAllPublicExperiences = async (categories?: string[]): Promise<ExperiencePublicDto[]> => {
   return await prisma.experience.findMany({
     where: {

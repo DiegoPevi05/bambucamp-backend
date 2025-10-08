@@ -4,6 +4,29 @@ import { ExperienceDto, ExperienceFilters, PaginatedExperiences, PublicExperienc
 import { deleteSubFolder, serializeImagesTodb, moveImagesToSubFolder, deleteImages } from '../lib/utils';
 import {BadRequestError} from '../middleware/errors';
 
+export const getAllPublicBundles = async (): Promise<PublicExperience[]> => {
+  const experiences = await experienceRepository.getAllPublicBundles();
+
+  return experiences.map((experience) => ({
+    id: experience.id,
+    categoryId: experience.categoryId,
+    category: experience.category,
+    header: experience.header,
+    name: experience.name,
+    description: experience.description,
+    price: experience.price,
+    duration: experience.duration,
+    images: JSON.parse(experience.images ?? "[]"),
+    limit_age: experience.limit_age,
+    qtypeople: experience.qtypeople,
+    suggestions: experience.suggestions,
+    custom_price:
+      experience.custom_price != null
+        ? utils.calculatePrice(experience.price, experience.custom_price)
+        : experience.price,
+  }));
+};
+
 export const getAllPublicExperiences = async (categories?:string[]) => {
   const experiences = await experienceRepository.getAllPublicExperiences(categories);
 
