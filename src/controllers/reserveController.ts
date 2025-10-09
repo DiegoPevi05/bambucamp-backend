@@ -289,8 +289,12 @@ export const createReserveByUser = [
     try {
 
       const language = req.language || 'en';
-      await reserveService.createReserveByUser(req.body, language);
-      res.status(201).json({ message: req.t('message.reserveCreatedByUser') });
+      const { external_id, gross_import  } = await reserveService.createReserveByUser(req.body, language);
+      res.status(201).json({ 
+        message: req.t('message.reserveCreatedByUser'), 
+        external_id,
+        gross_import
+      });
     } catch (error) {
       console.log(error);
       if (error instanceof CustomError) {

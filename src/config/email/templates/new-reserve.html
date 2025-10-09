@@ -149,79 +149,136 @@
 </table>
 
 <!-- Totales + código de reserva -->
-<table cellpadding="0" cellspacing="0" class="email-reserve-content" role="presentation" style="width:100%;margin-top:8px;">
-  <tbody>
-    <tr>
-      <td class="email-reserve-line" style="padding:0 16px;">
-        <table class="email-reserve-header-body" cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">
-          <tbody>
-            <tr>
-              <td class="email-reserve-header-structure">
-                <table cellpadding="0" cellspacing="0" width="100%" role="presentation">
-                  <tbody>
-                    <tr>
-                      <td class="email-reserve-header-text" style="padding:8px 0;">
-                        <h3 style="margin:0;font-size:16px;color:#111827;"><b>{{reserve_label}} {{idReserve}}</b></h3>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="email-reserve-header-block-spacer" style="padding-bottom:8px;">
-                        <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
-                          <tbody><tr><td style="height:1px;background:#e5e7eb;line-height:1px;font-size:1px;">&nbsp;</td></tr></tbody>
-                        </table>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </td>
-            </tr>
+<table cellpadding="0" cellspacing="0" class="email-reserve-content">
+	<tbody>
+		<tr>
+			<td class="email-reserve-line">
+				<table class="email-reserve-header-body" cellpadding="0" cellspacing="0">
+					<tbody>
+						<tr>
+							<td class="email-reserve-header-structure">
+								<table cellpadding="0" cellspacing="0" width="100%">
+									<tbody>
+										<tr>
+											<td class="email-reserve-header-frame">
+												<table cellpadding="0" cellspacing="0" width="100%">
+													<tbody>
+														<tr>
+															<td class="email-reserve-header-text">
+																<h3><b>{{reserve_label}} {{idReserve}}</b></h3>
+															</td>
+														</tr>
+														<tr>
+															<td class="email-reserve-header-block-spacer">
+																<table class="email-reserve-block-table-spacer" cellpadding="0" cellspacing="0">
+																	<tbody>
+																		<tr>
+																			<td class="email-reserve-block-td-spacer">
+																			</td>
+																		</tr>
+																	</tbody>
+																</table>
+															</td>
+														</tr>
+													</tbody>
+												</table>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</td>
+						</tr>
+						{{tents}}
+						<tr>
+							<td class="email-reserve-content-structure-experience">
+								<table cellpadding="0" cellspacing="0" class="email-reserve-content-experience">
+									<tbody>
+										<tr>
+											<td class="email-reserve-content-container-frame">
+												<table cellpadding="0" cellspacing="0" width="100%">
+													<tbody>
+														<tr>
+															<td class="email-reserve-content-experience-header">
+																<h3>{{experiences_label}}</h3>
+															</td>
+														</tr>
+														{{experiences}}
+													</tbody>
+												</table>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</td>
+						</tr>
 
-            <tr>
-              <td class="email-reserve-content-footer-structure">
-                <table cellpadding="0" cellspacing="0" class="email-reserve-content-column-left" role="presentation" style="width:50%;display:inline-block;vertical-align:top;">
-                  <tbody>
-                    <tr>
-                      <td class="email-reserve-content-frame-left" style="padding-right:8px;">
-                        <table cellpadding="0" cellspacing="0" width="100%" role="presentation">
-                          <tbody>
-                            <tr>
-                              <td class="email-block-total-text" style="color:#111827;font-size:14px;">
-                                <p style="margin:0;">
-                                  {{subtotal_label}}<br>{{discount_label}}<br><strong>{{total_label}}</strong>
-                                </p>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-                <table cellpadding="0" cellspacing="0" class="email-reserve-content-column-right" role="presentation" style="width:50%;display:inline-block;vertical-align:top;">
-                  <tbody>
-                    <tr>
-                      <td class="email-reserve-content-frame-right" style="padding-left:8px;">
-                        <table cellpadding="0" cellspacing="0" width="100%" role="presentation">
-                          <tbody>
-                            <tr>
-                              <td class="email-block-total-text" style="color:#111827;font-size:14px;" align="right">
-                                <p style="margin:0;">{{grossImport}}<br>{{discounted}}<br><strong>{{netImport}}</strong></p>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </td>
-            </tr>
-
-          </tbody>
-        </table>
-      </td>
-    </tr>
-  </tbody>
+						<tr>
+							<td class="email-reserve-content-structure-product">
+								<table cellpadding="0" cellspacing="0" class="email-reserve-content-product">
+									<tbody>
+										<tr>
+											<td class="email-reserve-content-container-frame">
+												<table cellpadding="0" cellspacing="0" width="100%">
+													<tbody>
+														<tr>
+															<td class="email-reserve-content-product-header">
+																<h3>{{products_label}}</h3>
+															</td>
+														</tr>
+														{{products}}
+													</tbody>
+												</table>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td class="email-reserve-content-footer-structure">
+								<table cellpadding="0" cellspacing="0" class="email-reserve-content-column-left">
+									<tbody>
+										<tr>
+											<td class="email-reserve-content-frame-left">
+												<table cellpadding="0" cellspacing="0" width="100%">
+													<tbody>
+														<tr>
+															<td class="email-block-total-text">
+																<p>
+																	<strong></strong>{{subtotal_label}}<br>{{discount_label}}<strong><br>{{total_label}}</strong><br>
+																</p>
+															</td>
+														</tr>
+													</tbody>
+												</table>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+								<table cellpadding="0" cellspacing="0" class="email-reserve-content-column-right">
+									<tbody>
+										<tr>
+											<td class="email-reserve-content-frame-right">
+												<table cellpadding="0" cellspacing="0" width="100%">
+													<tbody>
+														<tr>
+															<td class="email-block-total-text">
+																<p>{{grossImport}}<br>{{discounted}}<br><strong>{{netImport}}</strong></p>
+															</td>
+														</tr>
+													</tbody>
+												</table>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</td>
+		</tr>
+	</tbody>
 </table>
 
 <!-- ESPACIO extra antes de footer -->

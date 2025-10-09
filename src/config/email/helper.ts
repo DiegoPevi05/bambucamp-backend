@@ -34,7 +34,29 @@ type TemplateData = {
   footer: string;
 };
 
-export const generateTemplate = (language: string): TemplateData => {
+type TemplateOpts = {
+  preheaderText?: string; // optional
+};
+
+export const generateTemplate = (language: string, opts: TemplateOpts = {}): TemplateData => {
+  const preheaderText = (opts.preheaderText ?? "").trim();
+
+  // Hidden preheader (only if provided)
+  const preheader_block = preheaderText
+    ? [
+        // visible to inbox preview, hidden in email body
+        `<div style="display:none!important;visibility:hidden;mso-hide:all;`,
+        `font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;color:transparent;">`,
+        `${escapeHtmlAttr(preheaderText)}`,
+        `</div>`,
+        // spacer to keep menu links from leaking into preview
+        `<div style="display:none!important;visibility:hidden;mso-hide:all;`,
+        `font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;color:transparent;">`,
+        `&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;`,
+        `</div>`
+      ].join("")
+    : "";
+
   const data_email = {
     homepage: escapeHtmlAttr(CLIENT_HOSTNAME),
     logo_link: escapeHtmlAttr(`${CLIENT_HOSTNAME}/backend-public/logo.png`),
@@ -79,6 +101,7 @@ export const generateTemplate = (language: string): TemplateData => {
       : "Bambucamp Glamping all rights reserved.",
 
     currentYear: new Date().getFullYear().toString(), // match {{currentYear}} exactly
+    preheader_block
   };
 
   const templateHeaderPath = path.join(__dirname, "templates/header.html");
@@ -217,108 +240,257 @@ export const generateResetPasswordTemplate = (name: string, code: string, langua
   return emailTemplate;
 }
 
+const buildReserveDetailsHTML = (reserve: ReserveDto, language: string) => {
+  let tentsHtml = "";
+  let experiencesHtml = "";
+  let productsHtml = "";
+
+  // --- Tents: match the original working structure & classes ---
+  reserve.tents.forEach((tent) => {
+    const nightlyBase = tent.price;
+    const nightlyTotal = tent.price + tent.kids_price + tent.additional_people_price;
+    const effectiveExtraAdults = tent.additional_people ?? 0;
+    const extraAdultPrice = tent.additional_people_price ?? 0;
+    const kidsCount = tent.kids ?? 0;
+    const kidsBundlePrice = tent.kids_price ?? 0;
+    const kidsBundleApplies = tent.kids_price > 0;
+
+    const perWord = language == "es" ? "por" : "per";
+    const nightWord = language == "es" ? "noche" : "night";
+    const baseNightlyLabel = language == "es" ? "Tarifa base por noche" : "Base nightly rate";
+    const nightlyTotalLabel = language == "es" ? "Tarifa por noche con adicionales" : "Nightly total";
+    const extraAdultsLabel = language == "es" ? "Adultos adicionales" : "Extra adults";
+    const kidsLabel = language == "es" ? "Niños" : "Kids";
+    const kidsBundleLabel = language == "es" ? "Bundle de niños" : "Kids bundle";
+    const nightsLabel = language == "es" ? "Cantidad de noches" : "Qty. nights";
+    const totalLabel = language == "es" ? "Total" : "Total";
+    const fromLabel = language == "es" ? "Desde" : "From";
+    const toLabel = language == "es" ? "Hasta" : "To";
+
+    const extraAdultsLine =
+      effectiveExtraAdults > 0
+        ? `<span class="email-reserve-content-label">${extraAdultsLabel}</span>:&nbsp;${effectiveExtraAdults}&nbsp;x&nbsp;${utils.formatPrice(extraAdultPrice)}/${perWord}&nbsp;${nightWord}<br>`
+        : "";
+    const kidsCountLine =
+      kidsCount > 0 ? `<span class="email-reserve-content-label">${kidsLabel}</span>:&nbsp;${kidsCount}<br>` : "";
+    const kidsBundleLine = kidsBundleApplies
+      ? `<span class="email-reserve-content-label">${kidsBundleLabel}</span>:&nbsp;${utils.formatPrice(kidsBundlePrice)}/${perWord}&nbsp;${nightWord}<br>`
+      : "";
+
+    tentsHtml += `
+      <tr>
+        <td class="email-reserve-content-structure">
+          <table cellpadding="0" cellspacing="0" class="email-reserve-content-left">
+            <tbody>
+              <tr>
+                <td class="email-reserve-content-structure-frame">
+                  <table cellpadding="0" cellspacing="0" width="100%">
+                    <tbody>
+                      <tr>
+                        <td align="center" class="email-reserve-block-image">
+                          <a target="_blank" href="${CLIENT_HOSTNAME}">
+                            <img class="email-reserve-block-image-img"
+                                 src="${formatImagePath(tent.tentDB?.images?.[0] ?? "", "small")}"
+                                 alt="image-reserve-${tent.idTent}">
+                          </a>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <table cellpadding="0" cellspacing="0" class="email-reserve-content-right">
+            <tbody>
+              <tr>
+                <td class="email-reserve-content-container-frame">
+                  <table cellpadding="0" cellspacing="0" width="100%">
+                    <tbody>
+                      <tr>
+                        <td class="email-reserve-content-header">
+                          <h3>${tent.name}</h3>
+                          <p class="email-reserve-content-paragraph">
+                            <span class="email-reserve-content-label">${fromLabel}</span>:&nbsp;${utils.formatDate(tent.dateFrom)}&nbsp;<br>
+                            <span class="email-reserve-content-label">${toLabel}</span>:&nbsp;${utils.formatDate(tent.dateTo)}&nbsp;<br>
+                            ${kidsCountLine}
+                            ${extraAdultsLine}
+                            ${kidsBundleLine}
+                            <span class="email-reserve-content-label">${baseNightlyLabel}</span>:&nbsp;${utils.formatPrice(nightlyBase)}/${perWord}&nbsp;${nightWord}<br>
+                            <span class="email-reserve-content-label">${nightlyTotalLabel}</span>:&nbsp;${utils.formatPrice(nightlyTotal)}/${perWord}&nbsp;${nightWord}<br>
+                            <span class="email-reserve-content-label">${nightsLabel}</span>:&nbsp;${tent.nights}<br>
+                            <span class="email-reserve-content-label">${totalLabel}</span>:&nbsp;${utils.formatPrice(nightlyTotal * tent.nights)}<br>
+                          </p>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </td>
+      </tr>`;
+  });
+
+  // --- Experiences: keep your original classes; no inline color overrides ---
+  reserve.experiences.forEach((experience) => {
+    experiencesHtml += `
+      <tr>
+        <td class="email-reserve-content-header">
+          <p class="email-reserve-content-experience-paragraph">
+            <span class="email-reserve-content-label">${experience.name}</span>&nbsp;
+          </p>
+          <p class="email-reserve-content-experience-paragraph">
+            <span class="email-reserve-content-label">${language == "es" ? "Dia" : "Day"}</span>:&nbsp;${utils.formatDateToYYYYMMDD(experience.day)}&nbsp;
+          </p>
+          <p class="email-reserve-content-experience-paragraph">
+            <span class="email-reserve-content-label">${language == "es" ? "Precio" : "Price"}</span>:&nbsp;${utils.formatPrice(experience.price)}/${language == "es" ? "por" : "per"}&nbsp;${language == "es" ? "cantidad" : "quantity"}
+          </p>
+          <p class="email-reserve-content-experience-paragraph">
+            <span class="email-reserve-content-label">${language == "es" ? "Cantidad" : "Quantity"}</span>:&nbsp;${experience.quantity}&nbsp;
+          </p>
+          <p class="email-reserve-content-experience-paragraph">
+            <span class="email-reserve-content-label">${language == "es" ? "Total" : "Total"}</span>:&nbsp;${utils.formatPrice(experience.price * experience.quantity)}
+          </p>
+        </td>
+      </tr>`;
+  });
+
+  // --- Products: same idea ---
+  reserve.products.forEach((product) => {
+    productsHtml += `
+      <tr>
+        <td class="email-reserve-content-header">
+          <p class="email-reserve-content-product-paragraph">
+            <span class="email-reserve-content-label">${product.name}</span>&nbsp;
+          </p>
+          <p class="email-reserve-content-product-paragraph">
+            <span class="email-reserve-content-label">${language == "es" ? "Precio" : "Price"}</span>:&nbsp;${utils.formatPrice(product.price)}/${language == "es" ? "por" : "per"}&nbsp;${language == "es" ? "cantidad" : "quantity"}
+          </p>
+          <p class="email-reserve-content-product-paragraph">
+              <span class="email-reserve-content-label">${language == "es" ? "Cantidad" : "Quantity"}</span>:&nbsp;${product.quantity}&nbsp;
+          </p>
+          <p class="email-reserve-content-product-paragraph">
+              <span class="email-reserve-content-label">${language == "es" ? "Total" : "Total"}</span>:&nbsp;${utils.formatPrice(product.quantity * product.price)}
+          </p>
+        </td>
+      </tr>`;
+  });
+
+  return { tentsHtml, experiencesHtml, productsHtml };
+};
+
 export const generateNewReservationTemplateUser = (
   firstName: string,
   reserve: ReserveDto,
   language: string
 ): string => {
-  const { header, footer } = generateTemplate(language);
 
-  // --- Constantes / podrían venir de .env o de generateTemplate si prefieres ---
+  const preheader = language === "es"
+    ? `Reserva ${reserve.external_id} — Total ${utils.formatPrice(reserve.net_import)}. Sigue los pasos para confirmar.`
+    : `Reservation ${reserve.external_id} — Total ${utils.formatPrice(reserve.net_import)}. Follow the steps to confirm.`;
+
+  const { header, footer } = generateTemplate(language, { preheaderText: preheader });
+
+  // Static config (can move to env if you prefer)
   const RESERVAS_EMAIL = "reservas@bambucamp.com";
   const WHATSAPP_URL = "https://wa.link/ioswo5";
   const QR_NAME = "CRIALCA S.A.C";
   const BBVA_ACCOUNT = "0011-0341-0200476632";
   const BBVA_CCI = "011-341-000200476632-51";
   const BBVA_OWNER = "CRIALCA S.A.C - RUC 20602767532";
-
   const QR_LINK = escapeHtmlAttr(`${CLIENT_HOSTNAME}/backend-public/qr_bambucamp.png`);
 
-  // --- Textos ES/EN ---
-  const i18n = (language === "es")
-    ? {
-      title: "Gracias por realizar tu reserva",
-      greeting_message: `Hola ${firstName}, tu reserva se encuentra en proceso. Sigue los pasos para confirmar tu reserva.`,
-      deposit_title: "Depósito del 50%",
-      deposit_instructions:
-        `Realiza un depósito del 50% del total por cualquiera de los métodos abajo. Luego, envía tu comprobante a ${RESERVAS_EMAIL} indicando tu nombre, apellido y el correo con el que realizaste la reserva. Si prefieres, también puedes enviarlo por WhatsApp.`,
-      payment_methods_title: "Métodos de pago",
-      payment_methods_intro: "Puedes pagar por QR (Plin) o por transferencia bancaria.",
-      qr_title: "Plin (QR)",
-      qr_badge: "QR seguro",
-      payment_qr_alt: "Código QR de pago",
-      qr_note: "Escanea el código con tu app bancaria o Plin.",
-      account_holder_label: "Titular",
-      bank_title: "Transferencia bancaria",
-      bank_badge: "BBVA",
-      bank_account_label: "Cuenta",
-      bank_cci_label: "CCI",
-      bank_holder_label: "Titular",
-      send_receipt_note_prefix: "Envía el comprobante a",
-      send_receipt_or: "o por",
-      reserve_label: "RESERVA",
-      subtotal_label: "SubTotal",
-      discount_label: "Descuento",
-      total_label: "Total"
-    }
-    : {
-      title: "Thanks for your reservation",
-      greeting_message: `Hi ${firstName}, your reservation is in process. Please follow the steps below to confirm it.`,
-      deposit_title: "50% Deposit",
-      deposit_instructions:
-        `Make a 50% deposit using any of the methods below. Then email your receipt to ${RESERVAS_EMAIL} including your first name, last name, and the email you used to book. You may also send it via WhatsApp.`,
-      payment_methods_title: "Payment methods",
-      payment_methods_intro: "You can pay using QR (Plin) or bank transfer.",
-      qr_title: "Plin (QR)",
-      qr_badge: "Secure QR",
-      payment_qr_alt: "Payment QR code",
-      qr_note: "Scan this code with your banking app or Plin.",
-      account_holder_label: "Account holder",
-      bank_title: "Bank transfer",
-      bank_badge: "BBVA",
-      bank_account_label: "Account",
-      bank_cci_label: "CCI (interbank code)",
-      bank_holder_label: "Account holder",
-      send_receipt_note_prefix: "Send the receipt to",
-      send_receipt_or: "or via",
-      reserve_label: "RESERVE",
-      subtotal_label: "SubTotal",
-      discount_label: "Discount",
-      total_label: "Total"
-    };
+  // i18n strings
+  const i18n =
+    language === "es"
+      ? {
+          title: "Gracias por realizar tu reserva",
+          greeting_message: `Hola ${firstName}, tu reserva se encuentra en proceso. Sigue los pasos para confirmar tu reserva.`,
+          deposit_title: "Depósito del 50%",
+          deposit_instructions: `Realiza un depósito del 50% del total por cualquiera de los métodos abajo. Luego, envía tu comprobante a ${RESERVAS_EMAIL} indicando tu nombre, apellido y el correo con el que realizaste la reserva. Si prefieres, también puedes enviarlo por WhatsApp.`,
+          payment_methods_title: "Métodos de pago",
+          payment_methods_intro: "Puedes pagar por QR (Plin) o por transferencia bancaria.",
+          qr_title: "Plin (QR)",
+          qr_badge: "QR seguro",
+          payment_qr_alt: "Código QR de pago",
+          qr_note: "Escanea el código con tu app bancaria o Plin.",
+          account_holder_label: "Titular",
+          bank_title: "Transferencia bancaria",
+          bank_badge: "BBVA",
+          bank_account_label: "Cuenta",
+          bank_cci_label: "CCI",
+          bank_holder_label: "Titular",
+          send_receipt_note_prefix: "Envía el comprobante a",
+          send_receipt_or: "o por",
+          reserve_label: "RESERVA",
+          experiences_label: "Experiencias",
+          products_label: "Productos",
+          subtotal_label: "SubTotal",
+          discount_label: "Descuento",
+          total_label: "Total",
+        }
+      : {
+          title: "Thanks for your reservation",
+          greeting_message: `Hi ${firstName}, your reservation is in process. Please follow the steps below to confirm it.`,
+          deposit_title: "50% Deposit",
+          deposit_instructions: `Make a 50% deposit using any of the methods below. Then email your receipt to ${RESERVAS_EMAIL} including your first name, last name, and the email you used to book. You may also send it via WhatsApp.`,
+          payment_methods_title: "Payment methods",
+          payment_methods_intro: "You can pay using QR (Plin) or bank transfer.",
+          qr_title: "Plin (QR)",
+          qr_badge: "Secure QR",
+          payment_qr_alt: "Payment QR code",
+          qr_note: "Scan this code with your banking app or Plin.",
+          account_holder_label: "Account holder",
+          bank_title: "Bank transfer",
+          bank_badge: "BBVA",
+          bank_account_label: "Account",
+          bank_cci_label: "CCI (interbank code)",
+          bank_holder_label: "Account holder",
+          send_receipt_note_prefix: "Send the receipt to",
+          send_receipt_or: "or via",
+          reserve_label: "RESERVE",
+          experiences_label: "Experiences",
+          products_label: "Products",
+          subtotal_label: "SubTotal",
+          discount_label: "Discount",
+          total_label: "Total",
+        };
 
-  // --- Cargar template ---
+  // Load template
   const templatePath = path.join(__dirname, `templates/new-reserve.html`);
-  let emailTemplate = fs.readFileSync(templatePath, 'utf8');
+  let emailTemplate = fs.readFileSync(templatePath, "utf8");
 
-  // --- Armar mapa de placeholders (un solo pase) ---
+  // Build detailed sections (tents/experiences/products)
+  const { tentsHtml, experiencesHtml, productsHtml } = buildReserveDetailsHTML(reserve, language);
+
+  // Map placeholders for single-pass replacement
   const data = {
     // Header/Footer
     header_email: header,
     footer_email: footer,
 
-    // Título e intro
+    // Title + intro + deposit
     title: i18n.title,
     greeting_message: i18n.greeting_message,
-
-    // Bloque depósito
     deposit_title: i18n.deposit_title,
     deposit_instructions: i18n.deposit_instructions,
 
-    // Métodos de pago
+    // Payment methods
     payment_methods_title: i18n.payment_methods_title,
     payment_methods_intro: i18n.payment_methods_intro,
 
-    // QR
+    // QR block
     qr_title: i18n.qr_title,
     qr_badge: i18n.qr_badge,
     payment_qr_alt: i18n.payment_qr_alt,
     qr_note: i18n.qr_note,
     account_holder_label: i18n.account_holder_label,
     qr_name_value: QR_NAME,
-    qr_link: QR_LINK, // <- asegúrate de que generateTemplate o tu .env lo setee
+    qr_link: QR_LINK,
 
-    // Banco
+    // Bank block
     bank_title: i18n.bank_title,
     bank_badge: i18n.bank_badge,
     bank_account_label: i18n.bank_account_label,
@@ -328,31 +500,36 @@ export const generateNewReservationTemplateUser = (
     bbva_cci: BBVA_CCI,
     bbva_owner: BBVA_OWNER,
 
-    // Nota de envío de comprobante
+    // Send proof note
     send_receipt_note_prefix: i18n.send_receipt_note_prefix,
     send_receipt_or: i18n.send_receipt_or,
     reservas_email: RESERVAS_EMAIL,
     whatsapp_url: WHATSAPP_URL,
 
-    // Totales
+    // Detail sections (appear in your new-reserve.html “Totales + código…” area)
     reserve_label: i18n.reserve_label,
     idReserve: reserve.external_id,
+    tents: tentsHtml,
+    experiences_label: i18n.experiences_label,
+    experiences: experiencesHtml,
+    products_label: i18n.products_label,
+    products: productsHtml,
+
+    // Totals
     grossImport: utils.formatPrice(reserve.gross_import),
     discounted: `${reserve.discount}%`,
     netImport: utils.formatPrice(reserve.net_import),
     subtotal_label: i18n.subtotal_label,
     discount_label: i18n.discount_label,
-    total_label: i18n.total_label
+    total_label: i18n.total_label,
   };
 
-  // Reemplazar todo en un solo pase (tu helper)
   emailTemplate = replaceAllPlaceholders(emailTemplate, data);
-
   return emailTemplate;
 };
 
 
-export const generateReservationTemplate = (title: string, greeting_message_1: string, greeting_message_2: string, greeting_message_3: string, reserve: ReserveDto, language: string): string => {
+/*export const generateReservationTemplate = (title: string, greeting_message_1: string, greeting_message_2: string, greeting_message_3: string, reserve: ReserveDto, language: string): string => {
 
   const { header, footer } = generateTemplate(language);
 
@@ -531,6 +708,75 @@ export const generateReservationTemplate = (title: string, greeting_message_1: s
 
   return emailTemplate;
 
-}
+}*/
 
+export const generateReservationTemplate = (
+  title: string,
+  greeting_message_1: string,
+  greeting_message_2: string,
+  greeting_message_3: string,
+  reserve: ReserveDto,
+  language: string
+): string => {
 
+  const preheader = language === "es"
+    ? `Reserva ${reserve.external_id} — Total ${utils.formatPrice(reserve.net_import)}.`
+    : `Reservation ${reserve.external_id} — Total ${utils.formatPrice(reserve.net_import)}.`;
+
+  const { header, footer } = generateTemplate(language, { preheaderText: preheader });
+
+  const templatePath = path.join(__dirname, `templates/reservation.html`);
+  let emailTemplate = fs.readFileSync(templatePath, "utf8");
+
+  // Build details once
+  const { tentsHtml, experiencesHtml, productsHtml } = buildReserveDetailsHTML(reserve, language);
+
+  // Labels/i18n
+  const labels =
+    language === "es"
+      ? {
+          reserve_label: "RESERVA",
+          experiences_label: "Experiencias",
+          products_label: "Productos",
+          subtotal_label: "SubTotal",
+          discount_label: "Descuento",
+          total_label: "Total",
+        }
+      : {
+          reserve_label: "RESERVE",
+          experiences_label: "Experiences",
+          products_label: "Products",
+          subtotal_label: "SubTotal",
+          discount_label: "Discount",
+          total_label: "Total",
+        };
+
+  // One-pass replacement
+  const data = {
+    header_email: header,
+    footer_email: footer,
+    title,
+    greeting_message_1,
+    greeting_message_2,
+    greeting_message_3,
+
+    reserve_label: labels.reserve_label,
+    experiences_label: labels.experiences_label,
+    products_label: labels.products_label,
+    subtotal_label: labels.subtotal_label,
+    discount_label: labels.discount_label,
+    total_label: labels.total_label,
+
+    tents: tentsHtml,
+    experiences: experiencesHtml,
+    products: productsHtml,
+
+    idReserve: reserve.external_id,
+    grossImport: utils.formatPrice(reserve.gross_import),
+    discounted: `${reserve.discount}%`,
+    netImport: utils.formatPrice(reserve.net_import),
+  };
+
+  emailTemplate = replaceAllPlaceholders(emailTemplate, data);
+  return emailTemplate;
+};

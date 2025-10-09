@@ -8,7 +8,7 @@ import { Review } from '@prisma/client';
 import { sendComplaintFormAdmin, sendComplaintFormConfirmation, sendContactFormAdmin, sendContactFormConfirmation } from '../config/email/mail';
 
 export const contactForm = async (props: ContactForm, language: string) => {
-  const { email, name, message, saveinfo } = props;
+  const { email, name, message } = props;
 
   await sendContactFormConfirmation({ email, name }, language);
   await sendContactFormAdmin({ email, name, message }, language);

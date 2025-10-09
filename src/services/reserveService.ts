@@ -111,7 +111,7 @@ export const getReserveById = async (id: number) => {
   return await reserveRepository.getReserveById(id);
 };
 
-export const createReserveByUser = async (data: ReserveFormDto, language: string) => {
+export const createReserveByUser = async (data: ReserveFormDto, language: string):Promise<{external_id:string, gross_import:number}> => {
 
   data.price_is_calculated = true;
   data.payment_status = PaymentStatus.UNPAID;
@@ -119,12 +119,19 @@ export const createReserveByUser = async (data: ReserveFormDto, language: string
   const reserve = await createReserve(data, language);
 
   if (reserve == null) {
+
     throw new BadRequestError("error.failedToCreateReserve")
   }
+
 
   await sendNewReservationEmailUser({ email: data.user_email ?? "", firstName: data.user_firstname ?? "" }, reserve, language);
 
   await sendNewReservationEmailAdmin({ email: data.user_email ?? "", firstName: data.user_firstname ?? "" }, reserve, language);
+
+  return {
+    external_id: reserve.external_id,
+    gross_import: reserve.gross_import
+  }
 
 };
 
