@@ -149,8 +149,8 @@ jobs:
 
       - name: Restart backend service
         env:
-          SLACK_OK: "✅ Restarted ${SERVICE_NAME} service"
-          SLACK_ERR: "❌ Failed restarting ${SERVICE_NAME} service"
+          SLACK_OK: "✅ Restarted ${{ env.SERVICE_NAME }} service"
+          SLACK_ERR: "❌ Failed restarting ${{ env.SERVICE_NAME }} service"
         run: |
           set -euo pipefail
           ssh bambucamp@"$HOST" '
