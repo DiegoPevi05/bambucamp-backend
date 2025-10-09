@@ -22,6 +22,7 @@ const replaceAllPlaceholders = (tpl: string, data: Record<string, string>) => {
 };
 
 const formatImagePath = (image: string, variant: ImageVariant = 'normal'): string => {
+
   if (!image) {
     return image;
   }

@@ -1,4 +1,4 @@
-import { PrismaClient, Reserve, ReserveTent, ReserveProduct, ReserveExperience, Tent, ReserveStatus, } from "@prisma/client";
+import { PrismaClient, Reserve, ReserveTent, ReserveProduct, ReserveExperience, Tent, ReserveStatus, PaymentStatus} from "@prisma/client";
 import { ReserveDto, ReserveFilters, PaginatedReserve, ReserveTentDto, ReserveExperienceDto, ReserveProductDto, ReserveOptions, createReserveProductDto, createReserveExperienceDto } from "../dto/reserve";
 import * as utils from "../lib/utils";
 import { NotFoundError } from "../middleware/errors";
@@ -15,6 +15,65 @@ export interface ExtendedReserve extends Reserve {
 }
 
 const prisma = new PrismaClient();
+
+
+type ReserveWithRelations = Reserve & {
+  tents: ReserveTent[];
+  products: ReserveProduct[];
+  experiences: ReserveExperience[];
+};
+
+// Devuelve un ReserveDto con tentDB / productDB / experienceDB pegados
+export async function enrichReserve(reserve: ReserveWithRelations): Promise<ReserveDto> {
+  const tentIds = reserve.tents.map(t => t.idTent);
+  const productIds = reserve.products.map(p => p.idProduct);
+  const experienceIds = reserve.experiences.map(e => e.idExperience);
+
+  const [rawTentsDB, rawProductsDB, rawExperiencesDB] = await Promise.all([
+    tentIds.length ? prisma.tent.findMany({ where: { id: { in: tentIds } } }) : Promise.resolve([]),
+    productIds.length ? prisma.product.findMany({ where: { id: { in: productIds } } }) : Promise.resolve([]),
+    experienceIds.length ? prisma.experience.findMany({ where: { id: { in: experienceIds } } }) : Promise.resolve([]),
+  ]);
+
+  // Parseo directo (siempre string JSON válido)
+  const tentsDB = rawTentsDB.map(t => ({
+    ...t,
+    services: JSON.parse(t.services as unknown as string),
+    images: JSON.parse(t.images as unknown as string),
+    custom_price: JSON.parse(t.custom_price as unknown as string),
+  }));
+
+  const productsDB = rawProductsDB.map(p => ({
+    ...p,
+    custom_price: JSON.parse(p.custom_price as unknown as string),
+  }));
+
+  const experiencesDB = rawExperiencesDB.map(e => ({
+    ...e,
+    custom_price: JSON.parse(e.custom_price as unknown as string),
+  }));
+
+  // Mapas por id para acceso O(1)
+  const tentMap = new Map(tentsDB.map(t => [t.id, t]));
+  const productMap = new Map(productsDB.map(p => [p.id, p]));
+  const experienceMap = new Map(experiencesDB.map(e => [e.id, e]));
+
+  return {
+    ...reserve,
+    tents: reserve.tents.map(tent => ({
+      ...tent,
+      tentDB: tentMap.get(tent.idTent),
+    })),
+    products: reserve.products.map(product => ({
+      ...product,
+      productDB: productMap.get(product.idProduct),
+    })),
+    experiences: reserve.experiences.map(experience => ({
+      ...experience,
+      experienceDB: experienceMap.get(experience.idExperience),
+    })),
+  } as ReserveDto;
+}
 
 export const searchAvailableTents = async (dateFrom: Date, dateTo: Date): Promise<Tent[]> => {
   // Find all reserved tent IDs within the date range
@@ -403,16 +462,16 @@ export const getReserveById = async (id: number): Promise<Reserve | null> => {
 
 
 export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null> => {
-  // Ensure userId is defined, otherwise throw an error or handle appropriately
   if (!data.userId) {
     throw new NotFoundError('error.noUserFoundInDB');
   }
 
-  const confirmed = data.reserve_status != ReserveStatus.NOT_CONFIRMED
-  // Prepare the data for Prisma
+  const confirmed = data.reserve_status !== ReserveStatus.NOT_CONFIRMED;
+
+  // Preparar payload para Prisma
   const reserveData = {
-    userId: data.userId,  // Ensure this is a valid number
-    external_id: "IN_PROCESS",  // Placeholder for external_id
+    userId: data.userId,
+    external_id: 'IN_PROCESS',
     dateSale: data.dateSale,
     price_is_calculated: data.price_is_calculated,
     discount_code_id: data.discount_code_id,
@@ -422,11 +481,11 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
     gross_import: data.gross_import,
     canceled_reason: data.canceled_reason,
     canceled_status: data.canceled_status,
-    payment_status: data.payment_status,
+    payment_status: data.payment_status ?? PaymentStatus.UNPAID,
     reserve_status: data.reserve_status,
     eta: data.eta,
     tents: {
-      create: data.tents.map(tent => ({
+      create: (data.tents ?? []).map(tent => ({
         idTent: tent.idTent,
         name: tent.name,
         price: tent.price,
@@ -437,69 +496,58 @@ export const createReserve = async (data: ReserveDto): Promise<ReserveDto | null
         additional_people_price: tent.additional_people_price,
         kids: tent.kids,
         kids_price: tent.kids_price,
-        confirmed: confirmed,
-      }))
+        confirmed,
+      })),
     },
     products: {
-      create: data.products.map(product => ({
+      create: (data.products ?? []).map(product => ({
         idProduct: product.idProduct,
         name: product.name,
         price: product.price,
         quantity: product.quantity,
-        confirmed: confirmed,
-      }))
+        confirmed,
+      })),
     },
     experiences: {
-      create: data.experiences.map(experience => ({
+      create: (data.experiences ?? []).map(experience => ({
         idExperience: experience.idExperience,
         name: experience.name,
         price: experience.price,
         quantity: experience.quantity,
         day: experience.day,
-        confirmed: confirmed,
-      }))
+        confirmed,
+      })),
     },
   };
 
+  // Transacción: crear -> actualizar external_id -> leer con relaciones
+  const reserve = await prisma.$transaction(async (tx) => {
+    const created = await tx.reserve.create({ data: reserveData });
 
-  // Create the reserve in the database
-  const createdReserve = await prisma.reserve.create({
-    data: reserveData,
+    const externalId = utils.generateExternalId(created.id);
+    await tx.reserve.update({
+      where: { id: created.id },
+      data: { external_id: externalId },
+    });
+
+    const fresh = await tx.reserve.findUnique({
+      where: { id: created.id },
+      include: {
+        tents: true,
+        products: true,
+        experiences: true,
+      },
+    });
+
+    if (!fresh) return null;
+    return fresh;
   });
 
-  // Generate the external_id based on the reserve's internal ID
-  const externalId = utils.generateExternalId(createdReserve.id);
+  if (!reserve) return null;
 
-  // Update the reserve with the generated external_id
-  await prisma.reserve.update({
-    where: { id: createdReserve.id },
-    data: { external_id: externalId },
-  });
-
-  // Fetch the newly created reserve with related data
-  const reserve = await prisma.reserve.findUnique({
-    where: { id: createdReserve.id },
-    include: {
-      tents: true,
-      products: true,
-      experiences: true,
-    },
-  });
-
-  // If reserve exists, map over related data to ensure compatibility with your DTO
-  if (reserve) {
-    const enrichedReserve: ReserveDto = {
-      ...reserve,
-      id: createdReserve.id,
-      tents: reserve.tents,
-      products: reserve.products,
-      experiences: reserve.experiences,
-    };
-
-    return enrichedReserve;
-  }
-
-  return null;
+  // Enriquecer con tentDB / productDB / experienceDB
+  const enriched = await enrichReserve(reserve);
+  return enriched;
 };
 
 export const AddProductReserve = async (data: createReserveProductDto[]): Promise<ReserveProduct[]> => {
